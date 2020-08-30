@@ -463,68 +463,45 @@ scene.add( trail.mesh );
     const canvas = document.createElement('canvas')
     canvas.width = targetSize.width
     canvas.height = targetSize.height
-    canvas.id = 'zob'
     canvas.setAttribute('name','MONMON')
     canvas.style = 'position: absolute ; right : 0px ; bottom : 0px;'   
 
     const context = canvas.getContext('2d')
     document.body.appendChild( canvas )
-    console.log('k',canvas)
     
-    context.fillStyle = 'rgba(0,0,0,1)'
-    context.fillRect(0,0,canvas.width,canvas.height)
+    const nominalScale=16
 
-    const halfCanvas = V2( canvas.width/2 ,
-                           canvas.height/2 )
-    
-    const scale=128
-    function toScreen( v, t=V2()){
-        t.x = v.x * scale
-        t.y = v.y * scale
-        return t
-    }
-    function fromScreen( v, t=V2()){
-        t.x = v.x  / scale
-        t.y = v.y  / scale
-        return t
-    }    
-
-    const mapBb = { lb : V2(0,0), rt : V2( width, height ) }
-    const camera = {
-        position : { x : 0.5, y : 0.5 }
-    }
-    
-    function clamp(x,min,max){
-        return Math.max(min,Math.min(x,max))
-    }
-    //    const js = x => JSON.stringify( x )
     setInterval( () => {
-        //camera.position.x = Math.sin(Date.now()/10)
-        //camera.position.y = Math.sin(Date.now()/10)
-        drawMap()
+        const camera = {
+            position : { x : 0, y : 0 }
+        }
+        clear( context )
+        //camera.position.x += 0.1
+        //camera.position.y += 0.1
+        //const scale = 1 + Math.abs( Math.sin(Date.now()/1000)  ) * 512
+        const scale = nominalScale
+        drawMap( context, camera.position, scale )
     }, 16 )
-    
-    function drawMap()    { 
-        const t1 = Date.now()
+
+    function clear( context ){
         context.fillStyle = 'rgba(0,127,200,1)'
         context.fillRect(0,0,canvas.width,canvas.height)
-        
-        // camera points to the center of screen
-        const cp = camera.position
-        const visiblemap = {
-            l : clamp(Math.floor( cp.x - halfCanvas.x / scale ),0,width-1),
-            r : clamp(Math.ceil( cp.x + halfCanvas.x / scale ),0,width-1),
-            b : clamp(Math.floor( cp.y - halfCanvas.y / scale ),0,height-1),
-            t : clamp(Math.ceil( cp.y + halfCanvas.y / scale ),0,height-1),
-        }
+    }
+    function drawMap( context, center, scale ){
 
-        const p = V2()
-        function cssrgba( r01,g01,b01,a=1){
-            const r = Math.floor( 256 * r01 ),
-                  g = Math.floor( 256 * g01 ),
-                  b = Math.floor( 256 * b01 )
-            return `rgba(${r},${g},${b},${a})`
-        }
+        const t1 = Date.now()
+
+        const canvas = context.canvas,
+              hcWidth = canvas.width / 2,
+              hcHeight = canvas.height / 2,        
+              cpx = center.x + 0.5,
+              cpy = center.y + 0.5,
+              visiblemap = {
+                  l : clamp(Math.floor( cpx - hcWidth / scale ),0,width-1),
+                  r : clamp(Math.ceil( cpx + hcWidth / scale ),0,width-1),
+                  b : clamp(Math.floor( cpy - hcHeight / scale ),0,height-1),
+                  t : clamp(Math.ceil( cpy + hcHeight / scale ),0,height-1),
+              }
         for ( let i = visiblemap.l ; i < visiblemap.r  ; i++ ){
             for ( let j = visiblemap.b ; j < visiblemap.t ; j++ ){
                 let col
@@ -535,12 +512,12 @@ scene.add( trail.mesh );
                     col = Cols[c] || [1,0,0]
                 }
                 const rgba = cssrgba( ...col )
-                p.x = (i - cp.x) * scale + canvas.width / 2
-                p.y = (j - cp.y) * scale + canvas.height / 2
+                const x = (i - cpx) * scale + hcWidth
+                const y = (j - cpy) * scale + hcHeight
                 context.fillStyle = rgba
                 context.fillRect(
-                    p.x,
-                    p.y,
+                    x,
+                    y,
                     scale-1,
                     scale-1
                 )
@@ -549,9 +526,16 @@ scene.add( trail.mesh );
         const t2 = Date.now()
         const elapsed = t2 - t1
         console.log('elapsed',elapsed)  
-
     }
-    
 }
 
 
+function clamp(x,min,max){
+    return Math.max(min,Math.min(x,max))
+}
+function cssrgba( r01,g01,b01,a=1){
+    const r = Math.floor( 256 * r01 ),
+          g = Math.floor( 256 * g01 ),
+          b = Math.floor( 256 * b01 )
+    return `rgba(${r},${g},${b},${a})`
+}
