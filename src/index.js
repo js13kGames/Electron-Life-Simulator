@@ -470,17 +470,18 @@ scene.add( trail.mesh );
     document.body.appendChild( canvas )
     
     const nominalScale=16
+    const camera = {
+        position : { x : 0, y : 0 }
+    }
 
     setInterval( () => {
-        const camera = {
-            position : { x : 0, y : 0 }
-        }
         clear( context )
-        //camera.position.x += 0.1
-        //camera.position.y += 0.1
+        camera.position.x += 0.5/8
+        camera.position.y += 0.2/8
         //const scale = 1 + Math.abs( Math.sin(Date.now()/1000)  ) * 512
         const scale = nominalScale
-        drawMap( context, camera.position, scale )
+        const elapsed1 = drawMap( context, camera.position, scale )
+        console.log('elapsed',elapsed1)  
     }, 16 )
 
     function clear( context ){
@@ -488,12 +489,12 @@ scene.add( trail.mesh );
         context.fillRect(0,0,canvas.width,canvas.height)
     }
     function drawMap( context, center, scale ){
-
         const t1 = Date.now()
-
         const canvas = context.canvas,
-              hcWidth = canvas.width / 2,
-              hcHeight = canvas.height / 2,        
+              cwidth = canvas.width,
+              cheight = canvas.height,
+              hcWidth = cwidth / 2,
+              hcHeight = cheight / 2,        
               cpx = center.x + 0.5,
               cpy = center.y + 0.5,
               visiblemap = {
@@ -511,21 +512,16 @@ scene.add( trail.mesh );
                     const c = map[ ij2idx( i,j ) ]
                     col = Cols[c] || [1,0,0]
                 }
-                const rgba = cssrgba( ...col )
-                const x = (i - cpx) * scale + hcWidth
-                const y = (j - cpy) * scale + hcHeight
+                const rgba = cssrgba( ...col ),
+                      x = (i - cpx) * scale + hcWidth,
+                      y = (j - cpy) * scale + hcHeight
                 context.fillStyle = rgba
-                context.fillRect(
-                    x,
-                    y,
-                    scale-1,
-                    scale-1
-                )
+                context.fillRect(x, y, scale-1, scale-1)
             }
         }
         const t2 = Date.now()
         const elapsed = t2 - t1
-        console.log('elapsed',elapsed)  
+        return elapsed 
     }
 }
 
