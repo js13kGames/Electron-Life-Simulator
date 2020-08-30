@@ -438,7 +438,7 @@ var animate = function (T) {
     stats.end()
 };
 
-animate();
+//animate();
 
 
 
@@ -470,7 +470,8 @@ scene.add( trail.mesh );
     const nominalScale=16
 
     const choices = mkChoices() 
-    const { startPosition, map, width, height, idx2j, idx2i, ij2idx, directions, outij } = choices
+    const { startPosition, map, width, height, idx2j, idx2i, ij2idx,
+            directions, outij } = choices
 
     const camera = {
         center : { ...startPosition },
@@ -483,8 +484,8 @@ scene.add( trail.mesh );
           camera.center.x += 0.5/8
           camera.center.y += 0.2/28
           camera.scale = nominalScale + Math.abs( Math.sin(Date.now()/1000)  ) * 8
-          const elapsed1 = drawMap( context, camera )
-          console.log('elapsed',elapsed1)  
+        const elapsed1 = drawMap( context, camera, choices )
+        //console.log('elapsed',elapsed1)  
         
     }, 16 )
 
@@ -492,9 +493,11 @@ scene.add( trail.mesh );
         context.fillStyle = 'rgba(0,127,200,1)'
         context.fillRect(0,0,canvas.width,canvas.height)
     }
-    function drawMap( context, { center, scale } ){
+    function drawMap( context, { center, scale }, level ){
         const t1 = Date.now()
-        const canvas = context.canvas,
+        const width = level.width,
+              height = level.height,        
+              canvas = context.canvas,
               cwidth = canvas.width,
               cheight = canvas.height,
               hcWidth = cwidth / 2,
@@ -539,3 +542,16 @@ function cssrgba( r01,g01,b01,a=1){
           b = Math.floor( 256 * b01 )
     return `rgba(${r},${g},${b},${a})`
 }
+
+let previousTimestamp 
+function roll(timestamp){    
+    requestAnimationFrame( roll )    
+    if ( previousTimestamp === undefined )
+        previousTimestamp = timestamp
+    const dt = timestamp - previousTimestamp
+    
+    previousTimestamp = timestamp
+    //if ( dt > 17 ) console.log('a')
+    //else console.log('b')
+}
+roll()
