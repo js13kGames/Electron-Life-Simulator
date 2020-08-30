@@ -58,9 +58,9 @@ if (true){
     ;[ 
         ['go','fetch','green'],
         ['failed','401 Unauthorized','orange'],
-        ['nextlevel','301 - moved permanently','yellow'],
-        ['success','host contacted!','cyan'], //200
-        ['gameover','404 - not found!','red'],
+        ['nextlevel','301 Moved permanently','orange'],
+        ['success','host contacted','orange'], //200
+        ['gameover','404 Not found!','red'],
         ['c0','zero','brown'],
         ['c1','one','white'],
         ['c.','.','grey'],
@@ -177,7 +177,8 @@ renderer.domElement.style.width = (scale * targetSize.width)+'px'
 renderer.domElement.style.height =  (scale * targetSize.height)+'px'
 
 const State = {
-    Choices : undefined // : mkChoices(),
+    Choices : undefined, // : mkChoices(),
+    level : 0
 }
 const player = {}
 {
@@ -185,6 +186,7 @@ const player = {}
     const material = new THREE.MeshBasicMaterial({color:0x0fffff,wireframe:true})
     const mesh = new THREE.Mesh( geometry, material)
     scene.add(mesh)
+    mesh.visible = false
     player.mesh = mesh
 }
 
@@ -200,22 +202,24 @@ function initLevel()
     
     player.mesh.position.x = 0
     player.mesh.position.y = choices[0].ys[ choices[0].good ] + 0.5
-    player.speed = new THREE.Vector2(0,0)
+    // player.speed = new THREE.Vector2(0,0)
     player.life = 1000
 
     updateCamera( player.mesh.position )
     camera.position.z = 10
-    /*setTimeout( () => {
-        STATE = 'S1'
-        },4000)*/
 }
+
 function nextLevel(){
+    State.level++
+    console.log('level',State.level)
     const { Choices } = State
     if ( Choices ){
         Choices.mesh.geometry.dispose()
         scene.remove( Choices.mesh )
     }
     const choices = mkChoices()
+    console.log('=>',choices.directions)
+    console.log(choices)
     State.Choices = choices
     scene.add( choices.mesh )
     initLevel()
@@ -232,6 +236,7 @@ var animate = function (T) {
     lastT = T
     stats.begin()
     if ( STATE === 'S00' ){
+        textPanels.nextlevel.mesh.visible = false
         /*State.Choices.mesh.visible = false
         setTimeout( () => {
             nextLevel()
@@ -283,38 +288,47 @@ var animate = function (T) {
         })
         STATE = 'S00S0'
         fs.forEach( (f,i) => {
-            setTimeout( f, i * 600 )
+            setTimeout( f, (1+i) * 600 )
         })
     } else if ( STATE === 'S00S0' ){
+        textPanels.go.animate(0.25)
     } else if ( STATE === 'S0' ){
         const choicesMesh = State.Choices.mesh
         choicesMesh.visible = true
         player.mesh.visible = true
-
+        textPanels.go.animate(0.25)
 
         //textPanels.go.mesh.position.x = camera.position.x 
         //textPanels.go.mesh.position.y = camera.position.y
         //textPanels.go.mesh.visible = true
         setTimeout( ()=>{
             textPanels.go.mesh.visible = false
+        } ,  1000 )
+        setTimeout( ()=>{
             STATE = 'S1'
-        } ,  3000 )
+        } ,  2000 )
         
-    } else if ( STATE === 'S3' ){
+    } else if ( STATE === 'S2' ){
+        textPanels.failed.mesh.visible = true
+        textPanels.failed.animate(0.25)
+        textPanels.failed.mesh.position.x = camera.position.x 
+        textPanels.failed.mesh.position.y = camera.position.y - 4
+    }else if ( STATE === 'S3' ){
         player.mesh.position.x +=  dt / 20
         camera.position.x +=  dt / 20
+        textPanels.success.animate(0.25)
         textPanels.success.mesh.visible = true
         textPanels.success.mesh.position.x = camera.position.x 
-        textPanels.success.mesh.position.y = camera.position.y
+        textPanels.success.mesh.position.y = camera.position.y - 4
         //keyboardController.axesCtrlState[1] = [0,0]
         updateTrail(camera.position, false, STATE)
-    } else if ( STATE === 'S2' ){
-        textPanels.failed.mesh.position.x = camera.position.x 
-        textPanels.failed.mesh.position.y = camera.position.y
-    } else if ( STATE === 'S4' ){ 
+    }  else if ( STATE === 'S4' ){
+        player.mesh.visible = false
         textPanels.success.mesh.visible = false
+        textPanels.nextlevel.animate(0.25)
+        textPanels.nextlevel.mesh.visible = true
         textPanels.nextlevel.mesh.position.x = camera.position.x 
-        textPanels.nextlevel.mesh.position.y = camera.position.y
+        textPanels.nextlevel.mesh.position.y = camera.position.y - 4
         updateTrail(camera.position, false, STATE)
     } else if ( STATE === 'S1' ){
 
@@ -323,6 +337,7 @@ var animate = function (T) {
         const dx = - 1 * l + r,
               dy = -1 * d + u,
               dz = -1 * o + p
+        
         const speed01 = 1,
               minspeed = 150,
               maxspeed = 40,
@@ -339,9 +354,9 @@ var animate = function (T) {
             const collides = cells.includes( c )
             return collides
         }
-        const nextPosition = pmp.clone()
-        let hasCollision = false
         
+        const nextPosition = pmp.clone()
+        let hasCollision = false        
         for ( let i = 3 ; i >= 1 ; i-- ){
             if ( i&1 ) nextPosition.x += dx * dt / ff
             if ( i&2 ) nextPosition.y += dy * dt / ff
@@ -351,15 +366,14 @@ var animate = function (T) {
             nextPosition.copy( pmp )
         }
         if ( posCollide( nextPosition, 'G' ) ){
-            if ( STATE = 'S3' ){
+            //if ( STATE = 'S3' ){
+            setTimeout( () => {
+                STATE = 'S4'
                 setTimeout( () => {
-                    STATE = 'S4'
-                    setTimeout( () => {
-                        nextLevel()
-                    },3000)
-                    
-                },4000)
-            }
+                    nextLevel()
+                },4000)                
+            },2000)
+            //}
         }
         //hasCollision = false
         /*
@@ -382,7 +396,7 @@ var animate = function (T) {
                 STATE = 'S2'
                 player.mesh.material.color.setRGB(1,0,0)
                 setTimeout( () => {
-                    
+                    textPanels.failed.mesh.visible = false
                     initLevel()
                 },3000)
             }

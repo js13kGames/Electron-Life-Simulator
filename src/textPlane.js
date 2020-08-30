@@ -14,13 +14,13 @@ export function textPlane( THREE, msg,family,style, textTargetSize ){
     plane.position.x = -Math.random()*320
     plane.position.z = 0.1
     plane.position.x = -5
-    
+    plane.visible = false
 
     const originalPositions = new Float32Array(
         plane.geometry.attributes.position.array
     )
-    function animate(){
-        if ( !plane.visible )return
+    function animate(ff=1){
+        if ( !plane.visible ) return
         const now = Date.now() / 200
         const pp = plane.geometry.attributes.position
         for ( let i = 0 ; i < pp.count ; i++ ){
@@ -28,13 +28,13 @@ export function textPlane( THREE, msg,family,style, textTargetSize ){
             const y = pp.array[ 3 * i + 1]
             const dx = Math.sin( y / 4 + now ) 
             const dy = Math.sin( x / 4 + now ) 
-            pp.array[ 3 * i ] = originalPositions[3*i] + dx
-            pp.array[ 3 * i  +1 ] = originalPositions[3*i+1] + dy
+            pp.array[ 3 * i ] = originalPositions[3*i] + dx *ff
+            pp.array[ 3 * i  +1 ] = originalPositions[3*i+1] + dy*ff
         }
         //geometry.computeBoundingBox()
         pp.needsUpdate = true
     }
-    setInterval( animate,10 )
+    //setInterval( animate, 32 )
     return { mesh:plane, animate }
 }
 export function textCanvas( msg, family, style, textTargetSize ){

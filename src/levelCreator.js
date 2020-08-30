@@ -179,6 +179,7 @@ function mkLevelMesh( name, data ){
     var material = new THREE.MeshBasicMaterial( { color: 0xffffff, vertexColors: true  } );
     var mesh = new THREE.Mesh( geometry, material );
     mesh.name = name
+    mesh.visible = false
     //scene.add( mesh )
     return mesh
 }
