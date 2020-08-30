@@ -8,6 +8,7 @@ import { KeyboardControllers } from './keyboardControllers.js'
 import { mkChoices } from './levelCreator.js'
 import { Cols } from './cols.js'
 import { textPlane } from './textPlane.js'
+import { V2, cloneV2, subV2, addV2, multScalar, divScalar, clampV2, ceilV2, floorV2 } from './v2.js'
 
 let STATE = 'S00'
 
@@ -148,27 +149,27 @@ function updateTrail(pmp,hasCollision,STATE){
 }
 
 /*
-var material = new THREE.ShaderMaterial( {
-    uniforms: {
-	time: { value: 1.0 },
-	resolution: { value: new THREE.Vector2() }
-    },
-    vertexShader: tunnel.vertexShader,
-    fragmentShader: tunnel.fragmentShader
+  var material = new THREE.ShaderMaterial( {
+  uniforms: {
+  time: { value: 1.0 },
+  resolution: { value: new THREE.Vector2() }
+  },
+  vertexShader: tunnel.vertexShader,
+  fragmentShader: tunnel.fragmentShader
 
-} );
-var geometry = new THREE.BufferGeometry();
-const po = -1,
-      pu = 1,
-      vertices = new Float32Array([
-          po,po,po,
-          pu,po,po,
-          pu,pu,po,
-          po,po,po,
-          pu,pu,po,
-          po,pu,po,
-      ])
-geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+  } );
+  var geometry = new THREE.BufferGeometry();
+  const po = -1,
+  pu = 1,
+  vertices = new Float32Array([
+  po,po,po,
+  pu,po,po,
+  pu,pu,po,
+  po,po,po,
+  pu,pu,po,
+  po,pu,po,
+  ])
+  geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
 */
 var startTime = Date.now();
 let lastT = undefined
@@ -186,7 +187,7 @@ const player = {}
     const material = new THREE.MeshBasicMaterial({color:0x0fffff,wireframe:true})
     const mesh = new THREE.Mesh( geometry, material)
     scene.add(mesh)
-    mesh.visible = false
+    mesh.visible = true
     player.mesh = mesh
 }
 
@@ -206,7 +207,7 @@ function initLevel()
     player.life = 1000
 
     updateCamera( player.mesh.position )
-    camera.position.z = 10
+    camera.position.z = 100
 }
 
 function nextLevel(){
@@ -230,7 +231,7 @@ nextLevel()
 
 
 var animate = function (T) {
-//    console.log(STATE)
+    //    console.log(STATE)
     requestAnimationFrame( animate )
     const dt = ( lastT === undefined )?0:(T-lastT)
     lastT = T
@@ -238,17 +239,17 @@ var animate = function (T) {
     if ( STATE === 'S00' ){
         textPanels.nextlevel.mesh.visible = false
         /*State.Choices.mesh.visible = false
-        setTimeout( () => {
-            nextLevel()
-            STATE = 'S0'
-            }, 10000 )*/
+          setTimeout( () => {
+          nextLevel()
+          STATE = 'S0'
+          }, 10000 )*/
 
         
         const dirs = State.Choices.directions
         const choicesMesh = State.Choices.mesh
         const fs = [
             () => {
-                choicesMesh.visible = false
+                choicesMesh.visible = true
                 player.mesh.visible = false
 
                 textPanels.go.mesh.visible = true
@@ -425,12 +426,12 @@ var animate = function (T) {
     
     keyboardController.resetKeyStrokes()
     /*
-    var elapsedMilliseconds = Date.now() - startTime;
-    var elapsedSeconds = elapsedMilliseconds / 1000.0;
+      var elapsedMilliseconds = Date.now() - startTime;
+      var elapsedSeconds = elapsedMilliseconds / 1000.0;
     */
     /*material.uniforms.time.value = 60. * elapsedSeconds;    
-    material.uniforms.resolution.value.x = renderer.domElement.width;
-    material.uniforms.resolution.value.y = renderer.domElement.height;
+      material.uniforms.resolution.value.x = renderer.domElement.width;
+      material.uniforms.resolution.value.y = renderer.domElement.height;
     */
     //renderer.domElement.setAttribute('class','three')
     renderer.render( scene, camera );
@@ -454,3 +455,103 @@ animate();
 */
 
 scene.add( trail.mesh );
+// 300 / 600 rect / ms
+{
+    const choices = mkChoices()
+    const { map, width, height, idx2j, idx2i, ij2idx, directions, outij } = choices
+    
+    const canvas = document.createElement('canvas')
+    canvas.width = targetSize.width
+    canvas.height = targetSize.height
+    canvas.id = 'zob'
+    canvas.setAttribute('name','MONMON')
+    canvas.style = 'position: absolute ; right : 0px ; bottom : 0px;'   
+
+    const context = canvas.getContext('2d')
+    document.body.appendChild( canvas )
+    console.log('k',canvas)
+    
+    context.fillStyle = 'rgba(0,0,0,1)'
+    context.fillRect(0,0,canvas.width,canvas.height)
+
+    const halfCanvas = V2( canvas.width/2 ,
+                           canvas.height/2 )
+    
+    const scale=128
+    function toScreen( v, t=V2()){
+        t.x = v.x * scale
+        t.y = v.y * scale
+        return t
+    }
+    function fromScreen( v, t=V2()){
+        t.x = v.x  / scale
+        t.y = v.y  / scale
+        return t
+    }    
+
+    const mapBb = { lb : V2(0,0), rt : V2( width, height ) }
+    const camera = {
+        position : { x : 0.5, y : 0.5 }
+    }
+    
+    function clamp(x,min,max){
+        return Math.max(min,Math.min(x,max))
+    }
+    //    const js = x => JSON.stringify( x )
+    setInterval( () => {
+        //camera.position.x = Math.sin(Date.now()/10)
+        //camera.position.y = Math.sin(Date.now()/10)
+        drawMap()
+    }, 16 )
+    
+    function drawMap()    { 
+        const t1 = Date.now()
+        context.fillStyle = 'rgba(0,127,200,1)'
+        context.fillRect(0,0,canvas.width,canvas.height)
+        
+        // camera points to the center of screen
+        const cp = camera.position
+        const visiblemap = {
+            l : clamp(Math.floor( cp.x - halfCanvas.x / scale ),0,width-1),
+            r : clamp(Math.ceil( cp.x + halfCanvas.x / scale ),0,width-1),
+            b : clamp(Math.floor( cp.y - halfCanvas.y / scale ),0,height-1),
+            t : clamp(Math.ceil( cp.y + halfCanvas.y / scale ),0,height-1),
+        }
+
+        const p = V2()
+        function cssrgba( r01,g01,b01,a=1){
+            const r = Math.floor( 256 * r01 ),
+                  g = Math.floor( 256 * g01 ),
+                  b = Math.floor( 256 * b01 )
+            return `rgba(${r},${g},${b},${a})`
+        }
+        for ( let i = visiblemap.l ; i < visiblemap.r  ; i++ ){
+            for ( let j = visiblemap.b ; j < visiblemap.t ; j++ ){
+                let col
+                if ( outij(i,j) ){
+                    col = [1,0,0]
+                } else {
+                    const c = map[ ij2idx( i,j ) ]
+                    col = Cols[c] || [1,0,0]
+                }
+                const rgba = cssrgba( ...col )
+                p.x = (i - cp.x) * scale + canvas.width / 2
+                p.y = (j - cp.y) * scale + canvas.height / 2
+                context.fillStyle = rgba
+                context.fillRect(
+                    p.x,
+                    p.y,
+                    scale-1,
+                    scale-1
+                )
+            }
+        }
+        const t2 = Date.now()
+        const elapsed = t2 - t1
+        console.log('elapsed',elapsed)  
+
+    }
+    
+}
+
+

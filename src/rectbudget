@@ -1,0 +1,62 @@
+
+
+// {
+//     const choices = mkChoices()
+//     const { map, width, height, idx2j, idx2i, ij2idx, directions } = choices
+    
+//     const canvas = document.createElement('canvas')
+//     canvas.width = targetSize.width
+//     canvas.height = targetSize.height
+//     canvas.id = 'zob'
+//     canvas.setAttribute('name','MONMON')
+//     canvas.style = 'position: absolute ; right : 0px ; bottom : 0px;'   
+
+//     const context = canvas.getContext('2d')
+//     document.body.appendChild( canvas )
+//     console.log('k',canvas)
+    
+//     for ( let repeat = 0 ; repeat < 100 ; repeat++ ){
+        
+//         context.fillStyle = 'rgba(0,0,0,1)'
+//         context.fillRect(0,0,canvas.width,canvas.height)
+
+        
+//         const t1 = Date.now()
+//         const count = 1000000
+//         let i = 0
+//         for ( ; i < count ; i++){
+//             const r = Math.floor( Math.random() * 256  )
+//             const g = Math.floor( Math.random() * 256  )
+//             const b = Math.floor( Math.random() * 256  )
+//             const style = `rgba(${r},${g},${b},1)`
+//             /*
+//             const w = Math.floor( canvas.width * Math.random() / 10)
+//             const h = Math.floor( canvas.height * Math.random() / 10)
+//             const l = Math.floor( canvas.width * Math.random() )
+//             const t = Math.floor( canvas.height * Math.random() )
+//             */
+            
+//             const w = canvas.width/4,
+//                   h = canvas.height/4,l=0,t=0
+            
+            
+//             //console.log(style)
+//             context.fillStyle = style
+//             context.fillRect(l,t,w,h)
+//             const t2 = Date.now()
+//             const elapsed = t2 - t1
+//             if (elapsed > 4)
+//                 break
+//         }
+        
+//         const t2 = Date.now()
+//         const elapsed = t2 - t1
+//         console.log('elapsed',elapsed,i,i/elapsed )
+//     }
+    
+    
+    
+
+// }
+
+

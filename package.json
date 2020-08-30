@@ -4,6 +4,7 @@
     "main": "index.js",
     "license": "MIT",
     "dependencies": {
+        "esm": "^3.2.25",
         "stats.js": "^0.17.0",
         "three": "^0.119.1"
     },

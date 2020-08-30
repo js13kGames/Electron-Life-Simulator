@@ -1,6 +1,7 @@
 const THREE = require('three')
 import { Cols } from './cols.js'
-
+import { BezierCurve } from './bezier.js'
+import { V2, cloneV2, subV2, addV2, multScalar, divScalar } from './v2.js'
 export function mkChoices(){
     const width = 100,
           height = 30
@@ -58,12 +59,21 @@ export function mkChoices(){
         c1.ys.forEach( (y1,y1i) => {
             const isgood = y1i === c1.good
             const r = (isgood)?1:0.8
-            const pts = [ new THREE.Vector2(c0.x,y0),
-                          new THREE.Vector2((c0.x+c1.x)/2,y0),
-                          new THREE.Vector2((c0.x+c1.x)/2,y1),
-                          new THREE.Vector2((1-r)*c0.x+r*c1.x,y1) ]
+            const pts = [ V2(c0.x,y0),
+                          V2((c0.x+c1.x)/2,y0),
+                          V2((c0.x+c1.x)/2,y1+0.01), 
+                          V2((1-r)*c0.x+r*c1.x,y1) ]
+            const npts = Math.ceil(c1.x - c0.x ) 
+            /*
             var curve = new THREE.CubicBezierCurve( ...pts )
-            const points = curve.getPoints( Math.ceil(c1.x - c0.x ) )
+            const points = curve.getPoints( npts )
+            */
+            
+            //                const pts2 = pts.map( v2 => [v2.x,v2.y] )
+            const curve = BezierCurve( ...pts )
+            const points = curve.getPoints(  npts )
+            //console.log(npts,{model:points,test:points2})
+            
             if ( i === 0 ){
                 const mainPixels = paintPoints( points, 'O' )                
             } else if ( i === (choices.length - 2 )){
@@ -88,21 +98,22 @@ export function mkChoices(){
     }
     const directions = choices.slice(2,choices.length-1).map( ({good}) => good )
 
+    
     function paintPoints( points, paint ){
 
         const mainPixels = []
         for ( let p = 1 ; p < points.length ; p++ ){
             const p0 = points[p-1],
-                  p1 = points[p],
-                  d = p1.clone().sub( p0 ),
+                  p1 = points[p]
+            const d = subV2( p1, p0 ),
                   ndivs = Math.ceil(Math.max( d.x, d.y )),
-                  off = d.clone().divideScalar( ndivs )
-            let ppos = p0.clone()
+                  off = divScalar( d, ndivs )
+            let ppos = cloneV2(p0)
             for ( let d = 0 ; d < ndivs ; d++ ){
                 const i = Math.round( ppos.x ),
                       j = Math.round( ppos.y )
                 mainPixels.push( ij2idx(i,j) )
-                ppos.add( off )
+                addV2( ppos, off, ppos )
             }
         }
         
@@ -135,7 +146,7 @@ export function mkChoices(){
         data[j] = a.join('')
     }
     const mesh = mkLevelMesh( 'level',data)
-    return { choices, data, idx2i, idx2j, ij2idx, map, mesh, directions }
+    return { choices, data, width, height, idx2i, idx2j, ij2idx, outij, map, mesh, directions }
 }
 
 function ic( s ){ return s.codePointAt( 0 ) }
