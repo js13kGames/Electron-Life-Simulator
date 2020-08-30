@@ -457,12 +457,10 @@ animate();
 scene.add( trail.mesh );
 // 300 / 600 rect / ms
 {
-    const choices = mkChoices()
-    const { map, width, height, idx2j, idx2i, ij2idx, directions, outij } = choices
     
     const canvas = document.createElement('canvas')
-    canvas.width = targetSize.width
-    canvas.height = targetSize.height
+    canvas.width =  targetSize.width 
+    canvas.height = targetSize.height 
     canvas.setAttribute('name','MONMON')
     canvas.style = 'position: absolute ; right : 0px ; bottom : 0px;'   
 
@@ -470,25 +468,31 @@ scene.add( trail.mesh );
     document.body.appendChild( canvas )
     
     const nominalScale=16
+
+    const choices = mkChoices() 
+    const { startPosition, map, width, height, idx2j, idx2i, ij2idx, directions, outij } = choices
+
     const camera = {
-        position : { x : 0, y : 0 }
+        center : { ...startPosition },
+        scale : nominalScale,
     }
 
     setInterval( () => {
-        clear( context )
-        camera.position.x += 0.5/8
-        camera.position.y += 0.2/8
-        //const scale = 1 + Math.abs( Math.sin(Date.now()/1000)  ) * 512
-        const scale = nominalScale
-        const elapsed1 = drawMap( context, camera.position, scale )
-        console.log('elapsed',elapsed1)  
+        clear( context )        
+        
+          camera.center.x += 0.5/8
+          camera.center.y += 0.2/28
+          camera.scale = nominalScale + Math.abs( Math.sin(Date.now()/1000)  ) * 8
+          const elapsed1 = drawMap( context, camera )
+          console.log('elapsed',elapsed1)  
+        
     }, 16 )
 
     function clear( context ){
         context.fillStyle = 'rgba(0,127,200,1)'
         context.fillRect(0,0,canvas.width,canvas.height)
     }
-    function drawMap( context, center, scale ){
+    function drawMap( context, { center, scale } ){
         const t1 = Date.now()
         const canvas = context.canvas,
               cwidth = canvas.width,
