@@ -64,12 +64,6 @@ export function mkChoices(){
                           V2((c0.x+c1.x)/2,y1+0.01), 
                           V2((1-r)*c0.x+r*c1.x,y1) ]
             const npts = Math.ceil(c1.x - c0.x ) 
-            /*
-            var curve = new THREE.CubicBezierCurve( ...pts )
-            const points = curve.getPoints( npts )
-            */
-            
-            //                const pts2 = pts.map( v2 => [v2.x,v2.y] )
             const curve = BezierCurve( ...pts )
             const points = curve.getPoints(  npts )
             //console.log(npts,{model:points,test:points2})
@@ -145,55 +139,55 @@ export function mkChoices(){
         }
         data[j] = a.join('')
     }
-    const mesh = mkLevelMesh( 'level',data)
+    //const mesh = mkLevelMesh( 'level',data)
     return { startPosition : {
         x: choices[0].x,
         y: choices[0].ys[0],
-    },choices, data, width, height, idx2i, idx2j, ij2idx, outij, map, mesh, directions }
+    },choices, data, width, height, idx2i, idx2j, ij2idx, outij, map,  directions }
 }
 
-function ic( s ){ return s.codePointAt( 0 ) }
-function ci( i ){ return String.fromCodePoint( i ) }
-function mkLevelMesh( name, data ){
+// function ic( s ){ return s.codePointAt( 0 ) }
+// function ci( i ){ return String.fromCodePoint( i ) }
+// function mkLevelMesh( name, data ){
     
-    const vertices = [],
-          colors = []
-    var geometry = new THREE.BufferGeometry();
-    for ( let j = 0 ; j < data.length ; j++ ){
-        const z = 0
-        const line = data[ j ]
-        for ( let i = 0 ; i < line.length ; i++ ){
-            const v = line.codePointAt( i )
-            function col(v){
-                const c = ci(v)
-                //                console.log('cols',cols,'v',v,'civ',ci(v))
-                return Cols[ ci(v) ] 
-            }
-            vertices.push(
-                i,j,z,
-                i+1,j,z,
-                i+1,j+1,z,                
-                i,j,z,
-                i+1,j+1,z,
-                i,j+1,z,
-            )
-            colors.push(
-                ...col(v),
-                ...col(v),
-                ...col(v),
+//     const vertices = [],
+//           colors = []
+//     var geometry = new THREE.BufferGeometry();
+//     for ( let j = 0 ; j < data.length ; j++ ){
+//         const z = 0
+//         const line = data[ j ]
+//         for ( let i = 0 ; i < line.length ; i++ ){
+//             const v = line.codePointAt( i )
+//             function col(v){
+//                 const c = ci(v)
+//                 //                console.log('cols',cols,'v',v,'civ',ci(v))
+//                 return Cols[ ci(v) ] 
+//             }
+//             vertices.push(
+//                 i,j,z,
+//                 i+1,j,z,
+//                 i+1,j+1,z,                
+//                 i,j,z,
+//                 i+1,j+1,z,
+//                 i,j+1,z,
+//             )
+//             colors.push(
+//                 ...col(v),
+//                 ...col(v),
+//                 ...col(v),
 
-                ...col(v),
-                ...col(v),
-                ...col(v),
-            )
-        }
-    }
-    geometry.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array( vertices ), 3 ) ); 
-    geometry.setAttribute( 'color', new THREE.BufferAttribute( new Float32Array( colors ), 3 ) );
-    var material = new THREE.MeshBasicMaterial( { color: 0xffffff, vertexColors: true  } );
-    var mesh = new THREE.Mesh( geometry, material );
-    mesh.name = name
-    mesh.visible = false
-    //scene.add( mesh )
-    return mesh
-}
+//                 ...col(v),
+//                 ...col(v),
+//                 ...col(v),
+//             )
+//         }
+//     }
+//     geometry.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array( vertices ), 3 ) ); 
+//     geometry.setAttribute( 'color', new THREE.BufferAttribute( new Float32Array( colors ), 3 ) );
+//     var material = new THREE.MeshBasicMaterial( { color: 0xffffff, vertexColors: true  } );
+//     var mesh = new THREE.Mesh( geometry, material );
+//     mesh.name = name
+//     mesh.visible = false
+//     //scene.add( mesh )
+//     return mesh
+// }
