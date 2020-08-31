@@ -9,7 +9,7 @@ import { mkChoices } from './levelCreator.js'
 import { Cols } from './cols.js'
 import { textCanvas } from './textPlane.js'
 import { V2, cloneV2, copyV2, subV2, addV2, multScalar, divScalar, clampV2, ceilV2, floorV2 } from './v2.js'
-
+import { Roller } from './roller.js'
 
 const ar = 16/9
 const targetSize = {
@@ -41,42 +41,7 @@ function Texts(){
 }
 const texts = Texts()
 
-// document.body.appendChild( renderer.domElement );
-// const trail = Trail()
 
-// function Trail(){
-    
-//     var colorArray = [ new THREE.Color( 0xff0080 ),
-//                        new THREE.Color( 0xffffff ),
-//                        new THREE.Color( 0x8000ff ) ];
-//     var positions = [];
-//     var colors = [];
-//     const count = 100
-//     for ( var i = 0; i < count; i ++ ) {
-// 	positions.push(
-//             400 * Math.random() ,
-//             30 * Math.random() ,
-//             5 //* Math.random())
-//         )
-// 	var clr = colorArray[ Math.floor( Math.random() * colorArray.length ) ];
-// 	colors.push( clr.r, clr.g, clr.b );                                   
-//     }
-    
-//     var geometry = new THREE.BufferGeometry();
-//     geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
-//     geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );    
-//     var material = new THREE.PointsMaterial( { size: 2,
-//                                                vertexColors: true,
-//                                                depthTest: false,
-//                                                sizeAttenuation: false
-
-//                                              } );
-    
-//     const mesh = new THREE.Points( geometry, material );
-//     //    console.log('trail',mesh)
-//     const trail = { mesh, count, idx : 0}
-//     return trail
-// }
 // function updateTrail(pmp,hasCollision,STATE){
 //     const tp = trail.mesh.geometry.attributes.position
 //     const tc = trail.mesh.geometry.attributes.color
@@ -117,54 +82,6 @@ const texts = Texts()
 //     tp.needsUpdate = true
 // }
 
-// /*
-//   var material = new THREE.ShaderMaterial( {
-//   uniforms: {
-//   time: { value: 1.0 },
-//   resolution: { value: new THREE.Vector2() }
-//   },
-//   vertexShader: tunnel.vertexShader,
-//   fragmentShader: tunnel.fragmentShader
-
-//   } );
-//   var geometry = new THREE.BufferGeometry();
-//   const po = -1,
-//   pu = 1,
-//   vertices = new Float32Array([
-//   po,po,po,
-//   pu,po,po,
-//   pu,pu,po,
-//   po,po,po,
-//   pu,pu,po,
-//   po,pu,po,
-//   ])
-//   geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
-// */
-// var startTime = Date.now();
-// let lastT = undefined
-// const scale = 1
-// renderer.domElement.style.width = (scale * targetSize.width)+'px'
-// renderer.domElement.style.height =  (scale * targetSize.height)+'px'
-
-// const State = {
-//     Choices : undefined, // : mkChoices(),
-//     level : 0
-// }
-// const player = {}
-// {
-//     const geometry = new THREE.SphereBufferGeometry(0.5,32,32)
-//     const material = new THREE.MeshBasicMaterial({color:0x0fffff,wireframe:true})
-//     const mesh = new THREE.Mesh( geometry, material)
-//     scene.add(mesh)
-//     mesh.visible = true
-//     player.mesh = mesh
-// }
-
-// function updateCamera( target ){
-//     camera.position.x = target.x
-//     camera.position.y = target.y
-// }
-
 // function initLevel()
 // {
 //     STATE = 'S00'
@@ -178,25 +95,6 @@ const texts = Texts()
 //     updateCamera( player.mesh.position )
 //     camera.position.z = 100
 // }
-
-// function nextLevel(){
-//     State.level++
-//     console.log('level',State.level)
-//     const { Choices } = State
-//     if ( Choices ){
-//         Choices.mesh.geometry.dispose()
-//         scene.remove( Choices.mesh )
-//     }
-//     const choices = mkChoices()
-//     console.log('=>',choices.directions)
-//     console.log(choices)
-//     State.Choices = choices
-//     scene.add( choices.mesh )
-//     initLevel()
-// }
-
-// const keyboardController = KeyboardControllers()
-// nextLevel()
 
 
 // var animate = function (T) {
@@ -431,7 +329,7 @@ function Display(){
     canvas.width =  targetSize.width 
     canvas.height = targetSize.height 
     canvas.setAttribute('name','MONMON')
-    canvas.style = 'position: absolute ; right : 0px ; bottom : 0px;'   
+    canvas.style = 'position: absolute ; top : 64px ; left : 0px;'   
 
     const context = canvas.getContext('2d')
     document.body.appendChild( canvas )
@@ -446,17 +344,7 @@ function Display(){
         scale : nominalScale,
         nominalScale
     }
-    /*
-    setInterval( () => {
-        clear( context )                
-        camera.center.x += 0.5/(8*4)
-        //camera.center.y += 0.2/28
-        camera.scale = nominalScale + Math.abs( Math.sin(Date.now()/1000)  ) * 8
-        const elapsed1 = draw( context, camera, choices )
-        //console.log('elapsed',elapsed1)  
-        
-    }, 16 )
-    */
+    
     function clear(  ){
         context.fillStyle = 'rgba(0,127,200,1)'
         context.fillRect(0,0,canvas.width,canvas.height)
@@ -572,6 +460,8 @@ function cssrgba( r01,g01,b01,a=1){
 function movePlayer( player, level, dx, dy, dt, ff){
     const { ij2idx, map } = level,
           pmp = player.position
+    const nextPosition = cloneV2(pmp)
+    let hasCollision = false        
     function posCollide( pos, cells ){
         const i = Math.round(pos.x-0.5),
               j = Math.round(pos.y-0.5),
@@ -579,8 +469,6 @@ function movePlayer( player, level, dx, dy, dt, ff){
         const collides = cells.includes( c )
         return collides
     }
-    const nextPosition = cloneV2(pmp)
-    let hasCollision = false        
     for ( let i = 3 ; i >= 1 ; i-- ){
         if ( i&1 ) nextPosition.x += dx * dt / ff
         if ( i&2 ) nextPosition.y += dy * dt / ff
@@ -756,6 +644,72 @@ function GameState(){
     
 }
 
+function Player(){
+    return {
+        position : V2(0,0)
+    }
+}
+const keyboardController = KeyboardControllers()
+const gameState = GameState()
+const display = Display()
+const player = Player()
+const step = dt=>{
+    stats.begin()
+    // grab input
+    const [[l,r],[d,u],[o,p]] = keyboardController.axesCtrlState
+    const camera = display.camera
+    const choices = display.choices
+    // move
+    const speed01 = 1,
+          minspeed = 150,
+          maxspeed = 40,
+          ff = (1-speed01) * minspeed + speed01 * maxspeed
+    const dx = ( -1*l + r ) 
+    const dy = ( -1*u + d ) 
+    const { nextPosition, hasCollision } =  movePlayer( player, choices, dx, dy, dt, ff )
+    if ( hasCollision ){
+        copyV2( camera.center, nextPosition )
+
+    }
+    copyV2( nextPosition, camera.center )
+
+    // display
+    display.clear( )                
+    camera.center.x += ( -1*l + r ) * dt / 100
+    camera.center.y += ( -1*u + d ) * dt / 100
+    camera.scale *= ( 1 + ( -1*o + p ) / 10 ) 
+    camera.scale = clamp( camera.scale, 4,32) // 4 wide zoom, 32 closeup
+    
+    const elapsed1 = display.draw( camera, choices )
+    
+    stats.end()
+
+
+}
+const roller = Roller(step)
+roller.command(1)
+/*
+setTimeout( ()=> roller.command(), 1000)
+setTimeout( ()=> roller.command(1), 2000)
+setTimeout( ()=> roller.command(0), 3000)
+*/
+function print(){
+    const s = gameState.state
+    console.log('->#',s.name,'l',s.level,'sl',s.sublevel,'lives',s.lives)
+}
+function say(m){
+    return function(){
+        gameState.event(m)
+    }
+}
+function repeat(r){
+    return function (...fs){
+        for (let i = 0 ; i < r ; i++){
+            fs.forEach( f => f() )
+        }
+    }
+}
+
 
 // complete()
 // function complete(){
@@ -796,96 +750,3 @@ function GameState(){
 
 // // repeat( 1 )( say('next'), print )
 // }
-
-function Roller( f ){
-    let pts,  // previous time stamp
-        running = 0, 
-        starting = 0
-    function command( cmd ){
-        if ( cmd && !running && !starting){
-            running = 1
-            starting = 1
-            pts = undefined
-            requestAnimationFrame( roll )
-        } else if ( !cmd && running ){
-            running = 0
-        }
-    }
-    function roll(t){
-        starting = 0
-        if (!running) return
-        requestAnimationFrame( roll )        
-        stats.begin()
-        if ( pts === undefined ) pts = t
-        const dt = t - pts
-        f(dt)
-        pts = t
-        stats.end()
-    }    
-    return { command }
-}
-function Player(){
-    return {
-        position : V2(0,0)
-    }
-}
-const keyboardController = KeyboardControllers()
-const gameState = GameState()
-const display = Display()
-const player = Player()
-
-
-const roller = Roller(dt=>{
-
-    // grab input
-    const [[l,r],[d,u],[o,p]] = keyboardController.axesCtrlState
-    const camera = display.camera
-    const choices = display.choices
-    // move
-    const speed01 = 1,
-          minspeed = 150,
-          maxspeed = 40,
-          ff = (1-speed01) * minspeed + speed01 * maxspeed
-    const dx = ( -1*l + r ) 
-    const dy = ( -1*u + d ) 
-    const { nextPosition, hasCollision } =  movePlayer( player, choices, dx, dy, dt, ff )
-    if ( hasCollision ){
-        copyV2( camera.center, nextPosition )
-
-    }
-    copyV2( nextPosition, camera.center )
-
-    // display
-    display.clear( )                
-    camera.center.x += ( -1*l + r ) * dt / 100
-    camera.center.y += ( -1*u + d ) * dt / 100
-    camera.scale *= ( 1 + ( -1*o + p ) / 10 ) 
-    camera.scale = clamp( camera.scale, 4,32) // 4 wide zoom, 32 closeup
-    
-    const elapsed1 = display.draw( camera, choices )
-    
-
-})
-
-roller.command(1)
-/*
-setTimeout( ()=> roller.command(), 1000)
-setTimeout( ()=> roller.command(1), 2000)
-setTimeout( ()=> roller.command(0), 3000)
-*/
-function print(){
-    const s = gameState.state
-    console.log('->#',s.name,'l',s.level,'sl',s.sublevel,'lives',s.lives)
-}
-function say(m){
-    return function(){
-        gameState.event(m)
-    }
-}
-function repeat(r){
-    return function (...fs){
-        for (let i = 0 ; i < r ; i++){
-            fs.forEach( f => f() )
-        }
-    }
-}
