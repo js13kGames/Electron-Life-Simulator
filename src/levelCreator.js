@@ -140,10 +140,15 @@ export function mkChoices(){
         data[j] = a.join('')
     }
     //const mesh = mkLevelMesh( 'level',data)
-    return { startPosition : {
-        x: choices[0].x,
-        y: choices[0].ys[0],
-    },choices, data, width, height, idx2i, idx2j, ij2idx, outij, map,  directions }
+    return {
+        startPosition : {
+            x: choices[0].x,
+            y: choices[0].ys[0],
+        }, choices,
+        data, width, height, idx2i, idx2j, ij2idx, outij,
+        map,
+        directions
+    }
 }
 
 // function ic( s ){ return s.codePointAt( 0 ) }

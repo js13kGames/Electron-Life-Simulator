@@ -25,6 +25,10 @@ export function multScalar(v1,a,t=V2()){
     t.y = v1.y * a
     return t
 }
+export function lerpV2(v1,v2,a,t=V2()){
+    t.x = (1-a) * v1.x + a * v2.x
+    t.y = (1-a) * v1.y + a * v2.y
+}
 /*
 function clamp(x,min,max){
     return Math.max( min, Math.min( x, max ) )

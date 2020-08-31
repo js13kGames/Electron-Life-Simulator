@@ -1,20 +1,42 @@
+"use strict";
 // cooridor debut / fin
 //const { OrbitControls } = require('three/examples/jsm/controls/OrbitControls.js')
 // const THREE = require('three')
 const Stats = require('stats.js')
 //const tunnel = require('./tunnel.js')
+//require('./zzfx.js')
 
 import { KeyboardControllers } from './keyboardControllers.js'
 import { mkChoices } from './levelCreator.js'
 import { Cols } from './cols.js'
 import { textCanvas } from './textPlane.js'
-import { V2, cloneV2, copyV2, subV2, addV2, multScalar, divScalar, clampV2, ceilV2, floorV2 } from './v2.js'
+import { V2, cloneV2, copyV2, subV2, addV2, multScalar, divScalar, clampV2, ceilV2, floorV2, lerpV2} from './v2.js'
 import { Roller } from './roller.js'
+const { zzfx } = require('./zz.js')
+
+const levels = []
+    //    minspeed, width, height, mainBranchesCount,
+
+const sounds = {
+    u : [,,1049,,.09,.25,,.45,,,442,.05,,.1,,,,.51,.08,.1],
+    v : [,,1322,.05,.12,.03,1,.02,31,7.7,,,,,,,.27,.33,.04,.01],
+    w : [,,34,.02,,.04,2,2.05,,1,-14,.16,,.8,,,.09,,.16,.17],
+    x : [,,565,.04,.19,0,,.33,,-4.1,,,,,,,.12,.05,,.55],
+    y : [,,27,.02,.16,.18,3,.7,,-0.7,,,,.1,,,,.34,.21,.09], // prout
+    z : [,,674,.07,.18,.01,,.9,-25,,,,.02,.7],
+    wo : [,,803,.05,.43,.55,,1.86,,,-97,.02,.27,,,,,.64,.04],
+    l1 : [,,72,.01,,.32,2,1.51,,-0.6,,,.02,,,,.07,.63],
+    l2 : [,,29,,.21,.15,4,1.63,,.7,-137,.03,,,,,.11,,.1]
+}
+
+//
+
+      
 
 const ar = 16/9
 const targetSize = {
     width : 2*256,
-    height : 2*256/ar
+    height : Math.floor(2*256/ar)
 }
 var stats = new Stats();
 stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -25,7 +47,17 @@ function Texts(){
     const family = 'monospace'
     const textTargetSize = {  width : targetSize.width/4, height : targetSize.height/4 }
     ;[ 
-        ['go','fetch','green'],
+        ['welcome','welcome!','green'],
+        ['title','incentive title screen','red'],
+        ['intro','the story begins...','red'],
+        ['gene','level generating...','red'],
+        ['instructions','follow route : 1010','red'],
+        ['ready?','ready set go','red'],
+        ['subwin','sublevel won !','red'],
+        ['redirecting','redirecting...','red'],
+        ['levelwin','level won !','red'],
+        ['win','you won it all !','red'],
+        //['go','fetch','green'],
         ['failed','401 Unauthorized','orange'],
         ['nextlevel','301 Moved permanently','orange'],
         ['success','host contacted','orange'], //200
@@ -70,7 +102,7 @@ function Display(){
         context.fillStyle = 'rgba(0,127,200,1)'
         context.fillRect(0,0,canvas.width,canvas.height)
     }
-    function draw( { center, scale }, level, player, texts ){
+    function draw( { center, scale }, level, player, particles, texts ){
     
         
         function drawMap(){
@@ -101,9 +133,8 @@ function Display(){
                 }
             }
         }        
-        function drawPanel()
+        function drawPanel( tp )
         {
-            const tp = texts.textPanels.go
             for ( let j = 0 ; j < tp.canvas.height ; j++ ){
                 let off = Math.floor(10 + Math.sin( j / 10 + Date.now() / 100 ) * 10)
                 context.putImageData(
@@ -129,31 +160,44 @@ function Display(){
                                              player.position.y,
                                              dim, dim, sb ) )
         }
-        function drawParticle( context, { center, scale }, i )
+        function drawParticle( context, { center, scale }, particle,  i )
         {
             const sb = []
-            const position = cloneV2(player.position)
-            const dim = 0.5
-            const d = Math.cos( i/10+ Date.now() / 1000 ) * 10
-            position.x += Math.cos( i+Date.now() / 1000 ) * d
-            position.y += Math.sin( i+Date.now() / 1000 ) * d
-            context.fillStyle = cssrgba(Math.random(),Math.cos( i/10),1)
-            context.fillRect( ...box2screen( position.x, position.y, dim, dim, sb ) )
+            
+            const position = V2()
+            let targetPosition = cloneV2(player.position)
+            {                
+                const d = Math.cos( i/10+ Date.now() / 1000 ) * 10
+                targetPosition.x += Math.cos( i+Date.now() / 1000 ) * d
+                targetPosition.y += Math.sin( i+Date.now() / 1000 ) * d
+                context.fillStyle = cssrgba(Math.random(),Math.cos( i/10),1)
+            }
+            const dim = particle.dim
+            
+            lerpV2( particle.position, targetPosition, 0.02, particle.position )
+            context.fillRect( ...box2screen( particle.position.x,
+                                             particle.position.y,
+                                             dim, dim, sb ) )
         }
 
         const t1 = Date.now()
         if (level)
             drawMap()
         const t2 = Date.now()
-        drawPlayer( context, camera)
-        const t3 = Date.now()        
-        const NB_PARTICLES = 100
-        for ( let i = 0 ; i < NB_PARTICLES ; i++ ){
-            drawParticle( context, camera, i)
-            
-        }
+        if ( player.visible ) 
+            drawPlayer( context, camera)
+        const t3 = Date.now()
+        particles.els.forEach( (particle,i) => {
+            if ( particle.visible )
+                drawParticle( context, camera, particle, i )
+        })
+     
         const t4 = Date.now()
-        drawPanel()
+        Object.values(texts.textPanels).forEach( tp => {
+            if ( tp.visible ){
+                drawPanel(tp)
+            }
+        })
         const t5 = Date.now()
 
         const e2 = t2 - t1
@@ -161,7 +205,7 @@ function Display(){
         const e4 = t4 - t3
         const e5 = t5 - t4
         const e = t5 - t1
-        //console.log(e2,e3,e4,e5,e)
+        //console.log(e2,e3,'p',e4,e5,e)
         return e
     }
     return { clear, draw, camera }
@@ -226,40 +270,64 @@ function GameState(){
         // boot intro and warm welcoming message   
         I0 : {
             //'#' : 1000,
-            'next' : d => update({name:'I1'})
+            'next' : d => {
+                update({name:'I1'})
+                zzfx(...sounds.u)
+            }
         },
         // incentive title screen
         I1 : {
-            'next' : d => update({name:'G0'})
+            'next' : d => {
+                update({name:'G0'})
+                zzfx(...sounds.v)
+            }
         },
         // global mission explanation and good luck player !
         G0 : {
-            'next' : d => update({
-                lives : NLIVES,
-                level : 1,
-                sublevel : 1,
-                name:'G1'
-            })
+            'next' : d => {
+                update({
+                    lives : NLIVES,
+                    level : 1,
+                    sublevel : 1,
+                    name:'G1'
+                })
+                zzfx(...sounds.w)
+            }
         },
         // sublevel generation
         G1 : {
-            'next' : d => update({
-                choices : mkChoices(),
-                name:'S1'
-            })
+            'next' : d => {
+                update({
+                    choices :( (() => {
+                        const a1= Date.now()
+                        const c = mkChoices()
+                        const a2= Date.now()
+                        console.log('kjlkjlkjlkjlk',a2-a1)
+                        return c
+                    })()),
+                    name:'S1'
+                })
+                zzfx(...sounds.x)
+            },
         },
         // level / sublevel presentation
         S1 : {
-            'next' : d => update({
-                name : 'S2',                
-            })
+            'next' : d => {
+                update({
+                    name : 'S2',                
+                })
+                zzfx(...sounds.y)
+            }
         },
         // ready / set / go
         S2 : {
-            'next' : d => update({
-                energy : NOMINAL_ENERGY,
-                name : 'S3',
-            })
+            'next' : d => {
+                update({
+                    energy : NOMINAL_ENERGY,
+                    name : 'S3',
+                })
+                zzfx(...sounds.z)
+            }
         },
         // runnning
         S3 : {
@@ -273,19 +341,25 @@ function GameState(){
                     event('sublevel-lose')
                 }
             },
-            'sublevel-win' : d => update({
-                name : 'W1'
-            }),
+            'sublevel-win' : d =>{
+                update({
+                    name : 'W1'
+                })
+                zzfx(...sounds.wo)
+            },
             'sublevel-lose' : d => {
                 if ( state.lives > 1 ){
                     update({
                         lives : state.lives - 1,
                         name : 'L1'
                     })
+                    zzfx(...sounds.l1)
                 } else {
                     update({
                         name : 'L2'
                     })
+                    zzfx(...sounds.l2)
+                    
                 }
             }
         },
@@ -295,7 +369,7 @@ function GameState(){
                 if ( state.sublevel < NSUBLEVELS ){
                     update({
                         sublevel : state.sublevel + 1,
-                        name:'G1'
+                        name:'R0'
                     })
                 } else {
                     if ( state.level < NLEVELS ){
@@ -311,9 +385,17 @@ function GameState(){
                 }
             }
         },
+        // redirecting aftr sublevel win
+        R0 : {
+            'next' :  d => update({
+                choices : undefined,
+                name : 'G1',
+            })
+        },
         // level win animation
         W2 : {
             'next' : d => update({
+                choices : undefined,
                 level : state.level + 1,
                 sublevel : 1,
                 name:'G1'
@@ -322,19 +404,23 @@ function GameState(){
         // game win animation
         W3 : {
             'next' : d => update({
+                choices : undefined,
                 name:'I1'
             })
         },
         // sublevel lost animation
         L1 : {
-            'next' : d => update({
-                name:'G1'
-            })
+            'next' : d => {
+                update({
+                    name:'S1'
+                })
+            }
         },
         // game lost animation
         L2 : {
             'next' : d => update({
-                name:'I1'
+                name:'I1',
+                choices : undefined,
             })
         }
     }
@@ -381,6 +467,7 @@ function GameState(){
 
 function Player(){
     return {
+        visible : true,
         position : V2(0,0)
     }
 }
@@ -389,10 +476,11 @@ function Particles(){
     const els = []
     for ( let i = 0 ; i < PARTICLE_COUNT ; i++ ){
         els[i] = {
-            disabled : true,
+            dim : 0.25,
+            visible : true,
             position : {
-                x : undefined,
-                y : undefined
+                x : 10,
+                y : 10
             }
         }
     }
@@ -418,7 +506,7 @@ const step = dt=>{
     // grab input
     stats.begin()
     if ( ['I0','I1','G0','G1','S1','S2',
-          'L1','L2','W1','W2'].includes( gameState.state.name ) ){
+          'L1','L2','W1','W2','W3','R0'].includes( gameState.state.name ) ){
         if ( keyboardController.anyKeyStroke.length ){
             console.log('to!')
             gameState.event('next')
@@ -427,26 +515,35 @@ const step = dt=>{
 
     const [[l,r],[d,u],[o,p]] = keyboardController.axesCtrlState
     keyboardController.resetKeyStrokes()
-    if ( ['S2'].includes( gameState.state.name ) ){
+    if ( ['S1','S2'].includes( gameState.state.name ) ){
         copyV2(choices.startPosition, player.position)        
+        copyV2(player.position,display.camera.center)
     }
-    if ( ['S3'].includes( gameState.state.name ) ){
+    if ( ['S3','W1','W2'].includes( gameState.state.name ) ){
 //        console.log('gameState',gameState)
         // player move + collide
         const speed01 = 1,
               minspeed = 150,
               maxspeed = 40,
               ff = (1-speed01) * minspeed + speed01 * maxspeed
-        const dx = ( -1*l + r ) 
-        const dy = ( -1*u + d )
-        const { nextPosition, hasCollision } =  movePlayer( player, choices, dx, dy, dt, ff )
+        let dx,dy
+        if ( ['S3'].includes( gameState.state.name ) ){
+            dx = ( -1*l + r ) ,
+            dy = ( -1*u + d )
+        } else {
+            dx = 1
+            dy = 0
+        }
+        
+        const { nextPosition, hasCollision } =  movePlayer( player,
+                                                            choices, dx, dy, dt, ff )
         copyV2(nextPosition,player.position)
         copyV2(player.position,display.camera.center)
         
         // update particles
         //if ( hasCollision ){
         //}
-        
+         if ( ['S3'].includes( gameState.state.name ) ){
         // check victory
         if ( posCollide( choices, nextPosition, 'G' ) ){
             gameState.event('sublevel-win')
@@ -457,6 +554,7 @@ const step = dt=>{
             //copyV2( camera.center, nextPosition )
             gameState.event('damage',10)
         }
+         }
     }
     
     /*
@@ -469,9 +567,27 @@ const step = dt=>{
     camera.center.y += ( -1*u + d ) * dt / 1000*/
     camera.scale *= ( 1 + ( -1*o + p ) / 10 ) 
     camera.scale = clamp( camera.scale, 4,32) // 4 wide zoom, 32 closeup
-    
-    const elapsed1 = display.draw( camera, choices, player, texts )
-    
+    const textVisibility = {
+        'I0' : ['loading...'],
+        'I1' : ['title'],
+        'G0' : ['intro'],
+        'G1' : ['gene'],
+        'S1' : ['instructions'],
+        'S2' : ['ready?'],
+        'W1' : ['subwin'],
+        'R0' : ['redirecting'],
+        'W2' : ['levelwin'],
+        'W3' : ['win'],
+        'L1' : ['failed'],
+        'L2' : ['gameover'],        
+    }
+    Object.entries(texts.textPanels).forEach( ([pname,tp]) => {
+        const v = textVisibility[ gameState.state.name ]
+        tp.visible = ( v && v.includes(pname) )
+    })
+
+    const elapsed1 = display.draw( camera, choices, player, particles, texts )
+   
     stats.end()
 
 
@@ -483,62 +599,21 @@ setTimeout( ()=> roller.command(), 1000)
 setTimeout( ()=> roller.command(1), 2000)
 setTimeout( ()=> roller.command(0), 3000)
 */
-function print(){
-    const s = gameState.state
-    console.log('->#',s.name,'l',s.level,'sl',s.sublevel,'lives',s.lives)
-}
-function say(m){
-    return function(){
-        gameState.event(m)
-    }
-}
-function repeat(r){
-    return function (...fs){
-        for (let i = 0 ; i < r ; i++){
-            fs.forEach( f => f() )
-        }
-    }
-}
-
-
-// complete()
-// function complete(){
-// repeat( 3 )( say('next'), print )
-
-// repeat( 3 )( say('next'), print )
-// repeat( 1 )( say('sublevel-win'), print )
-//  repeat( 1 )( say('next'), print )
-
-//  repeat( 3 )( say('next'), print )
-//  repeat( 1 )( say('sublevel-lose'), print )
-//  repeat( 1 )( say('next'), print )
-//  repeat( 3 )( say('next'), print )
-//  repeat( 1 )( say('sublevel-lose'), print )
-//  repeat( 1 )( say('next'), print )
-        
-
-// // repeat( 1 )( say('next'), print )
-
-// // repeat( 3 )( say('next'), print )
-// // repeat( 1 )( say('sublevel-lose'), print )
-// // repeat( 1 )( say('next'), print )
-
-// // repeat( 3 )( say('next'), print )
-// // repeat( 1 )( say('sublevel-win'), print )
-// // repeat( 1 )( say('next'), print )
-
-// // repeat( 1 )( say('next'), print )
-
-
-// // repeat( 3 )( say('next'), print )
-// // repeat( 1 )( say('sublevel-win'), print )
-// // repeat( 1 )( say('next'), print )
-
-// // repeat( 3 )( say('next'), print )
-// // repeat( 1 )( say('sublevel-win'), print )
-// // repeat( 1 )( say('next'), print )
-
-// // repeat( 1 )( say('next'), print )
+// function print(){
+//     const s = gameState.state
+//     console.log('->#',s.name,'l',s.level,'sl',s.sublevel,'lives',s.lives)
+// }
+// function say(m){
+//     return function(){
+//         gameState.event(m)
+//     }
+// }
+// function repeat(r){
+//     return function (...fs){
+//         for (let i = 0 ; i < r ; i++){
+//             fs.forEach( f => f() )
+//         }
+//     }
 // }
 
 
