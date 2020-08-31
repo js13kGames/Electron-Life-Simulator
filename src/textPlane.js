@@ -47,6 +47,8 @@ export function textCanvas( msg, family, style, textTargetSize ){
     let bounds = [1,textTargetSize.height]    
     const niter = 100
     let measure,tw,th
+
+    // dichotomy search
     for ( let i = 0 ; i< niter ;i++){
         const center = (bounds[0]+bounds[1])/2
         if ( ( bounds[1] - bounds[0] ) < 1e-6 ) break
@@ -60,6 +62,7 @@ export function textCanvas( msg, family, style, textTargetSize ){
             bounds[0] = center
         }
     }
+    
     const border = 5
     canvas.width = Math.floor( tw ) + border * 2
     canvas.height = Math.floor( th ) + border * 2
@@ -77,4 +80,3 @@ export function textCanvas( msg, family, style, textTargetSize ){
              imageData : context.getImageData( 0,0,canvas.width, canvas.height ) }
              
 }
-

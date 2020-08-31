@@ -1,5 +1,10 @@
 export function V2(x,y){ return {x,y} }
 export function cloneV2({x,y}){ return V2(x,y) }
+export function copyV2(v,t){
+    t.x = v.x
+    t.y = v.y
+    return t
+}
 export function subV2(v1,v2,t=V2()){
     t.x = v1.x - v2.x
     t.y = v1.y - v2.y

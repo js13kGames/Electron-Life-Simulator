@@ -8,52 +8,20 @@ import { KeyboardControllers } from './keyboardControllers.js'
 import { mkChoices } from './levelCreator.js'
 import { Cols } from './cols.js'
 import { textCanvas } from './textPlane.js'
-import { V2, cloneV2, subV2, addV2, multScalar, divScalar, clampV2, ceilV2, floorV2 } from './v2.js'
+import { V2, cloneV2, copyV2, subV2, addV2, multScalar, divScalar, clampV2, ceilV2, floorV2 } from './v2.js'
 
-let STATE = 'S00'
 
 const ar = 16/9
 const targetSize = {
     width : 2*256,
     height : 2*256/ar
 }
-
-// function InitThree(){
-
-//     const style = document.createElement('style')
-//     //style.textContent = 'body { margin: 0; } canvas { display: block; width:100% ; height : 100%; image-rendering : crisp-edges}'
-//     //style.textContent = 'canvas { display: block ; image-rendering : crisp-edges ; } canvas.three { position: fixed; display: block; left : 100px;}'// width : '+targetSize.width*2'px; }'
-//     style.textContent = 'canvas.three { position: fixed; display: block; left : 100px;}'// width : '+targetSize.width*2'px; }'
-
-//     document.head.appendChild(style)
-
 var stats = new Stats();
 stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild( stats.dom );
 
-//     var scene = new THREE.Scene();
-//     var camera = new THREE.PerspectiveCamera(
-//         75,
-//         targetSize.width/targetSize.height,
-//         0.1,
-//         1000
-//     );
-
-//     var renderer = new THREE.WebGLRenderer();
-//     //renderer.sortObjects = false;
-
-//     const ocontrols = new OrbitControls(camera, renderer.domElement)
-//     ocontrols.enableDamping = true
-//     ocontrols.dampingFactor = 0.25
-//     ocontrols.enableKeys = false
-//     //ocontrols.enableZoom = false
-//     return { scene, camera, renderer, stats }
-// }
-// const { scene, camera, renderer, stats } = InitThree()
-
-
-let textPanels ={}
-if (true){
+function Texts(){
+    let textPanels ={}
     const family = 'monospace'
     const textTargetSize = {  width : targetSize.width/4, height : targetSize.height/4 }
     ;[ 
@@ -66,12 +34,12 @@ if (true){
         ['c1','one','white'],
         ['c.','.','grey'],
     ].forEach( ([k,msg,style]) => {
-        //const panel = textPlane( THREE,msg,family,style,textTargetSize )
         const panel = textCanvas( msg,family,style,textTargetSize )
         textPanels[k] = panel
-//         scene.add( panel.mesh )       
     })
+    return { textPanels }
 }
+const texts = Texts()
 
 // document.body.appendChild( renderer.domElement );
 // const trail = Trail()
@@ -457,7 +425,7 @@ if (true){
 
 // scene.add( trail.mesh );
 // 300 / 600 rect / ms
-{
+function Display(){
     
     const canvas = document.createElement('canvas')
     canvas.width =  targetSize.width 
@@ -468,70 +436,69 @@ if (true){
     const context = canvas.getContext('2d')
     document.body.appendChild( canvas )
     
-    const nominalScale=16
-
     const choices = mkChoices() 
     const { startPosition, map, width, height, idx2j, idx2i, ij2idx,
             directions, outij } = choices
 
+    const nominalScale =16
     const camera = {
         center : { ...startPosition },
         scale : nominalScale,
+        nominalScale
     }
-
+    /*
     setInterval( () => {
-        clear( context )        
-        
-        camera.center.x += 0.5/8
+        clear( context )                
+        camera.center.x += 0.5/(8*4)
         //camera.center.y += 0.2/28
         camera.scale = nominalScale + Math.abs( Math.sin(Date.now()/1000)  ) * 8
-        const elapsed1 = drawMap( context, camera, choices )
+        const elapsed1 = draw( context, camera, choices )
         //console.log('elapsed',elapsed1)  
         
     }, 16 )
-
-    function clear( context ){
+    */
+    function clear(  ){
         context.fillStyle = 'rgba(0,127,200,1)'
         context.fillRect(0,0,canvas.width,canvas.height)
     }
-    function drawMap( context, { center, scale }, level ){
-        const t1 = Date.now()
+    function draw( { center, scale }, level ){
         const width = level.width,
               height = level.height,        
               canvas = context.canvas,
               cwidth = canvas.width,
               cheight = canvas.height,
               hcWidth = cwidth / 2,
-              hcHeight = cheight / 2,        
-              cpx = center.x + 0.5,
-              cpy = center.y + 0.5,
-              visiblemap = {
-                  l : clamp(Math.floor( cpx - hcWidth / scale ),0,width-1),
-                  r : clamp(Math.ceil( cpx + hcWidth / scale ),0,width-1),
-                  b : clamp(Math.floor( cpy - hcHeight / scale ),0,height-1),
-                  t : clamp(Math.ceil( cpy + hcHeight / scale ),0,height-1),
-              }
-        for ( let i = visiblemap.l ; i < visiblemap.r  ; i++ ){
-            for ( let j = visiblemap.b ; j < visiblemap.t ; j++ ){
-                let col
-                if ( outij(i,j) ){
-                    col = [1,0,0]
-                } else {
-                    const c = map[ ij2idx( i,j ) ]
-                    col = Cols[c] || [1,0,0]
-                }
-                const rgba = cssrgba( ...col ),
-                      x = (i - cpx) * scale + hcWidth,
-                      y = (j - cpy) * scale + hcHeight
-                context.fillStyle = rgba
-                context.fillRect(x, y, scale-1, scale-1)
-            }
-        }
-        const t2 = Date.now()
+              hcHeight = cheight / 2
         
+        function drawMap(){
+            const  cpx = center.x + 0.5,
+                  cpy = center.y + 0.5,
+                  visiblemap = {
+                      l : clamp(Math.floor( cpx - hcWidth / scale ),0,width-1),
+                      r : clamp(Math.ceil( cpx + hcWidth / scale ),0,width-1),
+                      b : clamp(Math.floor( cpy - hcHeight / scale ),0,height-1),
+                      t : clamp(Math.ceil( cpy + hcHeight / scale ),0,height-1),
+                  }
+            for ( let i = visiblemap.l ; i < visiblemap.r  ; i++ ){
+                for ( let j = visiblemap.b ; j < visiblemap.t ; j++ ){
+                    let col
+                    if ( outij(i,j) ){
+                        col = [1,0,0]
+                    } else {
+                        const c = map[ ij2idx( i,j ) ]
+                        col = Cols[c] || [1,0,0]
+                    }
+                    const rgba = cssrgba( ...col ),
+                          x = (i - cpx) * scale + hcWidth,
+                          y = (j - cpy) * scale + hcHeight
+                    context.fillStyle = rgba
+                    context.fillRect(x, y, scale-1, scale-1)
+                }
+            }
+        }        
         function drawPanel()
         {
-            const tp = textPanels.go
+            const tp = texts.textPanels.go
             for ( let j = 0 ; j < tp.canvas.height ; j++ ){
                 let off = Math.floor(10 + Math.sin( j / 10 + Date.now() / 100 ) * 10)
                 context.putImageData(
@@ -544,7 +511,7 @@ if (true){
         function drawPlayer( context, { center, scale } )
         {
             const position = { ...startPosition }
-            const dim = 2
+            const dim = 1
             position.x = 0
             const x = (position.x - dim/2 - center.x) * scale + hcWidth
             const y = (position.y - dim/2 - center.y) * scale + hcHeight
@@ -556,24 +523,29 @@ if (true){
         {
             const position = { ...startPosition }
             const dim = 0.5
-            position.x += Math.cos( i+Date.now() / 1000 ) * 3
-            position.y += Math.sin( i+Date.now() / 1000 ) * 3
-            const x = (position.x - dim/2 - center.x) * scale + hcWidth
-            const y = (position.y - dim/2 - center.y) * scale + hcHeight
             
-            context.fillStyle = cssrgba(0,0,1)
+            const d = Math.cos( i/10+ Date.now() / 1000 ) * 10
+            position.x += Math.cos( i+Date.now() / 1000 ) * d
+            position.y += Math.sin( i+Date.now() / 1000 ) * d
+            
+            const x = (position.x - dim/2 - center.x) * scale + hcWidth
+            const y = (position.y - dim/2 - center.y) * scale + hcHeight            
+            context.fillStyle = cssrgba(Math.random(),Math.cos( i/10),1)
             context.fillRect(x,y, dim*scale,dim*scale)
         }
-        const t3 = Date.now()
+
+        const t1 = Date.now()
+        drawMap()
+        const t2 = Date.now()
         drawPlayer( context, camera,)
-        
-        const t4 = Date.now()
+        const t3 = Date.now()        
         const NB_PARTICLES = 100
         for ( let i = 0 ; i < NB_PARTICLES ; i++ ){
             drawParticle( context, camera, i)
             
         }
-
+        const t4 = Date.now()
+        drawPanel()
         const t5 = Date.now()
 
         const e2 = t2 - t1
@@ -581,9 +553,10 @@ if (true){
         const e4 = t4 - t3
         const e5 = t5 - t4
         const e = t5 - t1
-        console.log(e2,e3,e4,e5,e)
-        return t3 - t1
+        //console.log(e2,e3,e4,e5,e)
+        return e
     }
+    return { clear, draw, camera, choices }
 }
 
 
@@ -596,8 +569,9 @@ function cssrgba( r01,g01,b01,a=1){
           b = Math.floor( 256 * b01 )
     return `rgba(${r},${g},${b},${a})`
 }
-function movePlayer( player, level, dx, dy, dt ){
-    const { ij2idx, map } = level
+function movePlayer( player, level, dx, dy, dt, ff){
+    const { ij2idx, map } = level,
+          pmp = player.position
     function posCollide( pos, cells ){
         const i = Math.round(pos.x-0.5),
               j = Math.round(pos.y-0.5),
@@ -605,7 +579,7 @@ function movePlayer( player, level, dx, dy, dt ){
         const collides = cells.includes( c )
         return collides
     }
-    const nextPosition = pmp.clone()
+    const nextPosition = cloneV2(pmp)
     let hasCollision = false        
     for ( let i = 3 ; i >= 1 ; i-- ){
         if ( i&1 ) nextPosition.x += dx * dt / ff
@@ -613,7 +587,7 @@ function movePlayer( player, level, dx, dy, dt ){
         const collide = posCollide( nextPosition, ['*'] )
         if ( !collide ) break;
         hasCollision = true
-        nextPosition.copy( pmp )
+        copyV2(pmp,nextPosition)
     }
     return {
         nextPosition,
@@ -781,23 +755,6 @@ function GameState(){
 
     
 }
-const gameState = GameState()
-function print(){
-    const s = gameState.state
-    console.log('->#',s.name,'l',s.level,'sl',s.sublevel,'lives',s.lives)
-}
-function say(m){
-    return function(){
-        gameState.event(m)
-    }
-}
-function repeat(r){
-    return function (...fs){
-        for (let i = 0 ; i < r ; i++){
-            fs.forEach( f => f() )
-        }
-    }
-}
 
 
 // complete()
@@ -840,20 +797,95 @@ function repeat(r){
 // // repeat( 1 )( say('next'), print )
 // }
 
-
-let previousTimestamp 
-function roll(timestamp){
-    requestAnimationFrame( roll )    
-    stats.begin()
-    if ( previousTimestamp === undefined )
-        previousTimestamp = timestamp
-    const dt = timestamp - previousTimestamp
-
-    //const { nextPosition, hasCollision } = movePlayer( player, level, dx, dy, dt )
-    
-    previousTimestamp = timestamp
-    //if ( dt > 17 ) console.log('a')
-    //else console.log('b')
-    stats.end()
+function Roller( f ){
+    let pts,  // previous time stamp
+        running = 0, 
+        starting = 0
+    function command( cmd ){
+        if ( cmd && !running && !starting){
+            running = 1
+            starting = 1
+            pts = undefined
+            requestAnimationFrame( roll )
+        } else if ( !cmd && running ){
+            running = 0
+        }
+    }
+    function roll(t){
+        starting = 0
+        if (!running) return
+        requestAnimationFrame( roll )        
+        stats.begin()
+        if ( pts === undefined ) pts = t
+        const dt = t - pts
+        f(dt)
+        pts = t
+        stats.end()
+    }    
+    return { command }
 }
-roll()
+function Player(){
+    return {
+        position : V2(0,0)
+    }
+}
+const keyboardController = KeyboardControllers()
+const gameState = GameState()
+const display = Display()
+const player = Player()
+
+
+const roller = Roller(dt=>{
+
+    // grab input
+    const [[l,r],[d,u],[o,p]] = keyboardController.axesCtrlState
+    const camera = display.camera
+    const choices = display.choices
+    // move
+    const speed01 = 1,
+          minspeed = 150,
+          maxspeed = 40,
+          ff = (1-speed01) * minspeed + speed01 * maxspeed
+    const dx = ( -1*l + r ) 
+    const dy = ( -1*u + d ) 
+    const { nextPosition, hasCollision } =  movePlayer( player, choices, dx, dy, dt, ff )
+    if ( hasCollision ){
+        copyV2( camera.center, nextPosition )
+
+    }
+    copyV2( nextPosition, camera.center )
+
+    // display
+    display.clear( )                
+    camera.center.x += ( -1*l + r ) * dt / 100
+    camera.center.y += ( -1*u + d ) * dt / 100
+    camera.scale *= ( 1 + ( -1*o + p ) / 10 ) 
+    camera.scale = clamp( camera.scale, 4,32) // 4 wide zoom, 32 closeup
+    
+    const elapsed1 = display.draw( camera, choices )
+    
+
+})
+
+roller.command(1)
+/*
+setTimeout( ()=> roller.command(), 1000)
+setTimeout( ()=> roller.command(1), 2000)
+setTimeout( ()=> roller.command(0), 3000)
+*/
+function print(){
+    const s = gameState.state
+    console.log('->#',s.name,'l',s.level,'sl',s.sublevel,'lives',s.lives)
+}
+function say(m){
+    return function(){
+        gameState.event(m)
+    }
+}
+function repeat(r){
+    return function (...fs){
+        for (let i = 0 ; i < r ; i++){
+            fs.forEach( f => f() )
+        }
+    }
+}
