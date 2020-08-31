@@ -21,7 +21,7 @@
 //     )
 //     function animate(ff=1){
 //         if ( !plane.visible ) return
-//         const now = Date.now() / 200
+//         constnow = Date.now() / 200
 //         const pp = plane.geometry.attributes.position
 //         for ( let i = 0 ; i < pp.count ; i++ ){
 //             const x = pp.array[ 3 * i ]
@@ -72,8 +72,9 @@ export function textCanvas( msg, family, style, textTargetSize ){
     context.fillText(msg,
                      border + measure.actualBoundingBoxLeft,
                      canvas.height - border - measure.actualBoundingBoxDescent)
-    document.body.appendChild( canvas )
-    window.ccc = context
-    return canvas
+    document.body.appendChild( canvas )    
+    return { canvas,
+             imageData : context.getImageData( 0,0,canvas.width, canvas.height ) }
+             
 }
 

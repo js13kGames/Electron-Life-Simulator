@@ -1,13 +1,13 @@
 // cooridor debut / fin
-const { OrbitControls } = require('three/examples/jsm/controls/OrbitControls.js')
-const THREE = require('three')
+//const { OrbitControls } = require('three/examples/jsm/controls/OrbitControls.js')
+// const THREE = require('three')
 const Stats = require('stats.js')
 //const tunnel = require('./tunnel.js')
 
 import { KeyboardControllers } from './keyboardControllers.js'
 import { mkChoices } from './levelCreator.js'
 import { Cols } from './cols.js'
-import { textPlane } from './textPlane.js'
+import { textCanvas } from './textPlane.js'
 import { V2, cloneV2, subV2, addV2, multScalar, divScalar, clampV2, ceilV2, floorV2 } from './v2.js'
 
 let STATE = 'S00'
@@ -52,25 +52,26 @@ document.body.appendChild( stats.dom );
 // const { scene, camera, renderer, stats } = InitThree()
 
 
-// let textPanels ={}
-// if (true){
-//     const family = 'monospace'
-//     const textTargetSize = {  width : targetSize.width/4, height : targetSize.height/4 }
-//     ;[ 
-//         ['go','fetch','green'],
-//         ['failed','401 Unauthorized','orange'],
-//         ['nextlevel','301 Moved permanently','orange'],
-//         ['success','host contacted','orange'], //200
-//         ['gameover','404 Not found!','red'],
-//         ['c0','zero','brown'],
-//         ['c1','one','white'],
-//         ['c.','.','grey'],
-//     ].forEach( ([k,msg,style]) => {
-//         const panel = textPlane( THREE,msg,family,style,textTargetSize )
-//         textPanels[k] = panel
+let textPanels ={}
+if (true){
+    const family = 'monospace'
+    const textTargetSize = {  width : targetSize.width/4, height : targetSize.height/4 }
+    ;[ 
+        ['go','fetch','green'],
+        ['failed','401 Unauthorized','orange'],
+        ['nextlevel','301 Moved permanently','orange'],
+        ['success','host contacted','orange'], //200
+        ['gameover','404 Not found!','red'],
+        ['c0','zero','brown'],
+        ['c1','one','white'],
+        ['c.','.','grey'],
+    ].forEach( ([k,msg,style]) => {
+        //const panel = textPlane( THREE,msg,family,style,textTargetSize )
+        const panel = textCanvas( msg,family,style,textTargetSize )
+        textPanels[k] = panel
 //         scene.add( panel.mesh )       
-//     })
-// }
+    })
+}
 
 // document.body.appendChild( renderer.domElement );
 // const trail = Trail()
@@ -481,9 +482,9 @@ document.body.appendChild( stats.dom );
     setInterval( () => {
         clear( context )        
         
-          camera.center.x += 0.5/8
-          camera.center.y += 0.2/28
-          camera.scale = nominalScale + Math.abs( Math.sin(Date.now()/1000)  ) * 8
+        camera.center.x += 0.5/8
+        //camera.center.y += 0.2/28
+        camera.scale = nominalScale + Math.abs( Math.sin(Date.now()/1000)  ) * 8
         const elapsed1 = drawMap( context, camera, choices )
         //console.log('elapsed',elapsed1)  
         
@@ -527,8 +528,61 @@ document.body.appendChild( stats.dom );
             }
         }
         const t2 = Date.now()
-        const elapsed = t2 - t1
-        return elapsed 
+        
+        function drawPanel()
+        {
+            const tp = textPanels.go
+            for ( let j = 0 ; j < tp.canvas.height ; j++ ){
+                let off = Math.floor(10 + Math.sin( j / 10 + Date.now() / 100 ) * 10)
+                context.putImageData(
+                    tp.imageData,off,j,
+                    0,j,
+                    tp.canvas.width,2
+                )
+            }
+        }
+        function drawPlayer( context, { center, scale } )
+        {
+            const position = { ...startPosition }
+            const dim = 2
+            position.x = 0
+            const x = (position.x - dim/2 - center.x) * scale + hcWidth
+            const y = (position.y - dim/2 - center.y) * scale + hcHeight
+            
+            context.fillStyle = cssrgba(1,0,0)
+            context.fillRect(x,y, dim*scale,dim*scale)
+        }
+        function drawParticle( context, { center, scale }, i )
+        {
+            const position = { ...startPosition }
+            const dim = 0.5
+            position.x += Math.cos( i+Date.now() / 1000 ) * 3
+            position.y += Math.sin( i+Date.now() / 1000 ) * 3
+            const x = (position.x - dim/2 - center.x) * scale + hcWidth
+            const y = (position.y - dim/2 - center.y) * scale + hcHeight
+            
+            context.fillStyle = cssrgba(0,0,1)
+            context.fillRect(x,y, dim*scale,dim*scale)
+        }
+        const t3 = Date.now()
+        drawPlayer( context, camera,)
+        
+        const t4 = Date.now()
+        const NB_PARTICLES = 100
+        for ( let i = 0 ; i < NB_PARTICLES ; i++ ){
+            drawParticle( context, camera, i)
+            
+        }
+
+        const t5 = Date.now()
+
+        const e2 = t2 - t1
+        const e3 = t3 - t2
+        const e4 = t4 - t3
+        const e5 = t5 - t4
+        const e = t5 - t1
+        console.log(e2,e3,e4,e5,e)
+        return t3 - t1
     }
 }
 
