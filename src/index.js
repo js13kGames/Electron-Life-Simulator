@@ -39,48 +39,7 @@ function Texts(){
     })
     return { textPanels }
 }
-const texts = Texts()
 
-
-// function updateTrail(pmp,hasCollision,STATE){
-//     const tp = trail.mesh.geometry.attributes.position
-//     const tc = trail.mesh.geometry.attributes.color
-    
-//     for ( let r = 0 ; r < 10 ; r++ ){
-//         const idx = trail.idx
-//         trail.idx = ( trail.idx + 1 )%trail.count
-//         //            const rang = 3 * Math.PI/4 + Math.random() * Math.PI / 2
-//         let rang,rdis
-//         if ( !hasCollision ){
-//             if (['S4'].includes( STATE )){
-//                 rang = 2 * Math.PI * Math.random()
-//             } else {
-//                 rang = Math.PI * ( 10 / 12 + 1 / 3 * Math.random() )
-//             }
-//             rdis = 0.5 + Math.pow(Math.random(),4) * 2.5
-//         } else {
-//             rang = Math.random() * Math.PI * 2
-//             rdis = 0+Math.pow(Math.random(),4) * 2
-//         }
-//         tp.array[ 3 * idx ] = pmp.x + Math.cos( rang ) * rdis
-//         tp.array[ 3 * idx + 1 ] = pmp.y + Math.sin( rang ) * rdis
-//         if ( hasCollision ){
-//             tc.array[ 3 * idx ] = 1
-//             tc.array[ 3 * idx + 1] /= 2
-//             tc.array[ 3 * idx + 2 ] /= 2
-//         } else {
-//             if ( ['S4','S3'].includes( STATE ) ){
-//                 tc.array[ 3 * idx ] =  Math.random()
-//             } else {
-//                 tc.array[ 3 * idx ] = 0
-//             }
-//             tc.array[ 3 * idx + 1] = Math.random()
-//             tc.array[ 3 * idx + 2 ] = Math.random()
-//         }
-//     }
-//     tc.needsUpdate = true
-//     tp.needsUpdate = true
-// }
 function Display(){
     
     // 300 / 600 rect / ms
@@ -103,20 +62,16 @@ function Display(){
         scale : nominalScale,
         nominalScale
     }
+    //const canvas = context.canvas,
+    const hcWidth = canvas.width / 2,
+          hcHeight = canvas.height / 2
     
     function clear(  ){
         context.fillStyle = 'rgba(0,127,200,1)'
         context.fillRect(0,0,canvas.width,canvas.height)
     }
-    function draw( { center, scale }, level, player ){
+    function draw( { center, scale }, level, player, texts ){
     
-        const/* width = level.width,
-              height = level.height,        */
-              canvas = context.canvas,
-              cwidth = canvas.width,
-              cheight = canvas.height,
-              hcWidth = cwidth / 2,
-              hcHeight = cheight / 2
         
         function drawMap(){
             const { map, width, height,
@@ -168,15 +123,8 @@ function Display(){
         function drawPlayer( context, { center, scale } )
         {
             const sb = []
-            //const position = { ...startPosition }
             const dim = 1
-            //position.x = 0
             context.fillStyle = cssrgba(1,0,0)
-            /*
-            const x = (position.x - dim/2 - center.x) * scale + hcWidth
-            const y = (position.y - dim/2 - center.y) * scale + hcHeight            
-            context.fillRect(x,y, dim*scale,dim*scale)
-            */
             context.fillRect( ...box2screen( player.position.x,
                                              player.position.y,
                                              dim, dim, sb ) )
@@ -184,25 +132,18 @@ function Display(){
         function drawParticle( context, { center, scale }, i )
         {
             const sb = []
-            const position = cloneV2(player.position)//{ ...startPosition }
+            const position = cloneV2(player.position)
             const dim = 0.5
             const d = Math.cos( i/10+ Date.now() / 1000 ) * 10
             position.x += Math.cos( i+Date.now() / 1000 ) * d
             position.y += Math.sin( i+Date.now() / 1000 ) * d
-
             context.fillStyle = cssrgba(Math.random(),Math.cos( i/10),1)
-            
-            /*
-            const x = (position.x - dim/2 - center.x) * scale + hcWidth
-            const y = (position.y - dim/2 - center.y) * scale + hcHeight            
-            context.fillRect(x,y, dim*scale,dim*scale)
-            */
             context.fillRect( ...box2screen( position.x, position.y, dim, dim, sb ) )
         }
 
         const t1 = Date.now()
         if (level)
-        drawMap()
+            drawMap()
         const t2 = Date.now()
         drawPlayer( context, camera)
         const t3 = Date.now()        
@@ -238,8 +179,8 @@ function cssrgba( r01,g01,b01,a=1){
 }
 function posCollide( level, pos, cells ){
     const { ij2idx, map, outij } = level,
-          i = Math.round(pos.x-0.5),
-          j = Math.round(pos.y-0.5)
+          i = Math.round(pos.x),
+          j = Math.round(pos.y)
     if ( !outij(i,j) ) {
         const c = map[ ij2idx( i,j ) ],
               collides = cells.includes( c )
@@ -284,7 +225,7 @@ function GameState(){
     const automata = {
         // boot intro and warm welcoming message   
         I0 : {
-            '#' : 4000,
+            //'#' : 1000,
             'next' : d => update({name:'I1'})
         },
         // incentive title screen
@@ -443,10 +384,30 @@ function Player(){
         position : V2(0,0)
     }
 }
+function Particles(){
+    const PARTICLE_COUNT = 50
+    const els = []
+    for ( let i = 0 ; i < PARTICLE_COUNT ; i++ ){
+        els[i] = {
+            disabled : true,
+            position : {
+                x : undefined,
+                y : undefined
+            }
+        }
+    }
+    return {
+        els
+    }
+}
+
 const keyboardController = KeyboardControllers()
 const gameState = GameState()
 const display = Display()
 const player = Player()
+const particles = Particles()
+const texts = Texts()
+
 const step = dt=>{
 //    console.log(gameState.state.name)
     const camera = display.camera
@@ -457,7 +418,7 @@ const step = dt=>{
     // grab input
     stats.begin()
     if ( ['I0','I1','G0','G1','S1','S2',
-          'L1','L2'].includes( gameState.state.name ) ){
+          'L1','L2','W1','W2'].includes( gameState.state.name ) ){
         if ( keyboardController.anyKeyStroke.length ){
             console.log('to!')
             gameState.event('next')
@@ -509,7 +470,7 @@ const step = dt=>{
     camera.scale *= ( 1 + ( -1*o + p ) / 10 ) 
     camera.scale = clamp( camera.scale, 4,32) // 4 wide zoom, 32 closeup
     
-    const elapsed1 = display.draw( camera, choices, player )
+    const elapsed1 = display.draw( camera, choices, player, texts )
     
     stats.end()
 
@@ -578,4 +539,46 @@ function repeat(r){
 // // repeat( 1 )( say('next'), print )
 
 // // repeat( 1 )( say('next'), print )
+// }
+
+
+
+// function updateTrail(pmp,hasCollision,STATE){
+//     const tp = trail.mesh.geometry.attributes.position
+//     const tc = trail.mesh.geometry.attributes.color
+    
+//     for ( let r = 0 ; r < 10 ; r++ ){
+//         const idx = trail.idx
+//         trail.idx = ( trail.idx + 1 )%trail.count
+//         //            const rang = 3 * Math.PI/4 + Math.random() * Math.PI / 2
+//         let rang,rdis
+//         if ( !hasCollision ){
+//             if (['S4'].includes( STATE )){
+//                 rang = 2 * Math.PI * Math.random()
+//             } else {
+//                 rang = Math.PI * ( 10 / 12 + 1 / 3 * Math.random() )
+//             }
+//             rdis = 0.5 + Math.pow(Math.random(),4) * 2.5
+//         } else {
+//             rang = Math.random() * Math.PI * 2
+//             rdis = 0+Math.pow(Math.random(),4) * 2
+//         }
+//         tp.array[ 3 * idx ] = pmp.x + Math.cos( rang ) * rdis
+//         tp.array[ 3 * idx + 1 ] = pmp.y + Math.sin( rang ) * rdis
+//         if ( hasCollision ){
+//             tc.array[ 3 * idx ] = 1
+//             tc.array[ 3 * idx + 1] /= 2
+//             tc.array[ 3 * idx + 2 ] /= 2
+//         } else {
+//             if ( ['S4','S3'].includes( STATE ) ){
+//                 tc.array[ 3 * idx ] =  Math.random()
+//             } else {
+//                 tc.array[ 3 * idx ] = 0
+//             }
+//             tc.array[ 3 * idx + 1] = Math.random()
+//             tc.array[ 3 * idx + 2 ] = Math.random()
+//         }
+//     }
+//     tc.needsUpdate = true
+//     tp.needsUpdate = true
 // }
