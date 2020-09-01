@@ -43,29 +43,31 @@ document.body.appendChild( stats.dom );
 function Texts(){
     let textPanels ={}
     const family = 'monospace'
-    const textTargetSize = {  width : targetSize.width/4, height : targetSize.height/4 }
+    const textTargetSize = {  width : targetSize.width/2,
+                              height : targetSize.height/2 }
     const desc = [ 
         ['welcome','welcome!','green'],
-        ['title','incentive title screen','red'],
-        ['intro','the story begins...','red'],
-        ['gene','entering network...','red','c'],
-        ['instructions','follow route : 1010','red','cbu'],
-        ['ready?','ready set go','red','ct'],
-        ['subwin','sublevel won !','red','ct'],
-        ['redirecting','redirecting...','red'],
-        ['levelwin','level won !','red'],
-        ['win','you won it all !','red'],
+        ['title','incentive title screen','white'],
+        ['intro','the story begins...','white'],
+        ['gene','setting route...','white','c'],
+        ['instructions','!routr!','white','cbu','a:none'],
+        ['ready?','connecting...','white','cbu'],
+        ['subwin','sublevel won !','white','ct'],
+        ['redirecting','redirecting...','white'],
+        ['levelwin','level won !','white'],
+        ['win','you won it all !','white'],
         //['go','fetch','green'],
         ['failed','401 Unauthorized','orange','ct'],
         ['nextlevel','301 Moved permanently','orange'],
         ['success','host contacted','orange'], //200
-        ['gameover','404 Not found!','red'],
+        ['gameover','404 Not found!','white'],
         ['c0','zero','brown'],
         ['c1','one','white'],
         ['c.','.','grey'],
         ['anykey','[press any key to continue...]','black','br','a:none']
     ]
     desc.forEach( ([k,msg,style,position='c',animation = 'a:floffle']) => {
+        console.log('***',msg,family,style,textTargetSize)
         const panel = textCanvas( msg,family,style,textTargetSize )
         panel.position=position
         panel.animation = animation
@@ -77,7 +79,9 @@ function Texts(){
     function updateMessage(name,msg){
         const panel = textPanels[ name ]
         const d = desc.find( d => d[0] === name )
-        const tcid = textCanvas( msg, ...d.slice(1), textTargetSize)
+        console.log('***>',d)
+        console.log('***',msg, textTargetSize)
+        const tcid = textCanvas( msg, family, d[2], textTargetSize)
         textPanels[ name ] 
         panel.canvas = tcid.canvas
         panel.imageData = tcid.imageData
@@ -160,7 +164,7 @@ function Display(){
         }
         function drawPanel( tp )
         {
-            let l=0,b =- 1* tp.canvas.height
+            let l=0,b =0
             if ( tp.position === 'c' ){
                 l += Math.floor( (canvas.width - tp.canvas.width )/ 2 )
                 b += Math.floor( (canvas.height - tp.canvas.height) / 2 ) 
@@ -179,7 +183,7 @@ function Display(){
             for ( let j = 0 ; j < tp.canvas.height ; j++ ){
                 let xoff=0
                 if ( tp.animation  === 'a:floffle' ){ 
-                    xoff = Math.floor(10 + Math.sin( j / 10 + Date.now() / 100 ) * 10)
+                    xoff = 10 + Math.sin( j / 10 + Date.now() / 100 ) * 10
                 }
                 /*context.putImageData(
                     tp.imageData,
@@ -190,7 +194,7 @@ function Display(){
                 context.drawImage( tp.canvas,
                                    0, j,
                                    tp.canvas.width, 2,
-                                   l+xoff, b+j*2,
+                                   Math.floor(l+xoff),Math.floor(b+j),
                                    tp.canvas.width, 2)
                 /*
                   void ctx.putImageData(imageData, dx, dy);
@@ -340,6 +344,7 @@ function GameState(){
     const state = {
         name : 'I',
         T : 0,
+        t : 0
     }
     const timeouts = [] 
     function update( ...ps ){
@@ -358,9 +363,10 @@ function GameState(){
         },
         // boot intro and warm welcoming message
         I0 : {
-            '>' : () => {
+            // just require an input to be able to play sounds
+            /*'>' : () => {
                 timeout( () => event('next'),3000)
-            },
+            },*/
             //'#' : 1000,
             'next' : d => {
                 update({name:'I1'})
@@ -392,7 +398,8 @@ function GameState(){
                 update({
                     choices : mkChoices(),
                 })
-                texts.updateMessage('instructions','route : '+gameState.state.choices.directions.join('.'))
+                const dirs = gameState.state.choices.directions
+                texts.updateMessage('instructions','route : '+ dirs.join('.'))
                 copyV2(gameState.state.choices.startPosition, player.position)
                 copyV2(player.position,display.camera.center)
                 timeout( () => event('next'),2000)
@@ -408,8 +415,10 @@ function GameState(){
         // level / sublevel presentation
         S1 : {
             '>' : () => {
+                const dirs = gameState.state.choices.directions
                 copyV2(gameState.state.choices.startPosition, player.position)
                 copyV2(player.position,display.camera.center)
+                timeout( () => event('next'), 1000 + dirs.length * 1000 )
             },
             'next' : d => {
                 update({
@@ -470,7 +479,7 @@ function GameState(){
         // sublevel win animation
         W1 : {
             '>' : d => {
-                timeout( () => event('next'),2000)
+                timeout( () => event('next'),4000)
             },
             'next' : d => {
                 if ( state.sublevel < NSUBLEVELS ){
@@ -570,17 +579,20 @@ function GameState(){
             }*/
             const mh = sm[ eName ]
             mh(eData)
-            if ( cStateName !== state.name  ){
-                const sm = automata[ state.name ]
-                const enter = sm['>']
-                if ( enter ){
-                    enter()
-                }
-                console.log('STATE CHANGE',cStateName,'->',state.name)
-                
-            }
         } catch (e){
             console.error('wrong message',cStateName,eName,{state, eName, eData},e)
+        }
+        if ( cStateName !== state.name  ){
+            //
+            state.t = state.T
+            
+            // enter state f
+            const sm = automata[ state.name ]
+            const enter = sm['>']
+            if ( enter ){
+                enter()
+            }
+            console.log('STATE CHANGE',cStateName,'->',state.name)
         }
     }
     //setInterval( checkTimeouts, 200 )
@@ -627,6 +639,24 @@ const particles = Particles()
 const texts = Texts()
 const timeoutBar = TimeoutBar()
 const step = (dt,T) =>{
+    const timeoutBarVisibility = ['G1','S1','S2','R0']
+    const textVisibility = {
+        'I0' : ['welcome','anykey'],
+        'I1' : ['title'],
+        'G0' : ['intro','anykey'],
+        'G1' : ['gene'],
+        'S1' : ['instructions','anykey'],
+        'S2' : ['ready?'/*,'instructions'*/],
+        'W1' : ['subwin'],
+        'R0' : ['redirecting'],
+        'W2' : ['levelwin','anykey'],
+        'W3' : ['win'],
+        'L1' : ['failed'],
+        'L2' : ['gameover'],        
+    }
+    const mapVisibility = ['S2','S3','W1','L1']
+    const playerVisibility = ['S1','S2','S3','W1','R0','L1']
+
     //    console.log(gameState.state.name)
     const camera = display.camera
     const choices = gameState.state.choices
@@ -634,23 +664,26 @@ const step = (dt,T) =>{
     // check timeouts
     const remainingTo = gameState.checkTimeouts(T)
     timeoutBar.remain = remainingTo
-    const timeoutBarVisibility = ['G1','S2','R0']
     timeoutBar.visible =  (remainingTo !== undefined) 
         && timeoutBarVisibility.includes( gameState.state.name ) 
-    
-    
+
+    const TIME_BEFORE_SKIP_STATE = 600
     // grab input
     stats.begin()
     if ( ['I0','I1','G0','G1','S1',
           'L1','L2','W2','W3','R0'].includes( gameState.state.name ) ){
-        if ( keyboardController.anyKeyStroke.length ){
-            console.log('to!')
-            gameState.event('next')
+        const sinceStateStart = T - gameState.state.t
+        if ( sinceStateStart > TIME_BEFORE_SKIP_STATE ){
+            if ( keyboardController.anyKeyStroke.length ){
+                console.log('to!')
+                gameState.event('next')
+            }
         }
     }
-    let HASCOLLIDSION = false
     const [[l,r],[d,u],[o,p]] = keyboardController.axesCtrlState
     keyboardController.resetKeyStrokes()
+
+    let HASCOLLIDSION = false
     if ( ['S3','W1','W2'].includes( gameState.state.name ) ){
         //        console.log('gameState',gameState)
         // player move + collide
@@ -664,7 +697,7 @@ const step = (dt,T) =>{
             //dx = ( -1*l + r ) 
             dy = ( -1*u + d )
         } else {
-            dx = 1
+            dx = 2
             dy = 0
         }
         
@@ -705,29 +738,13 @@ const step = (dt,T) =>{
        camera.center.y += ( -1*u + d ) * dt / 1000*/
     camera.scale *= ( 1 + ( -1*o + p ) / 10 ) 
     camera.scale = clamp( camera.scale, 4,32) // 4 wide zoom, 32 closeup
-    const textVisibility = {
-        'I0' : ['welcome','anykey'],
-        'I1' : ['title'],
-        'G0' : ['intro','anykey'],
-        'G1' : ['gene'],
-        'S1' : ['instructions','anykey'],
-        'S2' : ['ready?','instructions'],
-        'W1' : ['subwin'],
-        'R0' : ['redirecting'],
-        'W2' : ['levelwin','anykey'],
-        'W3' : ['win'],
-        'L1' : ['failed'],
-        'L2' : ['gameover'],        
-    }
     Object.entries(texts.textPanels).forEach( ([pname,tp]) => {
         const v = textVisibility[ gameState.state.name ]
         tp.visible = ( v && v.includes(pname) )
     })
     if ( choices ){
-        const mapVisibility = ['S2','S3','W1','L1']
         choices.visible = mapVisibility.includes( gameState.state.name )
     }
-    const playerVisibility = ['S1','S2','S3','W1','R0','L1']
     player.visible = playerVisibility.includes(  gameState.state.name )
     player.energy =  gameState.state.energy
 

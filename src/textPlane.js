@@ -1,4 +1,5 @@
 export function textCanvas( msg, family, style, textTargetSize ){
+    msg = msg.toUpperCase()
     const canvas = document.createElement('canvas')
     //canvas.style = 'position: absolute ; bottom : 0px'   
     //canvas.setAttribute('name','text-panel')
