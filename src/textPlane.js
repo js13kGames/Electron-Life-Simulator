@@ -37,7 +37,7 @@ export function textCanvas( msg, family, style, textTargetSize ){
     context.fillText(msg,
                      border + measure.actualBoundingBoxLeft,
                      canvas.height - border - measure.actualBoundingBoxDescent)
-    document.body.appendChild( canvas )    
+    //document.body.appendChild( canvas )    
     return { canvas,
              imageData : context.getImageData( 0,0,canvas.width, canvas.height ) }
              

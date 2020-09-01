@@ -5,6 +5,21 @@
 const Stats = require('stats.js')
 //const tunnel = require('./tunnel.js')
 //require('./zzfx.js')
+document.body.style = 'background:#111;'
+const canvasStyle = `
+//    border-top : 1px solid white;
+//    border-bottom : 1px solid white;
+    padding: 0;
+    margin: auto;
+    display: block;
+    width: 100%;
+    height: auto;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+`
 
 import { KeyboardControllers } from './keyboardControllers.js'
 import { mkChoices } from './levelCreator.js'
@@ -94,10 +109,11 @@ function Display(){
     // 300 / 600 rect / ms
     
     const canvas = document.createElement('canvas')
+    
     canvas.width =  targetSize.width 
     canvas.height = targetSize.height 
     canvas.setAttribute('name','MONMON')
-    canvas.style = 'position: absolute ; top : 200px ; left : 0px;'   
+    canvas.style = canvasStyle//'position: absolute ; top : 200px ; left : 0px;'   
 
     const context = canvas.getContext('2d')
     document.body.appendChild( canvas )
@@ -444,7 +460,7 @@ function GameState(){
                 texts.updateMessage('instructions','route : '+ dirs.join('.'))
                 copyV2(gameState.state.choices.startPosition, player.position)
                 copyV2(player.position,display.camera.center)
-                timeout( () => event('next'),2000)
+                timeout( () => event('next'),5000)
             },
             'next' : d => {
                 update({

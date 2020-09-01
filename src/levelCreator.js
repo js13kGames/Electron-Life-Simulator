@@ -80,7 +80,7 @@ export function mkChoices(){
         })
         
     }
-    {
+    if ( false ){
         //const directions = 
         const $div = document.createElement('div')
         $div.textContent = choices.slice(2,choices.length-1)
