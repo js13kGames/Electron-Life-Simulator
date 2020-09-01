@@ -120,7 +120,7 @@ function Display(){
         context.fillStyle = 'rgba(0,0,0,1)'
         context.fillRect(0,0,canvas.width,canvas.height)
     }
-    function draw( { center, scale }, level, player, particles, texts, timeoutBar, remainingTo ){
+    function draw( { center, scale }, level, player, particles, texts, timeoutBar, lifeBar, remainingTo ){
         
         
         function drawMap(){
@@ -272,6 +272,32 @@ function Display(){
             context.fillRect(0,canvas.height-height,
                              canvas.width*timeoutBar.remain,canvas.height)
         }
+        function drawLifeBar(){
+            let { l, L } = lifeBar
+            const dim = 16,
+                  margin = 4
+            let x = margin
+            context.fillStyle = cssrgba(0,0,0,0.5)
+            context.fillRect(
+                0,0,
+                (   dim + margin)*L+margin,
+                dim+2*margin
+            )
+            function drawUnit(){
+                context.fillRect(x,margin,dim,dim)
+                x += dim + margin
+            }
+            context.fillStyle = cssrgba(1,0,0,1)
+            for ( let i = 1 ; i <= l ; i++ ){
+                drawUnit()
+            }
+            context.fillStyle = cssrgba(0.2,0.2,0.2,1)
+            for ( let i = l+1 ; i <= L ; i++ ){
+                drawUnit()
+            }
+            
+            
+        }
         const t1 = Date.now()
         if (level && level.visible)
             drawMap()
@@ -296,8 +322,9 @@ function Display(){
             drawTimeoutBar()
         }
         const t6 = Date.now()
-
-
+        if ( lifeBar.visible ){
+            drawLifeBar()
+        }
         
         const e2 = t2 - t1
         const e3 = t3 - t2
@@ -398,6 +425,7 @@ function GameState(){
         G0 : {
             'next' : d => {
                 update({
+                    L : NLIVES,
                     lives : NLIVES,
                     level : 1,
                     sublevel : 1,
@@ -505,6 +533,7 @@ function GameState(){
                     if ( state.level < NLEVELS ){
                         update({
                             lives : state.lives + 1,
+                            L: Math.max( state.lives + 1, state.L ),
                             name:'W2'
                         })
                     } else {
@@ -643,8 +672,14 @@ function Particles(){
 }
 function TimeoutBar(){
     return {
-        
         visible : true,
+    }
+}
+function LifeBar(){
+    return {
+        visible : true,
+        l : 5, // current
+        L : 5 // max
     }
 }
 const keyboardController = KeyboardControllers()
@@ -654,6 +689,8 @@ const player = Player()
 const particles = Particles()
 const texts = Texts()
 const timeoutBar = TimeoutBar()
+const lifeBar = LifeBar()
+
 const step = (dt,T) =>{
     const timeoutBarVisibility = ['G1','S1','S2','R0','L1']
     const textVisibility = {
@@ -672,6 +709,7 @@ const step = (dt,T) =>{
     }
     const mapVisibility = ['S2','S3','W1','L1']
     const playerVisibility = ['S1','S2','S3','W1','R0','L1']
+    const lifeBarVisibility = ['G1','S1','S2','S3','W1','W2','R0','L1']
 
     //    console.log(gameState.state.name)
     const camera = display.camera
@@ -774,9 +812,13 @@ const step = (dt,T) =>{
         updateParticles( particles, target, HASCOLLIDSION, gameState.state.name )
     }
     //if ( choices ) choices.visible = true
-    
+    if ( gameState.state.lives && gameState.state.lives ){
+        lifeBar.l = gameState.state.lives
+        lifeBar.L = gameState.state.L
+    }
+    lifeBar.visible = lifeBarVisibility.includes(  gameState.state.name )
     copyV2( player.position, camera.center )
-    const elapsed1 = display.draw( camera, choices, player, particles, texts, timeoutBar,remainingTo )
+    const elapsed1 = display.draw( camera, choices, player, particles, texts, timeoutBar, lifeBar, remainingTo )
     
     stats.end()
 
