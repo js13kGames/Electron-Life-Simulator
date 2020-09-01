@@ -50,21 +50,21 @@ function Texts(){
         ['title','incentive title screen','white'],
         ['intro','the story begins...','white'],
         ['gene','setting route...','white','c'],
-        ['instructions','!routr!','white','cbu','a:none'],
-        ['ready?','connecting...','white','cbu'],
+        ['instructions','!routr!','white','cbu','a:sscroll'],
+        ['ready?','connecting...','white','cbu','a:sscroll'],
         ['subwin','sublevel won !','white','ct'],
         ['redirecting','redirecting...','white'],
         ['levelwin','level won !','white'],
         ['win','you won it all !','white'],
         //['go','fetch','green'],
-        ['failed','401 Unauthorized','orange','ct'],
+        ['failed','401 Unauthorized','white','cbu','a:sscroll'],
         ['nextlevel','301 Moved permanently','orange'],
         ['success','host contacted','orange'], //200
         ['gameover','404 Not found!','white'],
         ['c0','zero','brown'],
         ['c1','one','white'],
         ['c.','.','grey'],
-        ['anykey','[press any key to continue...]','black','br','a:none']
+        ['anykey','[press any key to continue...]','grey','br','a:none']
     ]
     desc.forEach( ([k,msg,style,position='c',animation = 'a:floffle']) => {
         console.log('***',msg,family,style,textTargetSize)
@@ -103,7 +103,7 @@ function Display(){
     document.body.appendChild( canvas )
     
     //const choices = mkChoices() 
-    const nominalScale = 2//16 
+    const nominalScale = 16 
     
     const camera = {
         //center : { ...startPosition },
@@ -116,10 +116,11 @@ function Display(){
           hcHeight = canvas.height / 2
     
     function clear(  ){
-        context.fillStyle = 'rgba(0,127,200,1)'
+        //context.fillStyle = 'rgba(0,127,200,1)'
+        context.fillStyle = 'rgba(0,0,0,1)'
         context.fillRect(0,0,canvas.width,canvas.height)
     }
-    function draw( { center, scale }, level, player, particles, texts, timeoutBar ){
+    function draw( { center, scale }, level, player, particles, texts, timeoutBar, remainingTo ){
         
         
         function drawMap(){
@@ -181,9 +182,12 @@ function Display(){
             l=Math.floor(l);
             b=Math.floor(b)
             for ( let j = 0 ; j < tp.canvas.height ; j++ ){
-                let xoff=0
+                let xoff=0,yoff=0
                 if ( tp.animation  === 'a:floffle' ){ 
-                    xoff = 10 + Math.sin( j / 10 + Date.now() / 100 ) * 10
+                    xoff = 10 + Math.sin( j / 10 + Date.now() / 200 ) * 5
+                } else if ( tp.animation  === 'a:sscroll'){
+                    xoff = remainingTo * canvas.width / 10
+
                 }
                 /*context.putImageData(
                     tp.imageData,
@@ -194,7 +198,7 @@ function Display(){
                 context.drawImage( tp.canvas,
                                    0, j,
                                    tp.canvas.width, 2,
-                                   Math.floor(l+xoff),Math.floor(b+j),
+                                   Math.floor(l+xoff),Math.floor(b+j+yoff),
                                    tp.canvas.width, 2)
                 /*
                   void ctx.putImageData(imageData, dx, dy);
@@ -231,22 +235,32 @@ function Display(){
                                              player.position.y,
                                              dim, dim, sb ) )
         }
-        function drawParticle( context, { center, scale }, particle,  i )
+        function drawParticle( context, { center, scale }, particle,  i ){
+            const sb = []
+            context.fillStyle = cssrgba(...particle.color)
+            context.fillRect( ...box2screen( particle.position.x,
+                                             particle.position.y,
+                                             particle.dim, particle.dim, sb ) )
+        }
+        function drawParticle2( context, { center, scale }, particle,  i )
         {
             const sb = []
             
             const position = V2()
             let targetPosition, dim, fill
-            
-            targetPosition = cloneV2(player.position)
-            {                
-                const d = Math.cos( i/10+ Date.now() / 1000 ) * 10
-                targetPosition.x += Math.cos( i+Date.now() / 1000 ) * d
-                targetPosition.y += Math.sin( i+Date.now() / 1000 ) * d
-                dim = particle.dim
-                fill = cssrgba(Math.random(),Math.cos( i/10),1)
+            dim = particle.dim
+            if ( true ){
+                targetPosition = cloneV2(player.position)
+                {                
+                    const d = Math.cos( i/10+ Date.now() / 1000 ) * 10
+                    targetPosition.x += Math.cos( i+Date.now() / 1000 ) * d
+                    targetPosition.y += Math.sin( i+Date.now() / 1000 ) * d
+                    particle.color = [Math.random(),Math.cos( i/10),1]
+                }
+            } else {
+                targetPosition = cloneV2(particle.position)
             }
-            context.fillStyle = fill
+            context.fillStyle = cssrgba(...particle.color)
             lerpV2( particle.position, targetPosition, 0.1, particle.position )
             context.fillRect( ...box2screen( particle.position.x,
                                              particle.position.y,
@@ -618,10 +632,12 @@ function Particles(){
             position : {
                 x : 10,
                 y : 10
-            }
+            },
+            color : [1,1,1,1]
         }
     }
     return {
+        idx : 0,
         els
     }
 }
@@ -639,7 +655,7 @@ const particles = Particles()
 const texts = Texts()
 const timeoutBar = TimeoutBar()
 const step = (dt,T) =>{
-    const timeoutBarVisibility = ['G1','S1','S2','R0']
+    const timeoutBarVisibility = ['G1','S1','S2','R0','L1']
     const textVisibility = {
         'I0' : ['welcome','anykey'],
         'I1' : ['title'],
@@ -748,12 +764,19 @@ const step = (dt,T) =>{
     player.visible = playerVisibility.includes(  gameState.state.name )
     player.energy =  gameState.state.energy
 
-    
+
     player.hasCollision = HASCOLLIDSION
+    particles.hasCollision = HASCOLLIDSION
+    {
+        // const running =  ['S3'].includes( gameState.state.name )
+
+        const target = player.position
+        updateParticles( particles, target, HASCOLLIDSION, gameState.state.name )
+    }
     //if ( choices ) choices.visible = true
     
     copyV2( player.position, camera.center )
-    const elapsed1 = display.draw( camera, choices, player, particles, texts, timeoutBar )
+    const elapsed1 = display.draw( camera, choices, player, particles, texts, timeoutBar,remainingTo )
     
     stats.end()
 
@@ -762,6 +785,88 @@ const step = (dt,T) =>{
 const roller = Roller(step)
 roller.command(1)
 gameState.event('start')
+
+
+
+function updateParticles(particles,pmp,targethasCollision,STATE){
+
+    if ( STATE === 'S3' ){
+        const targetPosition = V2()
+        for ( let r = 0 ; r < /*10*/4 ; r++ ){
+            particles.idx = (particles.idx + 1)%particles.els.length
+            const particle = particles.els[ particles.idx ]
+            copyV2( pmp, targetPosition )
+            if ( targethasCollision ){
+                particle.color = [1,0,0]
+            } else {
+                particle.color = [0,Math.random(),Math.random()]
+            }
+            const rang = Math.PI * ( 10 / 12 + 1 / 3 * Math.random() )
+            const rdis = 0.5 + Math.pow(Math.random(),4) * 2.5
+            targetPosition.x = pmp.x + Math.cos( rang ) * rdis
+            targetPosition.y = pmp.y + Math.sin( rang ) * rdis
+            lerpV2( particle.position, targetPosition, 0.8, particle.position )
+        }
+    } else if ( STATE === 'S2' ){
+        const targetPosition = V2()
+        for ( let r = 0 ; r < particles.els.length ; r++ ){
+            const particle = particles.els[ r ]
+            copyV2( pmp, targetPosition )
+            lerpV2( particle.position, targetPosition, 0.3, particle.position )
+        }
+    } else {
+        const targetPosition = V2()
+        for ( let r = 0 ; r < particles.els.length ; r++ ){
+            copyV2( pmp, targetPosition )
+            const particle = particles.els[ r ]
+            const d = Math.cos( r/10+ Date.now() / 1000 ) * 10
+            targetPosition.x += Math.cos( r+Date.now() / 1000 ) * d
+            targetPosition.y += Math.sin( r+Date.now() / 1000 ) * d
+            particle.color = [Math.random(),Math.cos( r/10),r]
+            lerpV2( particle.position, targetPosition, 0.1, particle.position )
+        }
+    }
+    /*
+    const tp = trail.mesh.geometry.attributes.position
+    const tc = trail.mesh.geometry.attributes.color
+
+    for ( let r = 0 ; r < 10 ; r++ ){
+        const idx = trail.idx
+        trail.idx = ( trail.idx + 1 )%trail.count
+        //            const rang = 3 * Math.PI/4 + Math.random() * Math.PI / 2
+        let rang,rdis
+        if ( !hasCollision ){
+            if (['S4'].includes( STATE )){
+                rang = 2 * Math.PI * Math.random()
+            } else {
+                rang = Math.PI * ( 10 / 12 + 1 / 3 * Math.random() )
+            }
+            rdis = 0.5 + Math.pow(Math.random(),4) * 2.5
+        } else {
+            rang = Math.random() * Math.PI * 2
+            rdis = 0+Math.pow(Math.random(),4) * 2
+        }
+        tp.array[ 3 * idx ] = pmp.x + Math.cos( rang ) * rdis
+        tp.array[ 3 * idx + 1 ] = pmp.y + Math.sin( rang ) * rdis
+        
+        if ( hasCollision ){
+            tc.array[ 3 * idx ] = 1
+            tc.array[ 3 * idx + 1] /= 2
+            tc.array[ 3 * idx + 2 ] /= 2
+        } else {
+            if ( ['S4','S3'].includes( STATE ) ){
+                tc.array[ 3 * idx ] =  Math.random()
+            } else {
+                tc.array[ 3 * idx ] = 0
+            }
+            tc.array[ 3 * idx + 1] = Math.random()
+            tc.array[ 3 * idx + 2 ] = Math.random()
+        }
+    }
+    tc.needsUpdate = true
+    tp.needsUpdate = true
+*/
+}
 /*
   setTimeout( ()=> roller.command(), 1000)
   setTimeout( ()=> roller.command(1), 2000)
@@ -782,46 +887,5 @@ gameState.event('start')
 //             fs.forEach( f => f() )
 //         }
 //     }
-// }
-
-
-
-// function updateTrail(pmp,hasCollision,STATE){
-//     const tp = trail.mesh.geometry.attributes.position
-//     const tc = trail.mesh.geometry.attributes.color
-
-//     for ( let r = 0 ; r < 10 ; r++ ){
-//         const idx = trail.idx
-//         trail.idx = ( trail.idx + 1 )%trail.count
-//         //            const rang = 3 * Math.PI/4 + Math.random() * Math.PI / 2
-//         let rang,rdis
-//         if ( !hasCollision ){
-//             if (['S4'].includes( STATE )){
-//                 rang = 2 * Math.PI * Math.random()
-//             } else {
-//                 rang = Math.PI * ( 10 / 12 + 1 / 3 * Math.random() )
-//             }
-//             rdis = 0.5 + Math.pow(Math.random(),4) * 2.5
-//         } else {
-//             rang = Math.random() * Math.PI * 2
-//             rdis = 0+Math.pow(Math.random(),4) * 2
-//         }
-//         tp.array[ 3 * idx ] = pmp.x + Math.cos( rang ) * rdis
-//         tp.array[ 3 * idx + 1 ] = pmp.y + Math.sin( rang ) * rdis
-//         if ( hasCollision ){
-//             tc.array[ 3 * idx ] = 1
-//             tc.array[ 3 * idx + 1] /= 2
-//             tc.array[ 3 * idx + 2 ] /= 2
-//         } else {
-//             if ( ['S4','S3'].includes( STATE ) ){
-//                 tc.array[ 3 * idx ] =  Math.random()
-//             } else {
-//                 tc.array[ 3 * idx ] = 0
-//             }
-//             tc.array[ 3 * idx + 1] = Math.random()
-//             tc.array[ 3 * idx + 2 ] = Math.random()
-//         }
-//     }
-//     tc.needsUpdate = true
-//     tp.needsUpdate = true
-// }
+// 
+//}
