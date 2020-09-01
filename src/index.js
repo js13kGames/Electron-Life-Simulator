@@ -61,8 +61,9 @@ function Texts(){
     const textTargetSize = {  width : targetSize.width/2,
                               height : targetSize.height/2 }
     const desc = [ 
-        ['welcome','welcome!','green'],
-        ['title','incentive title screen','white'],
+        ['welcome','icentive title screen software limited presents','green'],
+        //['title','incentive title screen','white'],
+        ['title','ip racer 2030','white'],        
         ['intro','the story begins...','white'],
         ['gene','setting route...','white','c'],
         ['instructions','!routr!','white','cbu','a:sscroll'],
@@ -82,7 +83,7 @@ function Texts(){
         ['anykey','[press any key to continue...]','grey','br','a:none']
     ]
     desc.forEach( ([k,msg,style,position='c',animation = 'a:floffle']) => {
-        console.log('***',msg,family,style,textTargetSize)
+//        console.log('***',msg,family,style,textTargetSize)
         const panel = textCanvas( msg,family,style,textTargetSize )
         panel.position=position
         panel.animation = animation
@@ -94,8 +95,8 @@ function Texts(){
     function updateMessage(name,msg){
         const panel = textPanels[ name ]
         const d = desc.find( d => d[0] === name )
-        console.log('***>',d)
-        console.log('***',msg, textTargetSize)
+//        console.log('***>',d)
+//        console.log('***',msg, textTargetSize)
         const tcid = textCanvas( msg, family, d[2], textTargetSize)
         textPanels[ name ] 
         panel.canvas = tcid.canvas
@@ -527,6 +528,7 @@ function GameState(){
                     zzfx(...sounds.l1)
                 } else {
                     update({
+                        lives : 0,
                         name : 'L2'
                     })
                     zzfx(...sounds.l2)
@@ -664,7 +666,8 @@ function GameState(){
 function Player(){
     return {
         visible : true,
-        position : V2(0,0)
+        position : V2(0,0),
+        lastpos : V2(0,0)
     }
 }
 function Particles(){
@@ -725,7 +728,7 @@ const step = (dt,T) =>{
     }
     const mapVisibility = ['S2','S3','W1','L1']
     const playerVisibility = ['S1','S2','S3','W1','R0','L1']
-    const lifeBarVisibility = ['G1','S1','S2','S3','W1','W2','R0','L1']
+    const lifeBarVisibility = ['G1','S1','S2','S3','W1','W2','R0','L1','L2']
 
     //    console.log(gameState.state.name)
     const camera = display.camera
@@ -776,6 +779,7 @@ const step = (dt,T) =>{
         if ( hasCollision ){
             console.log( 't',collisionType )
         }
+        copyV2(player.position,player.lastpos)
         copyV2(nextPosition,player.position)
         //copyV2(player.position,display.camera.center)
         
@@ -797,7 +801,24 @@ const step = (dt,T) =>{
             }
         }
     }
-    
+    if( gameState.state.name === 'S3' ){
+    if (gameState.state.choices) {
+        const choices = gameState.state.choices.choices
+        // console.log( player.position,player.lastpos )
+        let idx = -1
+        for ( let i = 0 ; i < choices.length ; i++ ){            
+            const x = choices[ i ].x
+            if ( ( player.lastpos.x < x ) && ( x <= player.position.x ) ){
+                idx = i
+                break
+            }
+        }
+        if ( idx !== -1 ){
+            zzfx(...sounds.v)
+            console.log('step',idx,'/', choices.length)
+        }
+    }
+    }
     /*
       
       copyV2( nextPosition, camera.center )
@@ -828,7 +849,8 @@ const step = (dt,T) =>{
         updateParticles( particles, target, HASCOLLIDSION, gameState.state.name )
     }
     //if ( choices ) choices.visible = true
-    if ( gameState.state.lives && gameState.state.lives ){
+    if ( ( gameState.state.lives !== undefined )
+         && ( gameState.state.lives !== undefined) ){
         lifeBar.l = gameState.state.lives
         lifeBar.L = gameState.state.L
     }

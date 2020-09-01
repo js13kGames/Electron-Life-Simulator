@@ -1,4 +1,4 @@
-export function textCanvas2( msg, family, style, textTargetSize ){
+function textCanvas2( msg, family, style, textTargetSize ){
     msg = msg.toUpperCase()
     const canvas = document.createElement('canvas')
     //canvas.style = 'position: absolute ; bottom : 0px'   

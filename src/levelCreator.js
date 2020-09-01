@@ -135,7 +135,8 @@ export function mkChoices(){
         startPosition : {
             x: choices[0].x,
             y: choices[0].ys[0],
-        }, choices,
+        },
+        choices,
         width, height, idx2i, idx2j, ij2idx, outij,
         map,
         directions
