@@ -3,7 +3,7 @@ import { Cols } from './cols.js'
 import { BezierCurve } from './bezier.js'
 import { V2, cloneV2, subV2, addV2, multScalar, divScalar } from './v2.js'
 export function mkChoices(){
-    const width = 100,
+    const width = 100*3,
           height = 30
     
     const mainBranchesCount = 4,

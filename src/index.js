@@ -44,12 +44,12 @@ function Texts(){
     let textPanels ={}
     const family = 'monospace'
     const textTargetSize = {  width : targetSize.width/4, height : targetSize.height/4 }
-    ;[ 
+    const desc = [ 
         ['welcome','welcome!','green'],
         ['title','incentive title screen','red'],
         ['intro','the story begins...','red'],
-        ['gene','entering network...','red','ct'],
-        ['instructions','follow route : 1010','red','ct'],
+        ['gene','entering network...','red','c'],
+        ['instructions','follow route : 1010','red','cbu'],
         ['ready?','ready set go','red','ct'],
         ['subwin','sublevel won !','red','ct'],
         ['redirecting','redirecting...','red'],
@@ -64,13 +64,25 @@ function Texts(){
         ['c1','one','white'],
         ['c.','.','grey'],
         ['anykey','[press any key to continue...]','black','br','a:none']
-    ].forEach( ([k,msg,style,position='c',animation = 'a:floffle']) => {
+    ]
+    desc.forEach( ([k,msg,style,position='c',animation = 'a:floffle']) => {
         const panel = textCanvas( msg,family,style,textTargetSize )
         panel.position=position
         panel.animation = animation
         textPanels[k] = panel
     })
-    return { textPanels }
+    function updateInstructions(){
+        return updateMessage('instructions')
+    }
+    function updateMessage(name,msg){
+        const panel = textPanels[ name ]
+        const d = desc.find( d => d[0] === name )
+        const tcid = textCanvas( msg, ...d.slice(1), textTargetSize)
+        textPanels[ name ] 
+        panel.canvas = tcid.canvas
+        panel.imageData = tcid.imageData
+    }
+    return { textPanels, updateMessage }
 }
 
 function Display(){
@@ -87,7 +99,7 @@ function Display(){
     document.body.appendChild( canvas )
     
     //const choices = mkChoices() 
-    const nominalScale = 16 
+    const nominalScale = 2//16 
     
     const camera = {
         //center : { ...startPosition },
@@ -103,7 +115,7 @@ function Display(){
         context.fillStyle = 'rgba(0,127,200,1)'
         context.fillRect(0,0,canvas.width,canvas.height)
     }
-    function draw( { center, scale }, level, player, particles, texts ){
+    function draw( { center, scale }, level, player, particles, texts, timeoutBar ){
         
         
         function drawMap(){
@@ -158,6 +170,9 @@ function Display(){
             } else if ( tp.position === 'ct' ){
                 l += Math.floor( (canvas.width - tp.canvas.width )/ 2 )
                 b += tp.canvas.height
+            } else if ( tp.position === 'cbu' ){
+                l += Math.floor( (canvas.width - tp.canvas.width )/ 2 )
+                b += canvas.height  - tp.canvas.height - 40
             }
             l=Math.floor(l);
             b=Math.floor(b)
@@ -217,21 +232,28 @@ function Display(){
             const sb = []
             
             const position = V2()
-            let targetPosition = cloneV2(player.position)
+            let targetPosition, dim, fill
+            
+            targetPosition = cloneV2(player.position)
             {                
                 const d = Math.cos( i/10+ Date.now() / 1000 ) * 10
                 targetPosition.x += Math.cos( i+Date.now() / 1000 ) * d
                 targetPosition.y += Math.sin( i+Date.now() / 1000 ) * d
-                context.fillStyle = cssrgba(Math.random(),Math.cos( i/10),1)
+                dim = particle.dim
+                fill = cssrgba(Math.random(),Math.cos( i/10),1)
             }
-            const dim = particle.dim
-            
-            lerpV2( particle.position, targetPosition, 0.02, particle.position )
+            context.fillStyle = fill
+            lerpV2( particle.position, targetPosition, 0.1, particle.position )
             context.fillRect( ...box2screen( particle.position.x,
                                              particle.position.y,
                                              dim, dim, sb ) )
         }
-
+        function drawTimeoutBar(){
+            const height = 20
+            context.fillStyle = cssrgba(1,1,1,0.25)
+            context.fillRect(0,canvas.height-height,
+                             canvas.width*timeoutBar.remain,canvas.height)
+        }
         const t1 = Date.now()
         if (level && level.visible)
             drawMap()
@@ -239,6 +261,7 @@ function Display(){
         if ( player.visible ) 
             drawPlayer( context, camera)
         const t3 = Date.now()
+        
         particles.els.forEach( (particle,i) => {
             if ( particle.visible )
                 drawParticle( context, camera, particle, i )
@@ -251,12 +274,19 @@ function Display(){
             }
         })
         const t5 = Date.now()
+        if ( timeoutBar.visible ){
+            drawTimeoutBar()
+        }
+        const t6 = Date.now()
 
+
+        
         const e2 = t2 - t1
         const e3 = t3 - t2
         const e4 = t4 - t3
         const e5 = t5 - t4
-        const e = t5 - t1
+        const e6 = t6 - t5
+        const e = t6 - t1
         //console.log(e2,e3,'p',e4,e5,e)
         return e
     }
@@ -287,18 +317,21 @@ function posCollide( level, pos, cells ){
 function movePlayer( player, level, dx, dy, dt, ff){
     const pmp = player.position,
           nextPosition = cloneV2(pmp)
-    let hasCollision = false        
+    let hasCollision = false,
+        collisionType = 0
     for ( let i = 3 ; i >= 1 ; i-- ){
         if ( i&1 ) nextPosition.x += dx * dt / ff
         if ( i&2 ) nextPosition.y += dy * dt / ff 
         const collide = posCollide( level, nextPosition, ['*'] )
         if ( !collide ) break;
         hasCollision = true
+        collisionType = i
         copyV2(pmp,nextPosition)
     }
     return {
         nextPosition,
-        hasCollision
+        hasCollision,
+        collisionType
     }
 }
 
@@ -310,7 +343,7 @@ function GameState(){
     }
     const timeouts = [] 
     function update( ...ps ){
-        console.log('update',...ps)
+        // console.log('update',...ps)
         Object.assign( state, ...ps )
     }
 
@@ -318,7 +351,7 @@ function GameState(){
     const NLEVELS = 3
     const NSUBLEVELS = 2
     const NLIVES = 2
-    const NOMINAL_ENERGY = 1000
+    const NOMINAL_ENERGY = 1
     const automata = {
         I : {
             'start' : d => update({name:'I0'})
@@ -356,12 +389,13 @@ function GameState(){
         // sublevel generation
         G1 : {
             '>' : () => {
-                timeout( () => event('next'),2000)
                 update({
                     choices : mkChoices(),
                 })
+                texts.updateMessage('instructions','route : '+gameState.state.choices.directions.join('.'))
                 copyV2(gameState.state.choices.startPosition, player.position)
                 copyV2(player.position,display.camera.center)
+                timeout( () => event('next'),2000)
             },
             'next' : d => {
                 update({
@@ -373,6 +407,10 @@ function GameState(){
         },
         // level / sublevel presentation
         S1 : {
+            '>' : () => {
+                copyV2(gameState.state.choices.startPosition, player.position)
+                copyV2(player.position,display.camera.center)
+            },
             'next' : d => {
                 update({
                     name : 'S2',                
@@ -483,7 +521,7 @@ function GameState(){
         // sublevel lost animation
         L1 : {
             '>' : d => {
-                timeout( () => event('next'),2000)
+                timeout( () => event('next'),8000)
             },  
             'next' : d => {
                 update({
@@ -504,7 +542,7 @@ function GameState(){
         const start = state.T,
               end = start + delay,
               idx = timeouts.findIndex( o => o.end > end ),
-              to = { start, end, f }
+              to = { start, end, delay, f }
         timeouts.splice((idx>0)?idx:0, 0, to)
     }
     function clearTimeouts(){
@@ -518,12 +556,13 @@ function GameState(){
             if ( now >= first.end ){
                 first.f()
             }
+            return clamp( ( first.end - T ) / first.delay,0,1)
         }
     }
     function event(eName,eData){
         clearTimeouts()
+        const cStateName = state.name
         try {
-            const cStateName = state.name
             const sm = automata[ cStateName ]
             /*const to = sm[ '#' ]
             if ( to ){
@@ -541,7 +580,7 @@ function GameState(){
                 
             }
         } catch (e){
-            console.error('wrong message',{state, eName, eData})
+            console.error('wrong message',cStateName,eName,{state, eName, eData},e)
         }
     }
     //setInterval( checkTimeouts, 200 )
@@ -574,25 +613,36 @@ function Particles(){
         els
     }
 }
-
+function TimeoutBar(){
+    return {
+        
+        visible : true,
+    }
+}
 const keyboardController = KeyboardControllers()
 const gameState = GameState()
 const display = Display()
 const player = Player()
 const particles = Particles()
 const texts = Texts()
-
+const timeoutBar = TimeoutBar()
 const step = (dt,T) =>{
     //    console.log(gameState.state.name)
     const camera = display.camera
     const choices = gameState.state.choices
 
     // check timeouts
-    gameState.checkTimeouts(T)
+    const remainingTo = gameState.checkTimeouts(T)
+    timeoutBar.remain = remainingTo
+    const timeoutBarVisibility = ['G1','S2','R0']
+    timeoutBar.visible =  (remainingTo !== undefined) 
+        && timeoutBarVisibility.includes( gameState.state.name ) 
+    
+    
     // grab input
     stats.begin()
-    if ( ['I0','I1','G0','G1','S1','S2',
-          'L1','L2','W1','W2','W3','R0'].includes( gameState.state.name ) ){
+    if ( ['I0','I1','G0','G1','S1',
+          'L1','L2','W2','W3','R0'].includes( gameState.state.name ) ){
         if ( keyboardController.anyKeyStroke.length ){
             console.log('to!')
             gameState.event('next')
@@ -618,8 +668,11 @@ const step = (dt,T) =>{
             dy = 0
         }
         
-        const { nextPosition, hasCollision } =  movePlayer( player,
-                                                            choices, dx, dy, dt, ff )
+        const { nextPosition, hasCollision, collisionType} =  movePlayer( player,
+                                                                          choices, dx, dy, dt, ff )
+        if ( hasCollision ){
+            console.log( 't',collisionType )
+        }
         copyV2(nextPosition,player.position)
         //copyV2(player.position,display.camera.center)
         
@@ -634,9 +687,10 @@ const step = (dt,T) =>{
             
             // check damage
             if ( hasCollision ){
-                //copyV2( camera.center, nextPosition )
                 HASCOLLIDSION  = true
-                gameState.event('damage',10)
+                const df = (collisionType !== 2)?5:1
+                const damage = ( dt / 1500 ) * df
+                gameState.event('damage',damage)
             }
         }
     }
@@ -657,10 +711,10 @@ const step = (dt,T) =>{
         'G0' : ['intro','anykey'],
         'G1' : ['gene'],
         'S1' : ['instructions','anykey'],
-        'S2' : ['ready?'],
+        'S2' : ['ready?','instructions'],
         'W1' : ['subwin'],
         'R0' : ['redirecting'],
-        'W2' : ['levelwin'],
+        'W2' : ['levelwin','anykey'],
         'W3' : ['win'],
         'L1' : ['failed'],
         'L2' : ['gameover'],        
@@ -670,21 +724,23 @@ const step = (dt,T) =>{
         tp.visible = ( v && v.includes(pname) )
     })
     if ( choices ){
-        const mapVisibility = ['S1','S2','S3','W1','L1']
+        const mapVisibility = ['S2','S3','W1','L1']
         choices.visible = mapVisibility.includes( gameState.state.name )
     }
-    
+    const playerVisibility = ['S1','S2','S3','W1','R0','L1']
+    player.visible = playerVisibility.includes(  gameState.state.name )
     player.energy =  gameState.state.energy
-    //player.visible = true
+
+    
     player.hasCollision = HASCOLLIDSION
     //if ( choices ) choices.visible = true
     
     copyV2( player.position, camera.center )
-    const elapsed1 = display.draw( camera, choices, player, particles, texts )
+    const elapsed1 = display.draw( camera, choices, player, particles, texts, timeoutBar )
     
     stats.end()
 
-
+//    texts.updateMessage('welcome','BONJOUR')
 }
 const roller = Roller(step)
 roller.command(1)
