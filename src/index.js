@@ -884,46 +884,6 @@ function updateParticles(particles,pmp,targethasCollision,STATE){
             lerpV2( particle.position, targetPosition, 0.1, particle.position )
         }
     }
-    /*
-    const tp = trail.mesh.geometry.attributes.position
-    const tc = trail.mesh.geometry.attributes.color
-
-    for ( let r = 0 ; r < 10 ; r++ ){
-        const idx = trail.idx
-        trail.idx = ( trail.idx + 1 )%trail.count
-        //            const rang = 3 * Math.PI/4 + Math.random() * Math.PI / 2
-        let rang,rdis
-        if ( !hasCollision ){
-            if (['S4'].includes( STATE )){
-                rang = 2 * Math.PI * Math.random()
-            } else {
-                rang = Math.PI * ( 10 / 12 + 1 / 3 * Math.random() )
-            }
-            rdis = 0.5 + Math.pow(Math.random(),4) * 2.5
-        } else {
-            rang = Math.random() * Math.PI * 2
-            rdis = 0+Math.pow(Math.random(),4) * 2
-        }
-        tp.array[ 3 * idx ] = pmp.x + Math.cos( rang ) * rdis
-        tp.array[ 3 * idx + 1 ] = pmp.y + Math.sin( rang ) * rdis
-        
-        if ( hasCollision ){
-            tc.array[ 3 * idx ] = 1
-            tc.array[ 3 * idx + 1] /= 2
-            tc.array[ 3 * idx + 2 ] /= 2
-        } else {
-            if ( ['S4','S3'].includes( STATE ) ){
-                tc.array[ 3 * idx ] =  Math.random()
-            } else {
-                tc.array[ 3 * idx ] = 0
-            }
-            tc.array[ 3 * idx + 1] = Math.random()
-            tc.array[ 3 * idx + 2 ] = Math.random()
-        }
-    }
-    tc.needsUpdate = true
-    tp.needsUpdate = true
-*/
 }
 /*
   setTimeout( ()=> roller.command(), 1000)
