@@ -15,7 +15,7 @@ import { Roller } from './roller.js'
 const { zzfx } = require('./zz.js')
 
 const levels = []
-    //    minspeed, width, height, mainBranchesCount,
+//    minspeed, width, height, mainBranchesCount,
 
 const sounds = {
     u : [,,1049,,.09,.25,,.45,,,442,.05,,.1,,,,.51,.08,.1],
@@ -30,8 +30,6 @@ const sounds = {
 }
 
 //
-
-      
 
 const ar = 16/9
 const targetSize = {
@@ -50,23 +48,26 @@ function Texts(){
         ['welcome','welcome!','green'],
         ['title','incentive title screen','red'],
         ['intro','the story begins...','red'],
-        ['gene','level generating...','red'],
-        ['instructions','follow route : 1010','red'],
-        ['ready?','ready set go','red'],
-        ['subwin','sublevel won !','red'],
+        ['gene','entering network...','red','ct'],
+        ['instructions','follow route : 1010','red','ct'],
+        ['ready?','ready set go','red','ct'],
+        ['subwin','sublevel won !','red','ct'],
         ['redirecting','redirecting...','red'],
         ['levelwin','level won !','red'],
         ['win','you won it all !','red'],
         //['go','fetch','green'],
-        ['failed','401 Unauthorized','orange'],
+        ['failed','401 Unauthorized','orange','ct'],
         ['nextlevel','301 Moved permanently','orange'],
         ['success','host contacted','orange'], //200
         ['gameover','404 Not found!','red'],
         ['c0','zero','brown'],
         ['c1','one','white'],
         ['c.','.','grey'],
-    ].forEach( ([k,msg,style]) => {
+        ['anykey','[press any key to continue...]','black','br','a:none']
+    ].forEach( ([k,msg,style,position='c',animation = 'a:floffle']) => {
         const panel = textCanvas( msg,family,style,textTargetSize )
+        panel.position=position
+        panel.animation = animation
         textPanels[k] = panel
     })
     return { textPanels }
@@ -80,17 +81,17 @@ function Display(){
     canvas.width =  targetSize.width 
     canvas.height = targetSize.height 
     canvas.setAttribute('name','MONMON')
-    canvas.style = 'position: absolute ; top : 64px ; left : 0px;'   
+    canvas.style = 'position: absolute ; top : 200px ; left : 0px;'   
 
     const context = canvas.getContext('2d')
     document.body.appendChild( canvas )
     
     //const choices = mkChoices() 
-    const nominalScale =16
+    const nominalScale = 16 
     
     const camera = {
         //center : { ...startPosition },
-        center : { x:0,y:10},
+        center : { x:0,y:0},
         scale : nominalScale,
         nominalScale
     }
@@ -103,7 +104,7 @@ function Display(){
         context.fillRect(0,0,canvas.width,canvas.height)
     }
     function draw( { center, scale }, level, player, particles, texts ){
-    
+        
         
         function drawMap(){
             const { map, width, height,
@@ -133,15 +134,59 @@ function Display(){
                 }
             }
         }        
-        function drawPanel( tp )
+        function drawPanel2( tp )
         {
             for ( let j = 0 ; j < tp.canvas.height ; j++ ){
                 let off = Math.floor(10 + Math.sin( j / 10 + Date.now() / 100 ) * 10)
                 context.putImageData(
-                    tp.imageData,off,j,
+                    tp.imageData,
+                    off,j,
                     0,j,
                     tp.canvas.width,2
                 )
+            }
+        }
+        function drawPanel( tp )
+        {
+            let l=0,b =- 1* tp.canvas.height
+            if ( tp.position === 'c' ){
+                l += Math.floor( (canvas.width - tp.canvas.width )/ 2 )
+                b += Math.floor( (canvas.height - tp.canvas.height) / 2 ) 
+            } else if ( tp.position === 'br' ){
+                l += canvas.width - tp.canvas.width
+                b += canvas.height  - tp.canvas.height
+            } else if ( tp.position === 'ct' ){
+                l += Math.floor( (canvas.width - tp.canvas.width )/ 2 )
+                b += tp.canvas.height
+            }
+            l=Math.floor(l);
+            b=Math.floor(b)
+            for ( let j = 0 ; j < tp.canvas.height ; j++ ){
+                let xoff=0
+                if ( tp.animation  === 'a:floffle' ){ 
+                    xoff = Math.floor(10 + Math.sin( j / 10 + Date.now() / 100 ) * 10)
+                }
+                /*context.putImageData(
+                    tp.imageData,
+                    300+off,j,
+                    0,j,
+                    tp.canvas.width,2
+                    )*/
+                context.drawImage( tp.canvas,
+                                   0, j,
+                                   tp.canvas.width, 2,
+                                   l+xoff, b+j*2,
+                                   tp.canvas.width, 2)
+                /*
+                  void ctx.putImageData(imageData, dx, dy);
+                  void ctx.putImageData(imageData, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight);
+                */
+                /*
+                  void ctx.drawImage(image, dx, dy);
+                  void ctx.drawImage(image, dx, dy, dWidth, dHeight);
+                  void ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+                  */
+                
             }
         }
         function box2screen( x,y,w,h, target ){
@@ -155,7 +200,14 @@ function Display(){
         {
             const sb = []
             const dim = 1
-            context.fillStyle = cssrgba(1,0,0)
+            let col
+            if (( player.hasCollision )&&(Math.random()<0.8)){
+                col = [ 1 - player.energy / 1000,Math.random(),Math.random()]
+            } else {
+                col = [ 1 - player.energy / 1000,0,0]
+            }
+//            console.log(player.energy)
+            context.fillStyle = cssrgba( ...col/*NOMINAL_ENERGY*/)
             context.fillRect( ...box2screen( player.position.x,
                                              player.position.y,
                                              dim, dim, sb ) )
@@ -181,7 +233,7 @@ function Display(){
         }
 
         const t1 = Date.now()
-        if (level)
+        if (level && level.visible)
             drawMap()
         const t2 = Date.now()
         if ( player.visible ) 
@@ -191,7 +243,7 @@ function Display(){
             if ( particle.visible )
                 drawParticle( context, camera, particle, i )
         })
-     
+        
         const t4 = Date.now()
         Object.values(texts.textPanels).forEach( tp => {
             if ( tp.visible ){
@@ -253,22 +305,29 @@ function movePlayer( player, level, dx, dy, dt, ff){
 function GameState(){
 
     const state = {
-        name : 'I0',
+        name : 'I',
+        T : 0,
     }
     const timeouts = [] 
     function update( ...ps ){
         console.log('update',...ps)
         Object.assign( state, ...ps )
     }
-   
+
 
     const NLEVELS = 3
     const NSUBLEVELS = 2
     const NLIVES = 2
     const NOMINAL_ENERGY = 1000
     const automata = {
-        // boot intro and warm welcoming message   
+        I : {
+            'start' : d => update({name:'I0'})
+        },
+        // boot intro and warm welcoming message
         I0 : {
+            '>' : () => {
+                timeout( () => event('next'),3000)
+            },
             //'#' : 1000,
             'next' : d => {
                 update({name:'I1'})
@@ -296,15 +355,17 @@ function GameState(){
         },
         // sublevel generation
         G1 : {
+            '>' : () => {
+                timeout( () => event('next'),2000)
+                update({
+                    choices : mkChoices(),
+                })
+                copyV2(gameState.state.choices.startPosition, player.position)
+                copyV2(player.position,display.camera.center)
+            },
             'next' : d => {
                 update({
-                    choices :( (() => {
-                        const a1= Date.now()
-                        const c = mkChoices()
-                        const a2= Date.now()
-                        console.log('kjlkjlkjlkjlk',a2-a1)
-                        return c
-                    })()),
+                    //choices : mkChoices(),
                     name:'S1'
                 })
                 zzfx(...sounds.x)
@@ -316,11 +377,16 @@ function GameState(){
                 update({
                     name : 'S2',                
                 })
+                copyV2(gameState.state.choices.startPosition, player.position)
+                copyV2(player.position,display.camera.center)
                 zzfx(...sounds.y)
             }
         },
         // ready / set / go
         S2 : {
+            '>' : () => {
+                timeout( () => event('next'),2000)
+            },
             'next' : d => {
                 update({
                     energy : NOMINAL_ENERGY,
@@ -365,6 +431,9 @@ function GameState(){
         },
         // sublevel win animation
         W1 : {
+            '>' : d => {
+                timeout( () => event('next'),2000)
+            },
             'next' : d => {
                 if ( state.sublevel < NSUBLEVELS ){
                     update({
@@ -387,6 +456,9 @@ function GameState(){
         },
         // redirecting aftr sublevel win
         R0 : {
+            '>' : d => {
+                timeout( () => event('next'),2000)
+            },            
             'next' :  d => update({
                 choices : undefined,
                 name : 'G1',
@@ -410,6 +482,9 @@ function GameState(){
         },
         // sublevel lost animation
         L1 : {
+            '>' : d => {
+                timeout( () => event('next'),2000)
+            },  
             'next' : d => {
                 update({
                     name:'S1'
@@ -424,9 +499,9 @@ function GameState(){
             })
         }
     }
- 
+    
     function timeout( f, delay ){
-        const start = Date.now(),
+        const start = state.T,
               end = start + delay,
               idx = timeouts.findIndex( o => o.end > end ),
               to = { start, end, f }
@@ -435,10 +510,11 @@ function GameState(){
     function clearTimeouts(){
         timeouts.length = 0
     }
-    function checkTimeouts(){
+    function checkTimeouts(T){
+        state.T = T
         const first = timeouts[ 0 ]
         if ( first ) {
-            const now = Date.now()
+            const now = T
             if ( now >= first.end ){
                 first.f()
             }
@@ -447,13 +523,23 @@ function GameState(){
     function event(eName,eData){
         clearTimeouts()
         try {
-            const sm = automata[ state.name ]
-            const to = sm[ '#' ]
+            const cStateName = state.name
+            const sm = automata[ cStateName ]
+            /*const to = sm[ '#' ]
             if ( to ){
                 timeout( () => event('next'), to )
-            }
+            }*/
             const mh = sm[ eName ]
             mh(eData)
+            if ( cStateName !== state.name  ){
+                const sm = automata[ state.name ]
+                const enter = sm['>']
+                if ( enter ){
+                    enter()
+                }
+                console.log('STATE CHANGE',cStateName,'->',state.name)
+                
+            }
         } catch (e){
             console.error('wrong message',{state, eName, eData})
         }
@@ -496,13 +582,13 @@ const player = Player()
 const particles = Particles()
 const texts = Texts()
 
-const step = dt=>{
-//    console.log(gameState.state.name)
+const step = (dt,T) =>{
+    //    console.log(gameState.state.name)
     const camera = display.camera
     const choices = gameState.state.choices
 
     // check timeouts
-    gameState.checkTimeouts()
+    gameState.checkTimeouts(T)
     // grab input
     stats.begin()
     if ( ['I0','I1','G0','G1','S1','S2',
@@ -512,15 +598,11 @@ const step = dt=>{
             gameState.event('next')
         }
     }
-
+    let HASCOLLIDSION = false
     const [[l,r],[d,u],[o,p]] = keyboardController.axesCtrlState
     keyboardController.resetKeyStrokes()
-    if ( ['S1','S2'].includes( gameState.state.name ) ){
-        copyV2(choices.startPosition, player.position)        
-        copyV2(player.position,display.camera.center)
-    }
     if ( ['S3','W1','W2'].includes( gameState.state.name ) ){
-//        console.log('gameState',gameState)
+        //        console.log('gameState',gameState)
         // player move + collide
         const speed01 = 1,
               minspeed = 150,
@@ -528,7 +610,8 @@ const step = dt=>{
               ff = (1-speed01) * minspeed + speed01 * maxspeed
         let dx,dy
         if ( ['S3'].includes( gameState.state.name ) ){
-            dx = ( -1*l + r ) ,
+            dx = 1
+            //dx = ( -1*l + r ) 
             dy = ( -1*u + d )
         } else {
             dx = 1
@@ -538,41 +621,42 @@ const step = dt=>{
         const { nextPosition, hasCollision } =  movePlayer( player,
                                                             choices, dx, dy, dt, ff )
         copyV2(nextPosition,player.position)
-        copyV2(player.position,display.camera.center)
+        //copyV2(player.position,display.camera.center)
         
         // update particles
         //if ( hasCollision ){
         //}
-         if ( ['S3'].includes( gameState.state.name ) ){
-        // check victory
-        if ( posCollide( choices, nextPosition, 'G' ) ){
-            gameState.event('sublevel-win')
+        if ( ['S3'].includes( gameState.state.name ) ){
+            // check victory
+            if ( posCollide( choices, nextPosition, 'G' ) ){
+                gameState.event('sublevel-win')
+            }
+            
+            // check damage
+            if ( hasCollision ){
+                //copyV2( camera.center, nextPosition )
+                HASCOLLIDSION  = true
+                gameState.event('damage',10)
+            }
         }
-        
-        // check damage
-        if ( hasCollision ){
-            //copyV2( camera.center, nextPosition )
-            gameState.event('damage',10)
-        }
-         }
     }
     
     /*
       
-    copyV2( nextPosition, camera.center )
+      copyV2( nextPosition, camera.center )
     */
     // display
     display.clear( )                
-   /* camera.center.x += ( -1*l + r ) * dt / 1000
-    camera.center.y += ( -1*u + d ) * dt / 1000*/
+    /* camera.center.x += ( -1*l + r ) * dt / 1000
+       camera.center.y += ( -1*u + d ) * dt / 1000*/
     camera.scale *= ( 1 + ( -1*o + p ) / 10 ) 
     camera.scale = clamp( camera.scale, 4,32) // 4 wide zoom, 32 closeup
     const textVisibility = {
-        'I0' : ['loading...'],
+        'I0' : ['welcome','anykey'],
         'I1' : ['title'],
-        'G0' : ['intro'],
+        'G0' : ['intro','anykey'],
         'G1' : ['gene'],
-        'S1' : ['instructions'],
+        'S1' : ['instructions','anykey'],
         'S2' : ['ready?'],
         'W1' : ['subwin'],
         'R0' : ['redirecting'],
@@ -585,19 +669,30 @@ const step = dt=>{
         const v = textVisibility[ gameState.state.name ]
         tp.visible = ( v && v.includes(pname) )
     })
-
+    if ( choices ){
+        const mapVisibility = ['S1','S2','S3','W1','L1']
+        choices.visible = mapVisibility.includes( gameState.state.name )
+    }
+    
+    player.energy =  gameState.state.energy
+    //player.visible = true
+    player.hasCollision = HASCOLLIDSION
+    //if ( choices ) choices.visible = true
+    
+    copyV2( player.position, camera.center )
     const elapsed1 = display.draw( camera, choices, player, particles, texts )
-   
+    
     stats.end()
 
 
 }
 const roller = Roller(step)
 roller.command(1)
+gameState.event('start')
 /*
-setTimeout( ()=> roller.command(), 1000)
-setTimeout( ()=> roller.command(1), 2000)
-setTimeout( ()=> roller.command(0), 3000)
+  setTimeout( ()=> roller.command(), 1000)
+  setTimeout( ()=> roller.command(1), 2000)
+  setTimeout( ()=> roller.command(0), 3000)
 */
 // function print(){
 //     const s = gameState.state
@@ -621,7 +716,7 @@ setTimeout( ()=> roller.command(0), 3000)
 // function updateTrail(pmp,hasCollision,STATE){
 //     const tp = trail.mesh.geometry.attributes.position
 //     const tc = trail.mesh.geometry.attributes.color
-    
+
 //     for ( let r = 0 ; r < 10 ; r++ ){
 //         const idx = trail.idx
 //         trail.idx = ( trail.idx + 1 )%trail.count

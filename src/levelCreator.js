@@ -6,8 +6,8 @@ export function mkChoices(){
     const width = 100,
           height = 30
     
-    const mainBranchesCount = 3,
-          branchHeight = 2,
+    const mainBranchesCount = 4,
+          branchHeight = 4,
           hpad = 1,
           branchTop = height - branchHeight - hpad ,
           branchBottom = branchHeight + hpad
@@ -21,10 +21,7 @@ export function mkChoices(){
     const ij2idx = (i,j) => {
         return i + j * width
         if (outij(i,j) ){
-            return 0
-            //throw new Error(`[${i},${j}]`)
-            //22
-            //return 0
+            throw new Error(`[${i},${j}]`)
         } else{
             return i + j * width
         }
@@ -33,7 +30,7 @@ export function mkChoices(){
     const map = new Array( width * height ).fill(0).map( (_,idx) => '*' )
     const choices = new Array( mainBranchesCount + 3 ).fill(0).map( (_,i) => {
         //const npossible = 2 + Math.floor( Math.random() * 2 )
-        let npossible = 2
+        let npossible = 3
         const good = Math.floor( Math.random() * npossible )
         const x = i * width / ( mainBranchesCount + 2 )
         const ys = [
@@ -41,7 +38,8 @@ export function mkChoices(){
             [height/2],
             [height/3,2*height/3],
             [height/4,height/2,3*height/4],
-        ][ npossible ]
+        ][ npossible ].map( y => Math.floor(y) )
+        
         return { x,good,ys }
     })
     choices[1].ys = [ choices[2].ys[choices[2].good] ]
@@ -118,7 +116,8 @@ export function mkChoices(){
             for ( let oj = -1*b ; oj <= b ; oj++ ){
                 let oi = 0
                 //for ( let oi = -1*b ; oi <= b ; oi++ )
-                map[ ij2idx( i+oi,j+oj  ) ] = 'B'
+                const isEnd = (paint==='G') && ( i > width - 5 )
+                map[ ij2idx( i+oi,j+oj  ) ] = isEnd?'G':'B'
             }
         })
         
@@ -130,69 +129,15 @@ export function mkChoices(){
         return mainPixels
     }
 
-    // to format
-    const data = []
-    for ( let j = 0 ; j < height ; j++ ){
-        const a = []
-        for ( let i = 0 ; i < width ; i++ ){
-            a.push( map[ ij2idx(i,j) ] )
-        }
-        data[j] = a.join('')
-    }
+
     //const mesh = mkLevelMesh( 'level',data)
     return {
         startPosition : {
             x: choices[0].x,
             y: choices[0].ys[0],
         }, choices,
-        data, width, height, idx2i, idx2j, ij2idx, outij,
+        width, height, idx2i, idx2j, ij2idx, outij,
         map,
         directions
     }
 }
-
-// function ic( s ){ return s.codePointAt( 0 ) }
-// function ci( i ){ return String.fromCodePoint( i ) }
-// function mkLevelMesh( name, data ){
-    
-//     const vertices = [],
-//           colors = []
-//     var geometry = new THREE.BufferGeometry();
-//     for ( let j = 0 ; j < data.length ; j++ ){
-//         const z = 0
-//         const line = data[ j ]
-//         for ( let i = 0 ; i < line.length ; i++ ){
-//             const v = line.codePointAt( i )
-//             function col(v){
-//                 const c = ci(v)
-//                 //                console.log('cols',cols,'v',v,'civ',ci(v))
-//                 return Cols[ ci(v) ] 
-//             }
-//             vertices.push(
-//                 i,j,z,
-//                 i+1,j,z,
-//                 i+1,j+1,z,                
-//                 i,j,z,
-//                 i+1,j+1,z,
-//                 i,j+1,z,
-//             )
-//             colors.push(
-//                 ...col(v),
-//                 ...col(v),
-//                 ...col(v),
-
-//                 ...col(v),
-//                 ...col(v),
-//                 ...col(v),
-//             )
-//         }
-//     }
-//     geometry.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array( vertices ), 3 ) ); 
-//     geometry.setAttribute( 'color', new THREE.BufferAttribute( new Float32Array( colors ), 3 ) );
-//     var material = new THREE.MeshBasicMaterial( { color: 0xffffff, vertexColors: true  } );
-//     var mesh = new THREE.Mesh( geometry, material );
-//     mesh.name = name
-//     mesh.visible = false
-//     //scene.add( mesh )
-//     return mesh
-// }

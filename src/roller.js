@@ -1,7 +1,9 @@
 export function Roller( f ){
     let pts,  // previous time stamp
         running = 0, 
-        starting = 0
+        starting = 0,
+        gameTime = 0
+    
     function command( cmd ){
         if ( cmd && !running && !starting){
             running = 1
@@ -18,7 +20,8 @@ export function Roller( f ){
         requestAnimationFrame( roll )        
         if ( pts === undefined ) pts = t
         const dt = t - pts
-        f(dt)
+        gameTime+=dt
+        f(dt,gameTime)
         pts = t
     }    
     return { command }
