@@ -360,7 +360,9 @@ function movePlayer( player, level, dx, dy, dt, ff){
     return {
         nextPosition,
         hasCollision,
-        collisionType
+        collisionType,
+        dx,
+        dy
     }
 }
 
@@ -731,6 +733,7 @@ const step = (dt,T) =>{
     keyboardController.resetKeyStrokes()
 
     let HASCOLLIDSION = false
+    let collision
     if ( ['S3','W1','W2'].includes( gameState.state.name ) ){
         //        console.log('gameState',gameState)
         // player move + collide
@@ -747,9 +750,10 @@ const step = (dt,T) =>{
             dx = 2
             dy = 0
         }
+        collision = movePlayer( player,
+                                choices, dx, dy, dt, ff )
         
-        const { nextPosition, hasCollision, collisionType} =  movePlayer( player,
-                                                                          choices, dx, dy, dt, ff )
+        const { nextPosition, hasCollision, collisionType } =  collision
         if ( hasCollision ){
             console.log( 't',collisionType )
         }
@@ -775,7 +779,9 @@ const step = (dt,T) =>{
             }
         }
     }
+
     if( gameState.state.name === 'S3' ){
+        // checkLaps
         if (gameState.state.choices) {
             const choices = gameState.state.choices.choices
             // console.log( player.position,player.lastpos )
@@ -792,6 +798,21 @@ const step = (dt,T) =>{
                 // console.log('step',idx,'/', choices.length)
             }
         }
+        // front raycast
+        function frontRaycast( position, length, types ) {
+            const { ij2idx, map } = gameState.state.choices,
+                  ix = Math.round( position.x ),
+                  iy = Math.round( position.y )
+            const seen = []
+            for ( let i = 0 ; i < length ; i++ ){
+                const t = map[ ij2idx(ix+i,iy) ]
+                seen.push( t )
+            }
+            return seen
+        }
+        const length = 10
+        const seen = frontRaycast( player.position, length )
+//        console.log('seen',seen)
     }
     /*
       
@@ -820,7 +841,7 @@ const step = (dt,T) =>{
         // const running =  ['S3'].includes( gameState.state.name )
 
         const target = player.position
-        updateParticles( particles, target, HASCOLLIDSION, gameState.state.name )
+        updateParticles( particles, target, HASCOLLIDSION, collision, gameState.state.name )
     }
     //if ( choices ) choices.visible = true
     if ( ( gameState.state.lives !== undefined )
@@ -842,24 +863,32 @@ gameState.event('start')
 
 
 
-function updateParticles(particles,pmp,targethasCollision,STATE){
+function updateParticles(particles,pmp,targethasCollision,collision,STATE){
 
     if ( STATE === 'S3' ){
         const targetPosition = V2()
         for ( let r = 0 ; r < /*10*/4 ; r++ ){
             particles.idx = (particles.idx + 1)%particles.els.length
             const particle = particles.els[ particles.idx ]
-            copyV2( pmp, targetPosition )
             if ( targethasCollision ){
-                particle.color = [1,0,0]
+                particle.color = [0.5+Math.random()/2,0,0]
             } else {
                 particle.color = [0,Math.random(),Math.random()]
             }
-            const rang = Math.PI * ( 10 / 12 + 1 / 3 * Math.random() )
-            const rdis = 0.5 + Math.pow(Math.random(),4) * 2.5
-            targetPosition.x = pmp.x + Math.cos( rang ) * rdis
-            targetPosition.y = pmp.y + Math.sin( rang ) * rdis
-            lerpV2( particle.position, targetPosition, 0.8, particle.position )
+            if ( targethasCollision ){
+                const { dx, dy } = collision
+                const rang = 2 * Math.PI * Math.random()
+                const rdis = 0.5 + Math.pow(Math.random(),4) * 1
+                targetPosition.x = pmp.x + dx / 2 + Math.cos( rang ) * rdis
+                targetPosition.y = pmp.y + dy / 2 + Math.sin( rang ) * rdis
+                lerpV2( particle.position, targetPosition, 0.9, particle.position )
+            } else {                
+                const rang = Math.PI * ( 10 / 12 + 1 / 3 * Math.random() )
+                const rdis = 0.5 + Math.pow(Math.random(),4) * 2.5
+                targetPosition.x = pmp.x + Math.cos( rang ) * rdis
+                targetPosition.y = pmp.y + Math.sin( rang ) * rdis
+                lerpV2( particle.position, targetPosition, 0.8, particle.position )
+            }
         }
     } else if ( STATE === 'S2' ){
         const targetPosition = V2()
@@ -873,7 +902,7 @@ function updateParticles(particles,pmp,targethasCollision,STATE){
         for ( let r = 0 ; r < particles.els.length ; r++ ){
             copyV2( pmp, targetPosition )
             const particle = particles.els[ r ]
-            const d = Math.cos( r/10+ Date.now() / 1000 ) * 10
+            const d = Math.cos( r/10+ Date.now() / 1000 ) * ( 6 + Math.cos( Date.now() / 1000 ) )
             targetPosition.x += Math.cos( r+Date.now() / 1000 ) * d
             targetPosition.y += Math.sin( r+Date.now() / 1000 ) * d
             particle.color = [Math.random(),Math.cos( r/10),r]
