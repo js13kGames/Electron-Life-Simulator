@@ -5,21 +5,7 @@
 const Stats = require('stats.js')
 //const tunnel = require('./tunnel.js')
 //require('./zzfx.js')
-document.body.style = 'background:#111;'
-const canvasStyle = `
-//    border-top : 1px solid white;
-//    border-bottom : 1px solid white;
-    padding: 0;
-    margin: auto;
-    display: block;
-    width: 100%;
-    height: auto;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-`
+
 
 import { KeyboardControllers } from './keyboardControllers.js'
 import { mkChoices } from './levelCreator.js'
@@ -27,7 +13,10 @@ import { Cols } from './cols.js'
 import { textCanvas } from './textPlane.js'
 import { V2, cloneV2, copyV2, subV2, addV2, multScalar, divScalar, clampV2, ceilV2, floorV2, lerpV2} from './v2.js'
 import { Roller } from './roller.js'
+import { canvasStyle, bodyStyle } from './css.js'
 const { zzfx } = require('./zz.js')
+
+document.body.style = 'background:#111;';
 
 const levels = []
 //    minspeed, width, height, mainBranchesCount,
@@ -83,7 +72,7 @@ function Texts(){
         ['anykey','[press any key to continue...]','grey','br','a:none']
     ]
     desc.forEach( ([k,msg,style,position='c',animation = 'a:floffle']) => {
-//        console.log('***',msg,family,style,textTargetSize)
+        //        console.log('***',msg,family,style,textTargetSize)
         const panel = textCanvas( msg,family,style,textTargetSize )
         panel.position=position
         panel.animation = animation
@@ -95,8 +84,8 @@ function Texts(){
     function updateMessage(name,msg){
         const panel = textPanels[ name ]
         const d = desc.find( d => d[0] === name )
-//        console.log('***>',d)
-//        console.log('***',msg, textTargetSize)
+        //        console.log('***>',d)
+        //        console.log('***',msg, textTargetSize)
         const tcid = textCanvas( msg, family, d[2], textTargetSize)
         textPanels[ name ] 
         panel.canvas = tcid.canvas
@@ -209,11 +198,11 @@ function Display(){
 
                 }
                 /*context.putImageData(
-                    tp.imageData,
-                    300+off,j,
-                    0,j,
-                    tp.canvas.width,2
-                    )*/
+                  tp.imageData,
+                  300+off,j,
+                  0,j,
+                  tp.canvas.width,2
+                  )*/
                 context.drawImage( tp.canvas,
                                    0, j,
                                    tp.canvas.width, 2,
@@ -227,7 +216,7 @@ function Display(){
                   void ctx.drawImage(image, dx, dy);
                   void ctx.drawImage(image, dx, dy, dWidth, dHeight);
                   void ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-                  */
+                */
                 
             }
         }
@@ -248,7 +237,7 @@ function Display(){
             } else {
                 col = [ 1 - player.energy / 1000,0,0]
             }
-//            console.log(player.energy)
+            //            console.log(player.energy)
             context.fillStyle = cssrgba( ...col/*NOMINAL_ENERGY*/)
             context.fillRect( ...box2screen( player.position.x,
                                              player.position.y,
@@ -401,8 +390,8 @@ function GameState(){
         I0 : {
             // just require an input to be able to play sounds
             /*'>' : () => {
-                timeout( () => event('next'),3000)
-            },*/
+              timeout( () => event('next'),3000)
+              },*/
             //'#' : 1000,
             'next' : d => {
                 update({name:'I1'})
@@ -475,6 +464,7 @@ function GameState(){
             'next' : d => {
                 update({
                     energy : NOMINAL_ENERGY,
+                    checkLines : [],
                     name : 'S3',
                 })
                 zzfx(...sounds.z)
@@ -482,6 +472,10 @@ function GameState(){
         },
         // runnning
         S3 : {
+            'checkLine' : num => {
+                state.checkLines.push( { num, t : state.T } )
+                console.log('state.checkLines',state.checkLines)
+            },
             'damage' : d => {
                 const energy = state.energy - d
                 if ( (energy - d)  > 0 ){
@@ -614,9 +608,9 @@ function GameState(){
         try {
             const sm = automata[ cStateName ]
             /*const to = sm[ '#' ]
-            if ( to ){
-                timeout( () => event('next'), to )
-            }*/
+              if ( to ){
+              timeout( () => event('next'), to )
+              }*/
             const mh = sm[ eName ]
             mh(eData)
         } catch (e){
@@ -781,22 +775,22 @@ const step = (dt,T) =>{
         }
     }
     if( gameState.state.name === 'S3' ){
-    if (gameState.state.choices) {
-        const choices = gameState.state.choices.choices
-        // console.log( player.position,player.lastpos )
-        let idx = -1
-        for ( let i = 0 ; i < choices.length ; i++ ){            
-            const x = choices[ i ].x
-            if ( ( player.lastpos.x < x ) && ( x <= player.position.x ) ){
-                idx = i
-                break
+        if (gameState.state.choices) {
+            const choices = gameState.state.choices.choices
+            // console.log( player.position,player.lastpos )
+            let idx = -1
+            for ( let i = 0 ; i < choices.length ; i++ ){            
+                const x = choices[ i ].x
+                if ( ( player.lastpos.x < x ) && ( x <= player.position.x ) ){
+                    idx = i
+                    break
+                }
+            }
+            if ( idx !== -1 ){
+                zzfx(...sounds.v)
+                console.log('step',idx,'/', choices.length)
             }
         }
-        if ( idx !== -1 ){
-            zzfx(...sounds.v)
-            console.log('step',idx,'/', choices.length)
-        }
-    }
     }
     /*
       
@@ -839,7 +833,7 @@ const step = (dt,T) =>{
     
     stats.end()
 
-//    texts.updateMessage('welcome','BONJOUR')
+    //    texts.updateMessage('welcome','BONJOUR')
 }
 const roller = Roller(step)
 roller.command(1)
