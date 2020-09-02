@@ -70,7 +70,7 @@ export function FeedbackBuffer( context ){
     function setMode( n ){
         const ks = Object.keys( modes )
         modeName = ks[ (ii++)% ks.length ]
-        modeName = 'none'
+        //modeName = 'none'
     }
     let used = false
     function copy(){
