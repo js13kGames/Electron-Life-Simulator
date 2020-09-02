@@ -760,9 +760,9 @@ const step = (dt,T) =>{
                                 choices, dx, dy, dt, ff )
         
         const { nextPosition, hasCollision, collisionType } =  collision
-        if ( hasCollision ){
+        /*if ( hasCollision ){
             console.log( 't',collisionType )
-        }
+        }*/
         copyV2(player.position,player.lastpos)
         copyV2(nextPosition,player.position)
         //copyV2(player.position,display.camera.center)
@@ -809,16 +809,20 @@ const step = (dt,T) =>{
             const { ij2idx, map } = gameState.state.choices,
                   ix = Math.round( position.x ),
                   iy = Math.round( position.y )
-            const seen = []
             for ( let i = 0 ; i < length ; i++ ){
-                const t = map[ ij2idx(ix+i,iy) ]
-                seen.push( t )
+                if ( types.includes( map[ ij2idx(ix+i,iy) ] ) ){
+                    return i
+                }
             }
-            return seen
         }
-        const length = 10
-        const seen = frontRaycast( player.position, length )
-//        console.log('seen',seen)
+        const rayLength = 10
+        const wallDist = frontRaycast( player.position, rayLength,['*'] )
+        if ( wallDist !== undefined ){
+            const wallProx = clamp((rayLength - wallDist - 1) / ( rayLength - 2 ),0,1)
+            console.log('seen',wallProx)
+        }
+        
+        
     }
     /*
       
@@ -917,11 +921,19 @@ function updateParticles(particles,pmp,targethasCollision,collision,STATE){
             const d = Math.cos( r/10+ Date.now() / 1000 ) * ( 6 + Math.cos( Date.now() / 1000 ) )
             targetPosition.x += Math.cos( r+Date.now() / 1000 ) * d
             targetPosition.y += Math.sin( r+Date.now() / 1000 ) * d
-            particle.color = [Math.random(),Math.cos( r/10),r]
+            if ( ['L1','L2'].includes( STATE ) ){
+                particle.color = [0.5+Math.random()/2,
+                                  lerp(Math.random()/4,particle.color[1],0.5),
+                                  lerp(Math.random()/4,particle.color[2],0.5)]
+                //Math.random() * r]
+            } else {
+                particle.color = [Math.random(),Math.cos( r/10),r]
+            }
             lerpV2( particle.position, targetPosition, 0.1, particle.position )
         }
     }
 }
+function lerp(a,b,p){ return ( 1 - p ) * a + p * b }
 /*
   setTimeout( ()=> roller.command(), 1000)
   setTimeout( ()=> roller.command(1), 2000)
