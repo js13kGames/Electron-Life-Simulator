@@ -66,8 +66,10 @@ export function FeedbackBuffer( context ){
     }
     function getPixelFilter( n ){ return modes[ n ][ 0 ] }
     function getPaste( n ){ return modes[ n ][ 1 ]  }
+    let ii = 0
     function setMode( n ){
-        modeName = n
+        const ks = Object.keys( modes )
+        modeName = ks[ (ii++)% ks.length ]
     }
     let used = false
     function copy(){

@@ -325,7 +325,7 @@ function Display(){
         //console.log(e2,e3,'p',e4,e5,e)
         return e
     }
-    return { newframe, draw, camera }
+    return { newframe, draw, camera, feedbackBuffer }
 }
 
 
@@ -857,6 +857,12 @@ const step = (dt,T) =>{
     }
     lifeBar.visible = lifeBarVisibility.includes(  gameState.state.name )
     copyV2( player.position, camera.center )
+
+    if (Math.random()>0.99){
+        display.feedbackBuffer.setMode()
+    }
+    
+    
     const elapsed1 = display.draw( camera, choices, player, particles, texts, timeoutBar, lifeBar, remainingTo )
     
     stats.end()
