@@ -101,11 +101,51 @@ function Display(){
     const canvas = document.createElement('canvas')
     
     canvas.width =  targetSize.width 
-    canvas.height = targetSize.height 
+    canvas.height = targetSize.height    
     canvas.setAttribute('name','MONMON')
     canvas.style = canvasStyle//'position: absolute ; top : 200px ; left : 0px;'   
-
     const context = canvas.getContext('2d')
+
+    function BlurBuffer(){
+
+        const secondCanvas = document.createElement('canvas')
+        secondCanvas.width =  targetSize.width 
+        secondCanvas.height = targetSize.height
+        
+        const secondContext = secondCanvas.getContext('2d')
+        document.body.appendChild( secondCanvas )
+        
+        let used = false
+        function copy(){
+            const src = context.getImageData(0,0,canvas.width,canvas.height),
+                  dst = secondContext.getImageData(0,0,canvas.width,canvas.height),
+                  srcData = src.data,
+                  dstData = dst.data
+            for ( let i = 0 ; i < srcData.length ; i+= 4 ){
+                dstData[ i ] = srcData[ i ]
+                dstData[ i + 1 ] = srcData[ i + 1]  / 2
+                dstData[ i + 2 ] = srcData[ i + 1]
+                dstData[ i + 3 ] = Math.floor(srcData[ i + 1] - 1)
+            }
+            secondContext.putImageData( dst,0,0)
+            used = true
+        }
+        function paste(){
+            const xoff = Math.cos( Date.now() / 100 ) * 6
+            const yoff = Math.sin( Date.now() / 100 ) * 6
+            if ( used ){
+                context.drawImage(secondCanvas,xoff,yoff)
+                
+            }
+        }
+        function reset(){
+            used = false
+        }
+        return { copy, paste, reset }
+    }
+
+    const blurBuffer = BlurBuffer( )
+    
     document.body.appendChild( canvas )
     
     //const choices = mkChoices() 
@@ -121,7 +161,8 @@ function Display(){
     const hcWidth = canvas.width / 2,
           hcHeight = canvas.height / 2
     
-    function clear(  ){
+    function newframe(  ){
+        blurBuffer.copy()
         //context.fillStyle = 'rgba(0,127,200,1)'
         context.fillStyle = 'rgba(0,0,0,1)'
         context.fillRect(0,0,canvas.width,canvas.height)
@@ -282,6 +323,7 @@ function Display(){
             
             
         }
+
         const t1 = Date.now()
         if (level && level.visible)
             drawMap()
@@ -305,11 +347,11 @@ function Display(){
         if ( timeoutBar.visible ){
             drawTimeoutBar()
         }
+        blurBuffer.paste()
         const t6 = Date.now()
         if ( lifeBar.visible ){
             drawLifeBar()
         }
-        
         const e2 = t2 - t1
         const e3 = t3 - t2
         const e4 = t4 - t3
@@ -319,7 +361,7 @@ function Display(){
         //console.log(e2,e3,'p',e4,e5,e)
         return e
     }
-    return { clear, draw, camera }
+    return { newframe, draw, camera }
 }
 
 
@@ -819,7 +861,7 @@ const step = (dt,T) =>{
       copyV2( nextPosition, camera.center )
     */
     // display
-    display.clear( )                
+    display.newframe( )                
     /* camera.center.x += ( -1*l + r ) * dt / 1000
        camera.center.y += ( -1*u + d ) * dt / 1000*/
     camera.scale *= ( 1 + ( -1*o + p ) / 10 ) 
