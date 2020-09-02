@@ -161,10 +161,12 @@ function Display(){
                         col = Cols[c] || [1,0,0]
                     }
                     const rgba = cssrgba( ...col ),
-                          x = (i - cpx) * scale + hcWidth,
-                          y = (j - cpy) * scale + hcHeight
+                          x = Math.floor( (i - cpx) * scale + hcWidth ),
+                          y = Math.floor( (j - cpy) * scale + hcHeight )
                     context.fillStyle = rgba
-                    context.fillRect(x, y, scale-1, scale-1)
+                    //context.fillRect(x, y, scale-1, scale-1)
+                    //context.fillRect(x, y, scale, scale)
+                    context.fillRect(x+1, y+1, scale-1, scale-1)
                 }
             }
         }        
@@ -258,30 +260,6 @@ function Display(){
             context.fillRect( ...box2screen( particle.position.x,
                                              particle.position.y,
                                              particle.dim, particle.dim, sb ) )
-        }
-        function drawParticle2( context, { center, scale }, particle,  i )
-        {
-            const sb = []
-            
-            const position = V2()
-            let targetPosition, dim, fill
-            dim = particle.dim
-            if ( true ){
-                targetPosition = cloneV2(player.position)
-                {                
-                    const d = Math.cos( i/10+ Date.now() / 1000 ) * 10
-                    targetPosition.x += Math.cos( i+Date.now() / 1000 ) * d
-                    targetPosition.y += Math.sin( i+Date.now() / 1000 ) * d
-                    particle.color = [Math.random(),Math.cos( i/10),1]
-                }
-            } else {
-                targetPosition = cloneV2(particle.position)
-            }
-            context.fillStyle = cssrgba(...particle.color)
-            lerpV2( particle.position, targetPosition, 0.1, particle.position )
-            context.fillRect( ...box2screen( particle.position.x,
-                                             particle.position.y,
-                                             dim, dim, sb ) )
         }
         function drawTimeoutBar(){
             const height = 20

@@ -89,7 +89,7 @@ export function textCanvas( msg, family, style, textTargetSize ){
                      border,
                      canvas.height - border)
     
-    document.body.appendChild( canvas )    
+//    document.body.appendChild( canvas )    
     return { canvas,
              imageData : context.getImageData( 0,0,canvas.width, canvas.height ) }
              
