@@ -474,6 +474,7 @@ function GameState(){
         S3 : {
             'checkLine' : num => {
                 state.checkLines.push( { num, t : state.T } )
+                zzfx(...sounds.v)
                 console.log('state.checkLines',state.checkLines)
             },
             'damage' : d => {
@@ -787,8 +788,8 @@ const step = (dt,T) =>{
                 }
             }
             if ( idx !== -1 ){
-                zzfx(...sounds.v)
-                console.log('step',idx,'/', choices.length)
+                gameState.event('checkLine',idx)
+                // console.log('step',idx,'/', choices.length)
             }
         }
     }
