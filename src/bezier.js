@@ -20,7 +20,6 @@ export function BezierCurve( p1, p2, p3, p4 ){
     return { at, getPoints }
 }
 
-const bezier = BezierCurve(V2(0,0),V2(0.3,0),V2(0.6,0),V2(-1,10))
-                 
-console.log('bze', bezier.getPoints( 10 ) )
+// const bezier = BezierCurve(V2(0,0),V2(0.3,0),V2(0.6,0),V2(-1,10))
+// console.log('bze', bezier.getPoints( 10 ) )
 

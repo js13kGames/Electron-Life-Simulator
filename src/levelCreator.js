@@ -3,21 +3,20 @@ import { Cols } from './cols.js'
 import { BezierCurve } from './bezier.js'
 import { V2, cloneV2, subV2, addV2, multScalar, divScalar } from './v2.js'
 export function mkChoices(){
+
+    // options
     const width = 100*3,
-          height = 30
-    
+          height = 30    
     const mainBranchesCount = 4,
           branchHeight = 4,
           hpad = 1,
           branchTop = height - branchHeight - hpad ,
           branchBottom = branchHeight + hpad
-    
+
+    // nmap
     const idx2i = idx => idx % width
     const idx2j = idx => Math.floor( idx / width )
-    const outij = (i,j) => ( ( i < 0 )
-                             || ( i >= width )
-                             || ( j < 0 )
-                             || ( j >= height ) )
+    const outij = (i,j) => ( ( i < 0 ) || ( i >= width ) || ( j < 0 ) || ( j >= height ) )
     const ij2idx = (i,j) => {
         return i + j * width
         if (outij(i,j) ){
@@ -26,8 +25,9 @@ export function mkChoices(){
             return i + j * width
         }
         
-    }
-    const map = new Array( width * height ).fill(0).map( (_,idx) => '*' )
+    } 
+
+    // choices
     const choices = new Array( mainBranchesCount + 3 ).fill(0).map( (_,i) => {
         //const npossible = 2 + Math.floor( Math.random() * 2 )
         let npossible = 3
@@ -38,8 +38,7 @@ export function mkChoices(){
             [height/2],
             [height/3,2*height/3],
             [height/4,height/2,3*height/4],
-        ][ npossible ].map( y => Math.floor(y) )
-        
+        ][ npossible ].map( y => Math.floor(y) )        
         return { x,good,ys }
     })
     choices[1].ys = [ choices[2].ys[choices[2].good] ]
@@ -49,7 +48,9 @@ export function mkChoices(){
     
     choices[choices.length-1].ys = [ choices[choices.length-2].ys[choices[choices.length-2].good] ]
     choices[choices.length-1].good = 0
-    
+
+    // map
+    const map = new Array( width * height ).fill(0).map( (_,idx) => '*' )
     for ( let i = 0 ; i < ( choices.length - 1 ) ; i++ ){
         const c0 = choices[i],
               c1 = choices[i+1]
@@ -64,8 +65,6 @@ export function mkChoices(){
             const npts = Math.ceil(c1.x - c0.x ) 
             const curve = BezierCurve( ...pts )
             const points = curve.getPoints(  npts )
-            //console.log(npts,{model:points,test:points2})
-            
             if ( i === 0 ){
                 const mainPixels = paintPoints( points, 'O' )                
             } else if ( i === (choices.length - 2 )){

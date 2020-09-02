@@ -483,6 +483,7 @@ function GameState(){
                 update({
                     name : 'S2',                
                 })
+                // ????
                 copyV2(gameState.state.choices.startPosition, player.position)
                 copyV2(player.position,display.camera.center)
                 zzfx(...sounds.y)
