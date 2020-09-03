@@ -5,7 +5,7 @@ export function FeedbackBuffer( context ){
     secondCanvas.height = canvas.height
     
     const secondContext = secondCanvas.getContext('2d')
-    document.body.appendChild( secondCanvas )
+    //    document.body.appendChild( secondCanvas )
 
     function pixelFilter1(srcData,dstData,i){
         dstData[ i ] = srcData[ i ]
@@ -56,20 +56,25 @@ export function FeedbackBuffer( context ){
             context.drawImage(secondCanvas,xoff,0)                
         }
     }        
-    let modeName = 'one'
+    let modeName = 'none'
     const modes = {
         'none' : [ pixelFilter3(0,0), paste2 ],
-        'one' : [ pixelFilter1, paste1 ],
-        'two' : [ pixelFilter2, paste2 ],
-        'three' : [ pixelFilter3(40,1), paste2 ],
-        'four' : [ pixelFilter4, paste3 ],
+        'broadway' : [ pixelFilter1, paste1 ],
+        'blue-blur' : [ pixelFilter2, paste2 ],
+        'color-blur' : [ pixelFilter3(40,1), paste2 ],
+        'left-grey' : [ pixelFilter4, paste3 ],
     }
     function getPixelFilter( n ){ return modes[ n ][ 0 ] }
     function getPaste( n ){ return modes[ n ][ 1 ]  }
     let ii = 0
     function setMode( n ){
-        const ks = Object.keys( modes )
-        modeName = ks[ (ii++)% ks.length ]
+        if ( n === undefined ){
+            const ks = Object.keys( modes )
+            modeName = ks[ (ii++)% ks.length ]
+        } else {
+            modeName = n
+        }
+        return modeName
         //modeName = 'none'
     }
     let used = false
@@ -94,5 +99,5 @@ export function FeedbackBuffer( context ){
     function reset(){
         used = false
     }
-    return { copy, paste, reset, setMode }
+    return { copy, paste, reset, setMode, getMode : () => modeName }
 }

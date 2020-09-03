@@ -60,7 +60,7 @@ function Texts(){
         ['intro','the story begins...','white'],
         ['levelnum','!levelnum!','white','ct'],
         ['sublevelnum','!sublevelnum','white','cbu'],
-        ['instructions','!routr!','white','cbu','a:sscroll'],
+        ['instructions','!routr!','white','cbu'],
         ['ready?','connecting...','white','cbu','a:sscroll'],
         ['subwin','sublevel won !','white','ct'],
         ['redirecting','redirecting...','white'],
@@ -552,7 +552,7 @@ function GameState(){
         // redirecting aftr sublevel win
         R0 : {
             '>' : d => {
-                timeout( () => event('next'),2000)
+                timeout( () => event('next'),8000)
             },            
             'next' :  d => update({
                 choices : undefined,
@@ -716,7 +716,22 @@ const step = (dt,T) =>{
     const mapVisibility = ['S2','S3','W1','L1']
     const playerVisibility = ['S1','S2','S3','W1','R0','L1']
     const lifeBarVisibility = ['G1','S1','S2','S3','W1','W2','R0','L1','L2']
-
+    const feedbackEffect = {
+        'I0' : ['none'],
+        'I1' : ['broadway'],
+        'G0' : ['broadway'],
+        'G1' : ['broadway'],
+        'S1' : ['blue-blur'],
+        'S2' : ['blue-blur'],
+        'S3' : ['none'],
+        'W1' : ['color-blur'],
+        'R0' : ['blue-blur'],
+        'W2' : ['color-blur'],
+        'W3' : ['broadway','color-blur'],
+        'L1' : ['left-grey'],
+        'L2' : ['left-grey'],
+        
+    }
     //    console.log(gameState.state.name)
     const camera = display.camera
     const choices = gameState.state.choices
@@ -867,8 +882,20 @@ const step = (dt,T) =>{
     lifeBar.visible = lifeBarVisibility.includes(  gameState.state.name )
     copyV2( player.position, camera.center )
 
-    if (Math.random()>0.99){
-    display.feedbackBuffer.setMode()
+
+    const currentFeedBackMode = display.feedbackBuffer.getMode()
+    //console.log('cr',currentFeedBackMode)
+    const feedBackChoices = feedbackEffect[ gameState.state.name ]
+    
+    const justChange = Math.random() > 0.99,
+          mustChange = !(feedBackChoices.includes(currentFeedBackMode))
+    //&& ( Math.random() < 1/20 )
+    if ( justChange || mustChange ){
+        const rmode = feedBackChoices[
+            Math.floor( feedBackChoices.length * Math.random() )
+        ]
+        console.log('->',rmode)
+        const mode = display.feedbackBuffer.setMode(rmode)
     }
     
     
