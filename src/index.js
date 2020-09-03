@@ -60,11 +60,11 @@ function Texts(){
         ['intro','the story begins...','white'],
         ['levelnum','!levelnum!','white','ct'],
         ['sublevelnum','!sublevelnum','white','cbu'],
-        ['instructions','!routr!','white','cbu'],
-        ['ready?','connecting...','white','cbu','a:sscroll'],
-        ['subwin','sublevel won !','white','ct'],
-        ['redirecting','redirecting...','white'],
-        ['levelwin','level won !','white'],
+        ['instructions','!routr!','white','cbu'/*,'a:sscroll'*/],
+        ['ready?','connecting...','white','cbu'/*,'a:sscroll'*/],
+        ['subwin','hop covered !','white','cbu'],
+        ['redirecting','redirecting...','white','cbu'],
+        ['levelwin','network covered !','white','cbu'],
         ['win','you won it all !','white'],
         //['go','fetch','green'],
         ['failed','401 Unauthorized','white','cbu','a:sscroll'],
@@ -240,11 +240,18 @@ function Display(){
             const sb = []
             const dim = 1
             let col
+            if ( player.hasCollision ){
+                col = [player.energy/2,0.2 * Math.random(),0.05 * Math.random()]
+            } else {
+                col = [Math.pow(player.energy,0.25),0,0]
+            }/*
+            
             if (( player.hasCollision )&&(Math.random()<0.8)){
                 col = [ 1 - player.energy / 1000,Math.random(),Math.random()]
             } else {
                 col = [ 1 - player.energy / 1000,0,0]
             }
+             */
             //            console.log(player.energy)
             context.fillStyle = cssrgba( ...col/*NOMINAL_ENERGY*/)
             context.fillRect( ...box2screen( player.position.x,
@@ -820,8 +827,8 @@ const step = (dt,T) =>{
                 }
             }
             if ( idx !== -1 ){
-                gameState.event('checkLine',idx)
-                // console.log('step',idx,'/', choices.length)
+                gameState.event('checkLine',idx, choices.length - 2)
+                console.log('step',idx,'/', choices.length - 2)
             }
         }
         // front raycast
@@ -871,7 +878,7 @@ const step = (dt,T) =>{
         // const running =  ['S3'].includes( gameState.state.name )
 
         const target = player.position
-        updateParticles( particles, target, HASCOLLIDSION, collision, gameState.state.name )
+        updateParticles( particles, target, HASCOLLIDSION, collision,gameState.state.energy,  gameState.state.name )
     }
     //if ( choices ) choices.visible = true
     if ( ( gameState.state.lives !== undefined )
@@ -911,7 +918,7 @@ gameState.event('start')
 
 
 
-function updateParticles(particles,pmp,targethasCollision,collision,STATE){
+function updateParticles(particles,pmp,targethasCollision,collision,playerEnergy,STATE){
 
     if ( STATE === 'S3' ){
         const targetPosition = V2()
@@ -921,7 +928,7 @@ function updateParticles(particles,pmp,targethasCollision,collision,STATE){
             if ( targethasCollision ){
                 particle.color = [0.5+Math.random()/2,0,0]
             } else {
-                particle.color = [0,Math.random(),Math.random()]
+                particle.color = [playerEnergy,Math.random()*playerEnergy,Math.random()*playerEnergy]
             }
             if ( targethasCollision ){
                 const { dx, dy } = collision
@@ -994,5 +1001,5 @@ let done = false
 window.addEventListener('keydown', e => {
     if ( done ) return
     done = true
-//    play()
+    play()
 })
