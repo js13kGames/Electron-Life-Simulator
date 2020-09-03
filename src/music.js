@@ -15,9 +15,10 @@ function adsr( ap, { values, durations }, t ){
     //     adsr              gain
     //      o                0
     //     o ooo             1
-    //    o     o
+    // 0_ o     o  _0
     //
     //      ad sr
+    //    0 12 3 4
     const times = itrvstot( durations, t )
     ap.setValueAtTime(0, times[0] )        
     ap.linearRampToValueAtTime( values[0], times[1] )
@@ -26,7 +27,33 @@ function adsr( ap, { values, durations }, t ){
     ap.linearRampToValueAtTime( 0, times[4] )
     return times[4]
 }
-
+function asr( ap, { values, durations }, t ){
+    //   a    s   r          gain
+    //       oooo            1
+    //     oo    o           0
+    // 1_ o       o _ 1       1
+    //
+    //    0  1  2 3
+    
+    const times = itrvstot( durations, t )
+    if ( times[0] === times[1] ){
+        ap.setValueAtTime( values[0], times[1] )
+    } else { 
+        ap.setValueAtTime( 1, times[0] )
+        ap.linearRampToValueAtTime( values[0], times[1] )
+    }
+    ap.linearRampToValueAtTime( values[1], times[2])
+    if ( times[2] === times[3] ){
+    } else {
+        ap.linearRampToValueAtTime( 1, times[3])
+    }
+    
+    //ap.linearRampToValueAtTime( 20, t+0.5)
+    //ap.linearRampToValueAtTime( 22, t+2)
+    //ap.linearRampToValueAtTime( 1, t+2.3)
+    
+    return times[3]            
+}
 function DelayChain( ac, ds  ){
     const nodes = []
     for ( let i = 0 ; i < ds.length ; i++ ){
@@ -42,22 +69,11 @@ function DelayChain( ac, ds  ){
     }
     const input = nodes[0],
           output = nodes[nodes.length-1]
-        output.connect( input )
+    output.connect( input )
     return { input, output  }
 }
-
-function Chords(){
-    
-    return chords
-}
-export function play(){
-    const ac = new AudioContext();
-    
-
-    //
-    const size = 256,
-          f0 = 7.25
-    
+function FftFreqs(size,f0){
+    // relation between frequency, midi key and fft bins
     const bins = new Array( size )
     {
         let f = f0
@@ -66,20 +82,37 @@ export function play(){
                   k = ftok(f)
             bins[ b ] = { f,k,i:b }
         }
-        console.log('bins',bins)
     }
-
+    const _nbcache = {}
     function nearestBins( k ){
-        return [...bins].sort( (b1,b2) => {
-            const k1 = b1.k,
-                  k2 = b2.k
-            return Math.abs(k1-k) - Math.abs(k2-k)
-        })
+        if ( _nbcache[ k ] === undefined ){
+            _nbcache[ k ] = [...bins].sort( (b1,b2) => {
+                const k1 = b1.k,
+                      k2 = b2.k
+                return Math.abs(k1-k) - Math.abs(k2-k)
+            })
+        }
+        return _nbcache[ k ]
     }
-    // for ( let k = 48 ; k < 48+24 ; k++ ){
-    //     const [nearest] =  nearestBins( k )
-    //     //console.log('kk',k,nearest,k - nearest.k)
-    // }
+    return { size, f0, bins, nearestBins }
+}
+function periodWaveFromKeys( ac, chord, { size, nearestBins } ){
+    const real = new Float32Array(size)
+    const imag = new Float32Array(size)
+    chord.forEach( k => {
+        const [nearest] = nearestBins( k )
+        real[nearest.i] = 0.5
+    })
+    return ac.createPeriodicWave(real, imag, {disableNormalization: true});
+}
+
+export function play(){
+    const ac = new AudioContext();
+    
+    const size = 256,
+          f0 = 7.25
+
+    const fftFreqs = FftFreqs(size,f0)
     
     const chords = []
     {
@@ -102,29 +135,18 @@ export function play(){
     
     chords.forEach( chord => {
         t = playChord( chord, t )
-    })    
+    })
     
+
     function playChord( chord, t ){
-        const real = new Float32Array(size)
-        const imag = new Float32Array(size)
-        for ( let i = 0 ; i < size ; i++ ){
-            real[i] = 0
-            imag[i] = 0
-        }
-        chord.forEach( k => {
-            const [nearest] =  nearestBins( k )
-            real[nearest.i] = 0.5
-        })
-        //        real[b] = 0.5
-        //        real[b-5] = 0.5
-        const wave = ac.createPeriodicWave(real, imag, {disableNormalization: true});        
+        
+        const wave = periodWaveFromKeys( ac, chord, fftFreqs )
         const osc = ac.createOscillator();
-        osc.frequency.value = f0
+        osc.frequency.value = fftFreqs.f0
         osc.setPeriodicWave(wave);
         
         const gainNode = ac.createGain();
         osc.connect(gainNode)
-        //gainNode.connect(ac.destination)
         gainNode.connect(delayChain.input)
         
         const envelope = {
@@ -132,28 +154,30 @@ export function play(){
             durations : [ ms(16), ms(20), 2.0, 0.5 ]
         }
         const envEnd = adsr( gainNode.gain, envelope,  t )
+
+        const vibratoEnvelope = {
+            values : [ 20, 22 ],
+            durations : [ 0.5, 2-0.5,2.3-2 ]
+        }
+        
+        
         
         // freq osc
         {
             const mod = ac.createOscillator();
             mod.frequency.value = 5
-                const modGain = ac.createGain()
+            const modGain = ac.createGain()
             //modGain.gain.value = 10.0
-            modGain.gain.setValueAtTime(1, t )        
-            modGain.gain.linearRampToValueAtTime( 20, t+0.5)
-            modGain.gain.linearRampToValueAtTime( 20, t+2)
-            modGain.gain.linearRampToValueAtTime( 1, t+2.3)
-            
-            
-                modGain.connect( osc.detune )
+            const vibEnvEnd = asr( modGain.gain, vibratoEnvelope, t )
+            modGain.connect( osc.detune )
             mod.connect( modGain )
-            mod.start()
+            mod.start(t)
         }
         
-        osc.frequency.setValueAtTime( f0, t )
-        osc.frequency.linearRampToValueAtTime( f0*1.02, envEnd )
+        osc.frequency.setValueAtTime( fftFreqs.f0, t )
+        osc.frequency.linearRampToValueAtTime( fftFreqs.f0*1.02, envEnd )
         
-            
+        
         
         osc.start( t )
         osc.stop( envEnd )
