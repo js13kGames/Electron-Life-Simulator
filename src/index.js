@@ -6,7 +6,7 @@ const Stats = require('stats.js')
 //const tunnel = require('./tunnel.js')
 //require('./zzfx.js')
 
-
+import * as Build from './build.js'
 import { KeyboardControllers } from './keyboardControllers.js'
 import { mkChoices } from './levelCreator.js'
 import { Cols } from './cols.js'
@@ -16,6 +16,9 @@ import { Roller } from './roller.js'
 import { canvasStyle, bodyStyle } from './css.js'
 import { FeedbackBuffer } from './feedbackBuffer.js'
 const { zzfx } = require('./zz.js')
+
+console.log(Build.date, Build.timestamp)
+
 
 document.body.style = 'background:#111;';
 
@@ -263,8 +266,8 @@ function Display(){
         }
         function drawLifeBar(){
             let { l, L } = lifeBar
-            const dim = 16,
-                  margin = 4
+            const dim = 10,
+                  margin = 2
             let x = margin
             context.fillStyle = cssrgba(0,0,0,0.5)
             context.fillRect(
