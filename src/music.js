@@ -1,11 +1,12 @@
 // general
 
 function ms(ms){ return ms / 1000 }
+function sample1(sr){ return function( s ){ return s/sr } }
 function ftok( f ){
     return 69 + 12 * Math.log2( f / 440 )
 }
 function ktof( k ) {
-    return Math.pow(2,(d-69)/12) * 440
+    return Math.pow(2,(k-69)/12) * 440
 }
 function itrvstot( itrvs, t0 ){
     return itrvs.reduce( (r,x) => {
@@ -102,10 +103,20 @@ function periodWaveFromKeys( ac, chord, { size, nearestBins } ){
     })
     return ac.createPeriodicWave(real, imag, {disableNormalization: true});
 }
-
+function NoiseBuffer(ac, noiseLength=0.25){
+    const bs = ac.sampleRate * noiseLength,
+          ab =  ac.createBuffer(1, bs, ac.sampleRate),
+          cd  = ab.getChannelData(0)
+    for (let i = 0; i < bs; i++) {
+        cd[i] = Math.random() * 2 - 1;
+    }
+    return ab
+}
 export function play(){
     const ac = new AudioContext();
-    
+    const sample = sample1(ac.sampleRate)
+
+    console.log(ac.sampleRate )
     const size = 256,
           f0 = 7.25
 
@@ -125,17 +136,180 @@ export function play(){
             })
         }
     }
-
+    // const rythme = [1,1,0,1,1,1,0,1,1] // BIEN
+    const rythme = [1,1,0,1, 1,1,0,1]
+    
     const delayChain = DelayChain(ac, [[0.3,0.6]/*,[0.1,0.6]*/] )
-    delayChain.output.connect( ac.destination )   
-    
-    let t = 0
-    chords.forEach( chord => {
-        t = playChord( chord, t )
-    })
-    
 
-    function playChord( chord, t ){
+    delayChain.output.connect( ac.destination )   
+
+    const noiseBuffer = NoiseBuffer(ac,1)
+    console.log('noiseBuffer',noiseBuffer)
+
+    let t = 0
+    chords.forEach( (chord,ci) => {
+        const vel = 0.5
+        //const volumes = [ 0.5, 0.15, 0.25, 1/*0.25*/ ]
+        const volumes = [ 1,1,1,1 ]
+        const sum = volumes.reduce((r,x)=>r+x,0)
+        const vels = volumes.map( x => vel * x / sum )
+        
+        const endChord = playChord( chord, vels[0], t )
+        const dur = endChord - t
+        if ( ci > 3 ){
+            playBass( chord, dur, vels[1], t )
+        }
+        //if ( ci > 7 ){
+            playDrums( chord, dur, vels[3], t )
+    //}
+        playLament( chord, dur, vels[2], t )
+        t = endChord
+    })
+
+    
+    function playDrums( chord, dur, vel, t){
+        const noise = ac.createBufferSource(),
+              biquad = ac.createBiquadFilter(),
+              gainNode = ac.createGain()
+
+        const flufshe = false
+
+        //const rythme = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        //const rythme = [1,1,1,0,1,1,1,0,1,1,1,0,1,1,1]
+        let rythme
+        if ( flufshe ){
+            rythme = [
+                1,1,1,
+                1,0,1,
+                0,0,1,
+                1,0,1,
+                1,1,1,
+                1,0,0,
+                0,0,1,
+                1,0,1,
+                1,0,1,
+                0,1,1,
+            ]
+        } else {
+            rythme = [0,1,
+                      1,1,
+                      0,1,
+                      1,1,
+                      1,0,
+                      0,1,
+                      1,1,
+                      0,1]
+        }
+            
+        
+        gainNode.gain.value = vel
+        noise.buffer = noiseBuffer
+        noise.loop = true
+        noise.loopEnd = noiseBuffer.duration
+        biquad.type = "bandpass"        
+        biquad.Q.value = 1 // default
+        
+        gainNode.gain.value = 0
+
+        noise.connect(gainNode)        
+        gainNode.connect(biquad)
+        if ( flufshe ){
+            biquad.connect( delayChain.input )
+        } else {
+//            biquad.connect( delayChain.input )
+            biquad.connect(ac.destination)
+        }
+        
+
+        
+        const handClapEnvelope = {
+            values : [ 1.0, 0.8 ].map( x => x * vel ),
+            durations : [ sample(10), sample(100), sample(10), sample(20) ]
+        }
+        const snareEnvelope = {
+            values : [ 1.0, 0.8 ].map( x => x * vel ),
+            durations : [ sample(20), sample(500), sample(3000), sample(500) ]
+        }
+        //const envelope = handClapEnvelope
+        const envelope = snareEnvelope
+        let end
+        let elDur = dur / rythme.length
+        if ( flufshe ){
+            biquad.Q.setValueAtTime( 10, t )
+            biquad.Q.linearRampToValueAtTime( 1, t+dur/2 )
+            biquad.Q.linearRampToValueAtTime( 5, t+dur )
+        }
+        
+        rythme.forEach( (on,ri) => {
+            if ( on ){
+                const start = t + ri * elDur
+                end = adsr( gainNode.gain, envelope,  start )              
+                biquad.frequency.setValueAtTime( ktof(chord[0])*4, start )
+                biquad.frequency.linearRampToValueAtTime( ktof(chord[0])/4, end )
+
+            }
+        })
+        noise.start(t)
+        noise.stop(end)
+        
+    }
+    function playBass( chord, dur, vel, t){
+
+        // get key
+        const tk = ( chord[0] % 12 )
+        const ks = new Array(128).fill(0).map( (_,i) => i )
+        const ambitus = [48-7,48+7]
+        const mk = ks
+              .filter( k => tk === k%12 )
+              .filter( k => ( k >= ambitus[0] ) && ( k <= ambitus[1] ) )
+        if ( mk.length === 0 ) return
+        if ( mk.length === 1 ){
+            mk.push( mk[0]-1)
+        }
+        const f = ktof( mk[0] ),
+              osc = ac.createOscillator(),
+              gainNode = ac.createGain()
+        //osc.frequency.value = f
+        osc.type ="triangle"
+        
+        const envelope = {
+            values : [ 1.0, 0.8 ].map( x => x * vel ),
+            durations : [ sample(100), sample(100), sample(4000), sample(20) ]
+        }
+        //console.log(envelope)
+        rythme.forEach( (on,ri) => {
+            if ( on ){
+
+                const start = t + dur * ri / rythme.length
+                const end = adsr( gainNode.gain, envelope,  start )
+                const f = ktof( mk[ ri % mk.length ] )
+                //console.log(ri,mk[ ri % mk.length ] ,f)
+                osc.frequency.setValueAtTime( f,  start)
+            }
+        })
+        
+        osc.connect(gainNode)
+        gainNode.connect( ac.destination )
+        //gainNode.connect( delayChain.input )
+        osc.start( t )
+        osc.stop( t + dur )
+        
+        
+    }
+    function playLament( chord, dur, vel, t){
+        const f = ktof(chord[0]),
+              osc = ac.createOscillator(),
+              gainNode = ac.createGain()
+        osc.frequency.value = f
+        gainNode.gain.value = vel 
+        osc.connect(gainNode)
+        gainNode.connect( ac.destination )
+        //gainNode.connect( delayChain.input )
+        osc.start( t )
+        osc.stop( t + dur )
+    }
+
+    function playChord( chord, vel, t ){
         
         const wave = periodWaveFromKeys( ac, chord, fftFreqs )
         
@@ -148,7 +322,7 @@ export function play(){
         gainNode.connect(delayChain.input)
         
         const envelope = {
-            values : [ 1.0, 0.4 ],
+            values : [ 1.0, 0.4 ].map( x => x * vel ),
             durations : [ ms(16), ms(20), 2.0, 0.5 ]
         }
         const envEnd = adsr( gainNode.gain, envelope,  t )

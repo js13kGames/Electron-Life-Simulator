@@ -866,7 +866,7 @@ const step = (dt,T) =>{
     copyV2( player.position, camera.center )
 
     if (Math.random()>0.99){
-        display.feedbackBuffer.setMode()
+    display.feedbackBuffer.setMode()
     }
     
     
