@@ -163,7 +163,43 @@ export function play(){
     
     const delayChain = DelayChain(ac, [[0.3,0.6]/*,[0.1,0.6]*/] )
 
-    delayChain.output.connect( ac.destination )   
+
+    let OUTPUT 
+    {
+        function makeDistortionCurve(amount=0.1) {
+            let n_samples = 512, curve = new Float32Array(n_samples);
+            for (let i = 0 ; i < n_samples; ++i ) {
+                let x = i * 2 / n_samples - 1;                
+                curve[i] = x//(Math.PI + amount) * x / (Math.PI + amount * Math.abs(x));
+            }
+            return curve;
+        } 
+        const distortion = ac.createWaveShaper(),
+              mod = ac.createOscillator(),
+              gain = ac.createGain()
+        
+        distortion.curve = makeDistortionCurve(400);
+        mod.frequency.value = 10
+        mod.start()
+        mod.connect( distortion )
+        distortion.connect( gain.gain )
+
+        OUTPUT = gain
+        OUTPUT.connect( ac.destination )
+        
+    }
+        
+    
+    //distortion.connect( ac.destination )
+   
+        
+    //delayChain.output.connect( OUTPUT )
+    delayChain.output.connect( ac.destination )
+//    OUTPUT = delayChain.input
+    //distortion.connect( ac.destination )
+    
+//     OUTPUT = delayChain
+    
 
     const noiseBuffer = NoiseBuffer(ac,1)
     console.log('noiseBuffer',noiseBuffer)
@@ -172,15 +208,16 @@ export function play(){
     chords.forEach( (chord,ci) => {
         const vel = 0.5
         //const volumes = [ 0.5, 0.15, 0.25, 1/*0.25*/ ]
-        const volumes = [ 1.5, // chord
-                          1.2, // bass
-                          1.4,   // lament
-                          1,   // drums
-                          1.3,   // bass drum
-                          1.2    // hero
+        const volumes = [ 1.4, // chord
+                          1.1, // bass
+                          0.3,   // lament
+                          0.95,   // drums
+                          1.4,   // bass drum
+                          1.3    // hero
                         ]
         const sum = volumes.reduce((r,x)=>r+x,0)
-        const vels = volumes.map( x => vel * x / sum )
+        const boost = 2
+        const vels = volumes.map( x => boost * vel * x / sum )
         
         const endChord = playChord( chord, vels[0], t )
         const dur = endChord - t
@@ -253,6 +290,7 @@ export function play(){
         //ac.destination
 
     }
+ 
 
     function playBassDrum( chord, dur, vel, t){
         const osc = ac.createOscillator(),
@@ -429,8 +467,9 @@ export function play(){
         osc.frequency.value = f
         gainNode.gain.value = vel 
         osc.connect(gainNode)
-        gainNode.connect( ac.destination )
+       // gainNode.connect( ac.destination )
         //gainNode.connect( delayChain.input )
+        gainNode.connect( OUTPUT )
         osc.start( t )
         osc.stop( t + dur )
     }
