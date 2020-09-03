@@ -72,7 +72,7 @@ export function play(){
     }
     let t = 0
 
-    function DelayChain( ds  ){
+    function DelayChain( ac, ds  ){
         const nodes = []
         for ( let i = 0 ; i < ds.length ; i++ ){
             const gn = ac.createGain(),
@@ -90,7 +90,7 @@ export function play(){
         output.connect( input )
         return { input, output  }
     }
-    const delayChain = DelayChain( [[0.3,0.6]/*,[0.1,0.6]*/] )
+    const delayChain = DelayChain(ac, [[0.3,0.6]/*,[0.1,0.6]*/] )
     delayChain.output.connect( ac.destination )
     
     chords.forEach( chord => {
@@ -155,3 +155,6 @@ export function play(){
     })
 
 }
+import * as Build from './build.js'
+console.log(Build)
+
