@@ -1,6 +1,6 @@
 "use strict";
 function TextScreen( width, height ){
-    const data = new Uint8Array( width * height ).fill(64)
+    const data = new Uint8Array( width * height )//.fill(64)
     function print(x,y,string){
         let off = x + y * width
         for ( let i = 0 ; i < string.length ; i++ ){
@@ -23,10 +23,22 @@ function Font(){
         console.log(0,0,fontCtx.width,fontCtx.height)
         fontImageData = fontCtx.getImageData(0,0,fontCanvas.width,fontCanvas.height)
     }
-    fontImage.src = '../mo5font.png';
+    fontImage.src = '../mo5font-fix-ext.png';
+    
     
     const fontDim = 8
-    const fontTable = 'ABCDEFGHIJKLMNOPQR'.split('')
+    const fontTable = [
+        'ABCDEFGHIJKLMNOPQR',
+        'STUVWXYZabcdefghij',
+        'klmnopqrstuvwxyz',
+        '0123456789',
+        '.,"\'?!@_*#$%&()+-/',
+        ':;(=)[\\]{|}~~~~~~~',
+    ].map( x => x.padEnd( 18,' ') ).join('').split('')
+           
+    console.log('fontTable',fontTable)
+    
+    console.log('fontTable',fontTable.map( x => [x,x.codePointAt(0)] ) )
     const codeIndex = []
     fontTable.forEach( (c,idx) => {
         const code = c.charCodeAt(0),
@@ -34,33 +46,34 @@ function Font(){
               j = Math.floor( idx / 18 ),
               x = i * fontDim,
               y = j * fontDim
-        codeIndex[ code ] = { idx, i, j, x, y}
+        if ( code < 128 ){
+            codeIndex[ code ] = { idx, i, j, x, y}
+        }
         
     })    
     console.log(fontTable,'codeIndex',codeIndex)
-    return { getImageData : () => fontImageData, fontDim, codeIndex }
+    return { getImageData : () => fontImageData, fontDim, codeIndex, fontTable }
 }
 const font = Font()
 
 export function TextMode( canvas ){
     const dim = font.fontDim,
-          width = Math.floor(canvas.width / dim),
-          height = Math.floor(canvas.height / dim),
+          width = 18,//Math.floor(canvas.width / dim) / 2, 
+          height = Math.floor(canvas.height / dim) / 2,
           textScreen = TextScreen( width, height )
 
-    let p = 0
-    textScreen.print(p++,0,'FGHIJKLMNS')
-    textScreen.print(p++,1,'FGHIJKLMNS')
-    textScreen.print(p++,2,'FGHIJKLMNS')
+/*    let p = 
+    textScreen.print(p++,0,'FGHIJ KLMNS:')
+    textScreen.print(p++,1,'FGHIJKLMNS?')
+    textScreen.print(p++,2,'FGHIJKLMNS!')
     textScreen.print(p++,3,'ABC')
+    p = 0
+  */  
+    textScreen.print(0,0,font.fontTable.join('')/*'MONSIEUR'*/)
+    //textScreen.print(12,(p++),'.,"\'?!@_*#$%&()+-/')
     
-    
-    textScreen.print(12,12,'MONSIEUR')
-    textScreen.print(12,13,'TEXT')
-
-    
-
     function draw(ctx){
+        textScreen.print(14,15,'TEXTs'+':'+Math.random())
         const data = textScreen.data
         for ( let i = 0 ; i < width ; i++ ){
             for ( let j = 0 ; j < height ; j++ ){
@@ -70,12 +83,13 @@ export function TextMode( canvas ){
                       tp = font.codeIndex[ c ],
                       fontImageData  = font.getImageData()
                 if ( ( fontImageData === undefined ) || ( tp === undefined ) ){
-                    ctx.fillStyle = 'rgba(100,200,100,1)'
-                    ctx.fillRect(x,y,dim/2,dim/2)
+                    ctx.fillStyle = 'rgba(100,100,100,1)'
+                    ctx.fillRect(x+1,y+1,dim-2,dim -2)
                 } else {
                     ctx.putImageData(
                         fontImageData,
-                        x-tp.x, y-tp.y, tp.x,tp.y,dim,dim
+                        Math.floor(x-tp.x),
+                        Math.floor(y-tp.y), tp.x,tp.y,dim,dim
                     )
                 }
                 
