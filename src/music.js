@@ -113,6 +113,7 @@ function NoiseBuffer(ac, noiseLength=0.25){
     return ab
 }
 export function play(){
+    
     const ac = new AudioContext();
     const sample = sample1(ac.sampleRate)
 

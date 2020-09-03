@@ -58,7 +58,8 @@ function Texts(){
         //['title','incentive title screen','white'],
         ['title','ip racer 2030','white'],        
         ['intro','the story begins...','white'],
-        ['gene','setting route...','white','c'],
+        ['levelnum','!levelnum!','white','ct'],
+        ['sublevelnum','!sublevelnum','white','cbu'],
         ['instructions','!routr!','white','cbu','a:sscroll'],
         ['ready?','connecting...','white','cbu','a:sscroll'],
         ['subwin','sublevel won !','white','ct'],
@@ -203,7 +204,6 @@ function Display(){
                     xoff = 10 + Math.sin( j / 10 + Date.now() / 200 ) * 5
                 } else if ( tp.animation  === 'a:sscroll'){
                     xoff = remainingTo * canvas.width / 10
-
                 }
                 /*context.putImageData(
                   tp.imageData,
@@ -436,6 +436,8 @@ function GameState(){
                     choices : mkChoices(),
                 })
                 const dirs = gameState.state.choices.directions
+                texts.updateMessage('levelnum',`network #${ gameState.state.level}`)
+                texts.updateMessage('sublevelnum',`hop #${ gameState.state.sublevel }`)
                 texts.updateMessage('instructions','route : '+ dirs.join('.'))
                 copyV2(gameState.state.choices.startPosition, player.position)
                 copyV2(player.position,display.camera.center)
@@ -701,7 +703,7 @@ const step = (dt,T) =>{
         'I0' : ['welcome','anykey'],
         'I1' : ['title'],
         'G0' : ['intro','anykey'],
-        'G1' : ['gene'],
+        'G1' : ['levelnum','sublevelnum'],
         'S1' : ['instructions','anykey'],
         'S2' : ['ready?'/*,'instructions'*/],
         'W1' : ['subwin'],
@@ -965,5 +967,5 @@ let done = false
 window.addEventListener('keydown', e => {
     if ( done ) return
     done = true
-    play()
+//    play()
 })
