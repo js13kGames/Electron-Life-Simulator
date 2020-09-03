@@ -15,6 +15,7 @@ import { V2, cloneV2, copyV2, subV2, addV2, multScalar, divScalar, clampV2, ceil
 import { Roller } from './roller.js'
 import { canvasStyle, bodyStyle } from './css.js'
 import { FeedbackBuffer } from './feedbackBuffer.js'
+import { TextMode } from './textMode.js'
 
 const playerNoises = PlayerNoises()
 
@@ -118,7 +119,8 @@ function Display(){
 
 
     const feedbackBuffer = FeedbackBuffer( context )
-    
+    const textMode = TextMode( canvas )
+
     document.body.appendChild( canvas )
     
     //const choices = mkChoices() 
@@ -306,6 +308,10 @@ function Display(){
         const t1 = Date.now()
         if (level && level.visible)
             drawMap()
+
+                textMode.draw(context)
+
+        
         const t2 = Date.now()
         if ( player.visible ) 
             drawPlayer( context, camera)
@@ -331,6 +337,8 @@ function Display(){
         if ( lifeBar.visible ){
             drawLifeBar()
         }
+
+        
         const e2 = t2 - t1
         const e3 = t3 - t2
         const e4 = t4 - t3
@@ -340,7 +348,7 @@ function Display(){
         //console.log(e2,e3,'p',e4,e5,e)
         return e
     }
-    return { newframe, draw, camera, feedbackBuffer }
+    return { newframe, draw, camera, feedbackBuffer, textMode }
 }
 
 
@@ -1074,7 +1082,7 @@ function PlayerNoises(){
         const t = ac.currentTime
         
         osc.frequency.value = 220
-        gain.gain.value = 0.5 
+        gain.gain.value = 0.0
         osc.connect(gain)
         gain.connect( ac.destination )        
         osc.start( t + 0.1 )
@@ -1082,7 +1090,8 @@ function PlayerNoises(){
         return ac
     }
     function update( d ){
-        console.log( JSON.stringify( d ) )
+        return
+        //console.log( JSON.stringify( d ) )
         //'energy','hasCollision','damage','wallDist'
         if (ac){
             ac.resume()
