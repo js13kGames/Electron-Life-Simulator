@@ -150,7 +150,7 @@ export function play(){
     chords.forEach( (chord,ci) => {
         const vel = 0.5
         //const volumes = [ 0.5, 0.15, 0.25, 1/*0.25*/ ]
-        const volumes = [ 1,1,1,1 ]
+        const volumes = [ 1,1,1,1,1,1]
         const sum = volumes.reduce((r,x)=>r+x,0)
         const vels = volumes.map( x => vel * x / sum )
         
@@ -159,13 +159,99 @@ export function play(){
         if ( ci > 3 ){
             playBass( chord, dur, vels[1], t )
         }
-        //if ( ci > 7 ){
+        if ( ci > 7 ){
             playDrums( chord, dur, vels[3], t )
-    //}
-        playLament( chord, dur, vels[2], t )
+        }
+        if ( ci > 9 ){
+            playLament( chord, dur, vels[2], t )
+        }
+        if ( ci > 12 ){
+            playBassDrum( chord, dur, vels[4], t )
+        }
+        if ( ci > 16 ){
+            playHero( chord, dur, vels[5],t )
+        }
         t = endChord
     })
+    function playHero( chord, dur, vel, t){
 
+        const osc = ac.createOscillator(),
+              gainNode = ac.createGain()
+
+        const nnotes = rythme.length * 2 + Math.floor( Math.random() * 3 )
+        const choices = chord.flatMap( x => [x,x + 3,x-3,x+1,x-1])
+        const notes = []
+        for ( let i = 0 ; i < nnotes ;i++ ){
+            const rndNote = choices[ Math.floor( Math.random() * choices.length ) ]
+            notes.push( rndNote )
+        }
+        //const notes=[chord,chord,chord].flat()
+        const elDur = dur / notes.length
+        let end
+        
+
+
+        osc.frequency.setValueAtTime( ktof(notes[0]), t )
+        gainNode.gain.setValueAtTime( 0, t )
+        notes.forEach( (k,ki) => {
+            const f = ktof( k )
+            let start = t + ki * elDur
+            end = start + elDur
+            const t1 = start + 0.01 * dur,
+                  t2 = start + 0.99 * dur
+            //osc.frequency.setValueAtTime( start )
+            osc.frequency.linearRampToValueAtTime( f, t1)
+            osc.frequency.linearRampToValueAtTime( f, t2)
+            
+            //gainNode.gain.setValueAtTime( 0, start )
+            gainNode.gain.linearRampToValueAtTime( 0, start)
+            gainNode.gain.linearRampToValueAtTime( vel, (start+t1)/2)
+            gainNode.gain.linearRampToValueAtTime( vel, (end+t2)/2)
+            gainNode.gain.linearRampToValueAtTime( 0, end)
+            /*
+            if ( ki === ( notes.length - 1 ) ){
+                gainNode.gain.linearRampToValueAtTime( 0, end )
+            } else {
+                //gainNode.gain.linearRampToValueAtTime( vel/4, end )
+            }*/
+
+
+        })
+        osc.start( t )
+        osc.stop( end ) 
+        osc.connect( gainNode )
+        gainNode.connect( delayChain.input )
+        //ac.destination
+
+    }
+
+    function playBassDrum( chord, dur, vel, t){
+        const osc = ac.createOscillator(),
+              gainNode = ac.createGain()
+        const rythme = [1,1,
+                        1,0,
+                        1,0,
+                        1,0]
+        const elDur = dur / rythme.length
+        let end
+        rythme.forEach( (r,ri) => {
+            if ( r ){
+                let start = t + ri * elDur
+                end = start + Math.min(elDur-sample(10),0.5)
+                
+                osc.frequency.setValueAtTime( 100, start )
+                osc.frequency.linearRampToValueAtTime( 0, end )
+                gainNode.gain.setValueAtTime( 0, start )
+                gainNode.gain.linearRampToValueAtTime( vel, start+sample(100) )
+                gainNode.gain.linearRampToValueAtTime( 0, end )
+            }
+        })
+        osc.start( t )
+        osc.stop( end ) 
+        osc.connect( gainNode )
+        gainNode.connect( ac.destination)
+
+    }
     
     function playDrums( chord, dur, vel, t){
         const noise = ac.createBufferSource(),
@@ -191,14 +277,23 @@ export function play(){
                 0,1,1,
             ]
         } else {
-            rythme = [0,1,
+            /*rythme = [0,1,
                       1,1,
                       0,1,
                       1,1,
                       1,0,
                       0,1,
                       1,1,
-                      0,1]
+                      0,1]*/
+            rythme = [2,0,
+                      1,0,
+                      1,0,
+                      1,0,
+                      
+                      2,0,
+                      1,0,
+                      1,0,
+                      1,1]
         }
             
         
@@ -241,12 +336,14 @@ export function play(){
         }
         
         rythme.forEach( (on,ri) => {
-            if ( on ){
-                const start = t + ri * elDur
+            const start = t + ri * elDur
+            if ( on === 1 ){
                 end = adsr( gainNode.gain, envelope,  start )              
                 biquad.frequency.setValueAtTime( ktof(chord[0])*4, start )
                 biquad.frequency.linearRampToValueAtTime( ktof(chord[0])/4, end )
-
+            } else if ( on === 2 ){
+                
+                
             }
         })
         noise.start(t)
@@ -274,7 +371,7 @@ export function play(){
         
         const envelope = {
             values : [ 1.0, 0.8 ].map( x => x * vel ),
-            durations : [ sample(100), sample(100), sample(4000), sample(20) ]
+            durations : [ sample(100), sample(100), sample(4000), sample(500) ]
         }
         //console.log(envelope)
         rythme.forEach( (on,ri) => {
