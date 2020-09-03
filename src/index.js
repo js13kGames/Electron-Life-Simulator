@@ -15,7 +15,9 @@ import { V2, cloneV2, copyV2, subV2, addV2, multScalar, divScalar, clampV2, ceil
 import { Roller } from './roller.js'
 import { canvasStyle, bodyStyle } from './css.js'
 import { FeedbackBuffer } from './feedbackBuffer.js'
-const { zzfx } = require('./zz.js')
+//const { zzfx } = require('./zz.js')
+function zzfx (){
+}
 
 console.log(Build.date, Build.timestamp)
 
@@ -724,10 +726,10 @@ const step = (dt,T) =>{
     const playerVisibility = ['S1','S2','S3','W1','R0','L1']
     const lifeBarVisibility = ['G1','S1','S2','S3','W1','W2','R0','L1','L2']
     const feedbackEffect = {
-        'I0' : ['none'],
-        'I1' : ['broadway'],
-        'G0' : ['broadway'],
-        'G1' : ['broadway'],
+        'I0' : ['none','broadway'],
+        'I1' : ['broadway','left-grey','blue-blur'],
+        'G0' : ['broadway','left-grey'],
+        'G1' : ['broadway','blue-blur'],
         'S1' : ['blue-blur'],
         'S2' : ['blue-blur'],
         'S3' : ['none'],
@@ -890,21 +892,53 @@ const step = (dt,T) =>{
     copyV2( player.position, camera.center )
 
 
+
+    
     const currentFeedBackMode = display.feedbackBuffer.getMode()
     //console.log('cr',currentFeedBackMode)
     const feedBackChoices = feedbackEffect[ gameState.state.name ]
+
+
+    const justChange = Math.random() > 0.98,
+          fbcInList = feedBackChoices.includes(currentFeedBackMode),
+          fbcFirst = feedBackChoices[ 0 ] === currentFeedBackMode
+
+    let rmode = currentFeedBackMode
+    if ( fbcFirst ){
+        // rarely change to other
+        if ( Math.random() < (3 / 1000) ){
+            rmode = feedBackChoices[ 1 +  Math.floor( ( feedBackChoices.length - 1 ) * Math.random() ) ]
+        }
+    }  else if (fbcInList ){
+        // often change to first
+        if ( Math.random() < (10 /1000)){
+            rmode = feedBackChoices[ 0 ]
+        }        
+    } else {
+        rmode = feedBackChoices[ 0 ]
+    }
+    if ( rmode !== currentFeedBackMode ){
+        const mode = display.feedbackBuffer.setMode(rmode)
+        console.log('+->',mode)
+    }
     
-    const justChange = Math.random() > 0.99,
+  /*  
+    const justChange = Math.random() > 0.98,
           mustChange = !(feedBackChoices.includes(currentFeedBackMode))
     //&& ( Math.random() < 1/20 )
     if ( justChange || mustChange ){
-        const rmode = feedBackChoices[
-            Math.floor( feedBackChoices.length * Math.random() )
-        ]
+        let rmode
+        if ( Math.random() > 0.8 ) {
+            rmode = feedBackChoices[ 0 ]
+        } else {
+            rmode = feedBackChoices[
+                1 +  Math.floor( ( feedBackChoices.length - 1 ) * Math.random() )
+            ]
+        }
         console.log('->',rmode)
         const mode = display.feedbackBuffer.setMode(rmode)
     }
-    
+*/    
     
     const elapsed1 = display.draw( camera, choices, player, particles, texts, timeoutBar, lifeBar, remainingTo )
     
@@ -1001,5 +1035,5 @@ let done = false
 window.addEventListener('keydown', e => {
     if ( done ) return
     done = true
-    play()
+//    play()
 })
