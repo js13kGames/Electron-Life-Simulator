@@ -15,6 +15,9 @@ import { V2, cloneV2, copyV2, subV2, addV2, multScalar, divScalar, clampV2, ceil
 import { Roller } from './roller.js'
 import { canvasStyle, bodyStyle } from './css.js'
 import { FeedbackBuffer } from './feedbackBuffer.js'
+
+const playerNoises = PlayerNoises()
+
 //const { zzfx } = require('./zz.js')
 function zzfx (){
 }
@@ -767,7 +770,10 @@ const step = (dt,T) =>{
     const [[l,r],[d,u],[o,p]] = keyboardController.axesCtrlState
     keyboardController.resetKeyStrokes()
 
-    let HASCOLLIDSION = false
+    let HASCOLLIDSION = false,
+        DAMAGE = 0,
+        WALLDIST = undefined
+    
     let collision
     if ( ['S3','W1','W2'].includes( gameState.state.name ) ){
         //        console.log('gameState',gameState)
@@ -810,6 +816,7 @@ const step = (dt,T) =>{
                 HASCOLLIDSION  = true
                 const df = (collisionType !== 2)?5:1
                 const damage = ( dt / 1500 ) * df
+                DAMAGE = damage
                 gameState.event('damage',damage)
             }
         }
@@ -844,13 +851,14 @@ const step = (dt,T) =>{
                 }
             }
         }
-        const rayLength = 10
+        const rayLength = 100
         const wallDist = frontRaycast( player.position, rayLength,['*'] )
         if ( wallDist !== undefined ){
-            const wallProx = clamp((rayLength - wallDist - 1) / ( rayLength - 2 ),0,1)
-            console.log('seen',wallProx)
+            const wallProx = clamp((rayLength - wallDist - 1) / ( rayLength - 2 ),0,1
+                                  )
+            WALLDIST = wallProx
+            //console.log('seen',wallProx)
         }
-        
         
     }
     /*
@@ -872,9 +880,11 @@ const step = (dt,T) =>{
     }
     player.visible = playerVisibility.includes(  gameState.state.name )
     player.energy =  gameState.state.energy
-
-
     player.hasCollision = HASCOLLIDSION
+
+    
+    
+    
     particles.hasCollision = HASCOLLIDSION
     {
         // const running =  ['S3'].includes( gameState.state.name )
@@ -891,7 +901,7 @@ const step = (dt,T) =>{
     lifeBar.visible = lifeBarVisibility.includes(  gameState.state.name )
     copyV2( player.position, camera.center )
 
-
+    
 
     
     const currentFeedBackMode = display.feedbackBuffer.getMode()
@@ -903,24 +913,36 @@ const step = (dt,T) =>{
           fbcInList = feedBackChoices.includes(currentFeedBackMode),
           fbcFirst = feedBackChoices[ 0 ] === currentFeedBackMode
 
-    let rmode = currentFeedBackMode
-    if ( fbcFirst ){
-        // rarely change to other
-        if ( Math.random() < (3 / 1000) ){
-            rmode = feedBackChoices[ 1 +  Math.floor( ( feedBackChoices.length - 1 ) * Math.random() ) ]
-        }
-    }  else if (fbcInList ){
-        // often change to first
-        if ( Math.random() < (10 /1000)){
-            rmode = feedBackChoices[ 0 ]
-        }        
-    } else {
-        rmode = feedBackChoices[ 0 ]
-    }
-    if ( rmode !== currentFeedBackMode ){
+    if ( !fbcFirst ){
+        const rmode = feedBackChoices[ 0 ]
         const mode = display.feedbackBuffer.setMode(rmode)
-        console.log('+->',mode)
     }
+    // let rmode = currentFeedBackMode
+    // if ( fbcFirst ){
+    //     // rarely change to other
+    //     if ( Math.random() < (3 / 1000) ){
+    //         rmode = feedBackChoices[ 1 +  Math.floor( ( feedBackChoices.length - 1 ) * Math.random() ) ]
+    //     }
+    // }  else if (fbcInList ){
+    //     // often change to first
+    //     if ( Math.random() < (10 /1000)){
+    //         rmode = feedBackChoices[ 0 ]
+    //     }        
+    // } else {
+    //     rmode = feedBackChoices[ 0 ]
+    // }
+    // if ( rmode !== currentFeedBackMode ){
+    //     const mode = display.feedbackBuffer.setMode(rmode)
+    //     console.log('+->',mode)
+    // }
+
+    playerNoises.update({
+        energy : gameState.state.energy,
+        hasCollision : HASCOLLIDSION,
+        damage : DAMAGE,
+        wallDist : WALLDIST
+    })
+
     
   /*  
     const justChange = Math.random() > 0.98,
@@ -1037,3 +1059,44 @@ window.addEventListener('keydown', e => {
     done = true
 //    play()
 })
+
+function PlayerNoises(){
+
+    
+    const ac = new AudioContext(),
+          osc = ac.createOscillator(),
+          gain = ac.createGain()
+
+    build()
+    function build(){
+        console.log('BUILED')
+        
+        const t = ac.currentTime
+        
+        osc.frequency.value = 220
+        gain.gain.value = 0.5 
+        osc.connect(gain)
+        gain.connect( ac.destination )        
+        osc.start( t + 0.1 )
+        console.log('*BUILED',ac,osc,gain)
+        return ac
+    }
+    function update( d ){
+        console.log( JSON.stringify( d ) )
+        //'energy','hasCollision','damage','wallDist'
+        if (ac){
+            ac.resume()
+        }
+            const t = ac.currentTime
+        if ( d.wallDist !== undefined ){
+            gain.gain.linearRampToValueAtTime( 0.5, t + 1/32 )
+            osc.frequency.linearRampToValueAtTime( 220 + 220 * d.wallDist, t + 1/32 )
+        } else {
+            gain.gain.linearRampToValueAtTime( 0, t + 1/32 )
+        }
+
+        
+    }
+    return { update }
+}
+
