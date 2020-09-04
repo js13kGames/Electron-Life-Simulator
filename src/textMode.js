@@ -68,20 +68,40 @@ function Font( fontInfo, scale ){
 
 export function TextScreen( width, height ){
     const data = new Uint8Array( width * height )
-    function print(x,y,string){
+    function print(x,y,string,prog=false){
         let off = x + y * width
         for ( let i = 0 ; i < string.length ; i++ ){
-            data[  off + i  ] = string.charCodeAt( i )
+            const code = string.charCodeAt( i )
+            if ( prog ){
+                const d = code - data[  off + i  ]
+                if ( Math.abs( d ) > 128 ){
+                    data[  off + i  ] += 32
+                } else if ( d > 0 ){
+                    data[  off + i  ]++ 
+                } else if ( d < 0 ){
+                    data[  off + i  ]--
+                }
+
+            } else {
+                data[  off + i  ] = code
+            }
             if ( ( off + i ) >= data.length ){
                 // console.error('out of bounds',x,y,string,i)
             }
         }
     }
+    function printCenter(y,string,prog){
+        const lmargin = Math.max(
+            0,Math.floor((width-string.length)/2)
+        )
+        print(lmargin,y,string,prog)
+                                 
+    }
     function cls(){
         for ( let i = 0 ; i < data.length ; i++ )
             data[ i ] = 0
     }
-    return { data, print, cls, width, height }
+    return { data, print, printCenter, cls, width, height }
 }
 
 export const font2 = Font( fontInfo, 2 )

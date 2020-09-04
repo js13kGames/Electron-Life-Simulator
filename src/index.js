@@ -16,6 +16,7 @@ import { Roller } from './roller.js'
 import { canvasStyle, bodyStyle } from './css.js'
 import { FeedbackBuffer } from './feedbackBuffer.js'
 import { TextMode, font2, font4, TextScreen } from './textMode.js'
+import { writeMission, Mission } from './missions.js'
 
 const playerNoises = PlayerNoises()
 
@@ -723,8 +724,8 @@ const particles = Particles()
 const texts = Texts()
 const timeoutBar = TimeoutBar()
 const lifeBar = LifeBar()
-console.log(textScreen,textScreen.print)
-textScreen.print(10,10,'yo!')
+
+
     
 const step = (dt,T) =>{
     const timeoutBarVisibility = ['G1','S1','S2','R0','L1']
@@ -746,7 +747,8 @@ const step = (dt,T) =>{
     const playerVisibility = ['S1','S2','S3','W1','R0','L1']
     const lifeBarVisibility = ['G1','S1','S2','S3','W1','W2','R0','L1','L2']
     const feedbackEffect = {
-        'I0' : ['none','broadway','blur'],
+        'I0' : ['blur'],
+        //'I0' : ['none','broadway','blur'],
         'I1' : ['broadway','left-grey','blue-blur'],
         'G0' : ['broadway','left-grey'],
         'G1' : ['broadway','blue-blur'],
@@ -770,7 +772,9 @@ const step = (dt,T) =>{
     timeoutBar.remain = remainingTo
     timeoutBar.visible =  (remainingTo !== undefined) 
         && timeoutBarVisibility.includes( gameState.state.name ) 
-
+    if ( keyboardController.anyKeyStroke.length ){
+        textScreen.cls()
+    }
     const TIME_BEFORE_SKIP_STATE = 600
     // grab input
     stats.begin()
@@ -980,6 +984,10 @@ const step = (dt,T) =>{
         const mode = display.feedbackBuffer.setMode(rmode)
         }
     */    
+    writeMission( textScreen,
+                  gameState.state.level || 1,
+                  gameState.state.sublevel || 1,
+                  (gameState.state.choices && gameState.state.choices.directions) || [0])
     
     const elapsed1 = display.draw( camera, choices, player, particles, texts, timeoutBar, lifeBar, remainingTo )
     
