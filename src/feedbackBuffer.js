@@ -1,5 +1,7 @@
 export function FeedbackBuffer( context ){
     const canvas = context.canvas
+    const { width, height } = canvas
+    
     const secondCanvas = document.createElement('canvas')
     secondCanvas.width =  canvas.width 
     secondCanvas.height = canvas.height
@@ -38,6 +40,29 @@ export function FeedbackBuffer( context ){
         dstData[ i + 2 ] = srcData[ i + 4 ]
         dstData[ i + 3 ] = Math.max(0,srcData[ i + 3 ] - sub )
     }
+    let ut = 0
+    function pixelFilter5(srcData,dstData,i,now){
+        const k = 0.5
+        const stride = 4
+        now = 0
+        const c = Math.floor( ( ut++ )/(60*2) )%3
+        //for ( let c = 0 ; c < 3 ; c++ ){
+            let sumv = 0
+            for ( let ii = -1 ; ii <= 1 ; ii++ ){
+                for ( let jj = -1 ; jj <= 1 ; jj++ ){
+                    const ni = i + ( ii + jj * width ) * stride,
+                          v = srcData[ ni ]
+                    sumv += v
+                }
+            }
+            sumv /= 9
+            dstData[ i + c ] = sumv
+        //}
+        dstData[ i + 1 ] = (sumv + srcData[ i + 1 ])/2
+        dstData[ i + 2 ] = (sumv + srcData[ i + 2 ])/2
+        dstData[ i + 3 ] = 220
+        
+    }
     function paste1(){
         const xoff = Math.cos( Date.now() / 100 ) * 6
         const yoff = Math.sin( Date.now() / 100 ) * 6
@@ -63,6 +88,7 @@ export function FeedbackBuffer( context ){
         'blue-blur' : [ pixelFilter2, paste2 ],
         'color-blur' : [ pixelFilter3(40,1), paste2 ],
         'left-grey' : [ pixelFilter4, paste3 ],
+        'blur' : [ pixelFilter5, paste2 ]
     }
     function getPixelFilter( n ){ return modes[ n ][ 0 ] }
     function getPaste( n ){ return modes[ n ][ 1 ]  }
@@ -83,9 +109,10 @@ export function FeedbackBuffer( context ){
               src = context.getImageData(0,0,canvas.width,canvas.height),
               dst = secondContext.getImageData(0,0,canvas.width,canvas.height),
               srcData = src.data,
-              dstData = dst.data
+              dstData = dst.data,
+              now = Date.now()
         for ( let i = 0 ; i < srcData.length ; i+= 4 ){
-            pixelFilter(srcData,dstData,i)
+            pixelFilter(srcData,dstData,i,now)
         }
         secondContext.putImageData( dst,0,0)
         used = true

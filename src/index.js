@@ -746,11 +746,11 @@ const step = (dt,T) =>{
     const playerVisibility = ['S1','S2','S3','W1','R0','L1']
     const lifeBarVisibility = ['G1','S1','S2','S3','W1','W2','R0','L1','L2']
     const feedbackEffect = {
-        'I0' : ['none','broadway'],
+        'I0' : ['none','broadway','blur'],
         'I1' : ['broadway','left-grey','blue-blur'],
         'G0' : ['broadway','left-grey'],
         'G1' : ['broadway','blue-blur'],
-        'S1' : ['blue-blur'],
+        'S1' : ['blur'],
         'S2' : ['blue-blur'],
         'S3' : ['none'],
         'W1' : ['color-blur'],
@@ -924,7 +924,7 @@ const step = (dt,T) =>{
     const currentFeedBackMode = display.feedbackBuffer.getMode()
     //console.log('cr',currentFeedBackMode)
     const feedBackChoices = feedbackEffect[ gameState.state.name ]
-
+    //const feedBackChoices = ['blur']
 
     const justChange = Math.random() > 0.98,
           fbcInList = feedBackChoices.includes(currentFeedBackMode),
