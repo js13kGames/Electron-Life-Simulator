@@ -18,7 +18,7 @@ table.forEach( (c,idx) => {
         codeIndex[ code ] = { idx, i, j, x, y}
     }   
 })
-export const FontInfo = {
+export const fontInfo = {
     //src:'mo5font-fix-ext.png',
     dim,
     table,

@@ -15,7 +15,7 @@ import { V2, cloneV2, copyV2, subV2, addV2, multScalar, divScalar, clampV2, ceil
 import { Roller } from './roller.js'
 import { canvasStyle, bodyStyle } from './css.js'
 import { FeedbackBuffer } from './feedbackBuffer.js'
-import { TextMode } from './textMode.js'
+import { TextMode, font2, font4, TextScreen } from './textMode.js'
 
 const playerNoises = PlayerNoises()
 
@@ -115,13 +115,16 @@ function Display(){
     canvas.height = targetSize.height    
     canvas.setAttribute('name','MONMON')
     canvas.style = canvasStyle//'position: absolute ; top : 200px ; left : 0px;'   
+    document.body.appendChild( canvas )
     const context = canvas.getContext('2d')
 
-
     const feedbackBuffer = FeedbackBuffer( context )
-    const textMode = TextMode( canvas )
+    const textScreen2 = TextScreen( 5, 5 )
+    
+    const textMode = TextMode( textScreen2, font2 )
+    
 
-    document.body.appendChild( canvas )
+    
     
     //const choices = mkChoices() 
     const nominalScale = 16 
@@ -309,8 +312,8 @@ function Display(){
         if (level && level.visible)
             drawMap()
 
-        textMode.draw(context)
-
+        textMode.draw()
+        context.drawImage( textMode.canvas,0,0 )
         
         const t2 = Date.now()
         if ( player.visible ) 
