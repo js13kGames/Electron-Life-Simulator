@@ -97,29 +97,6 @@ export function TextMode( textScreen, font ){
     canvas.height = textScreen.height * dim
     const ctx = canvas.getContext('2d')
 
-    /*
-
-    
-    return {
-        canvas, draw, textScreen
-    }
-    
-    
-    //data, print, cls, width, height 
-}
-
-export function TextMode( canvas ){
-
-    //const textScreen2 = TextScreen( 
-    const font2 = Font( fontInfo, 2 )
-    const font4 = Font( fontInfo, 4 )
-    const font = font2
-    
-    const dim = font.fontInfo.dim,
-          width = Math.floor(canvas.width / dim / 2) , 
-          height = Math.floor(canvas.height / dim / 2) ,
-          textScreen = TextScreen( width, height )
-*/
     function draw(){
 
         //textScreen.cls()
