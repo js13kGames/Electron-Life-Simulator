@@ -12,6 +12,16 @@ module.exports = {
         minimizer: [new TerserPlugin()],
     },
     watchOptions: {
-      ignored: /\.#|node_modules|~$/,
-    },
+        ignored: /\.#|node_modules|~$/,
+    }// ,
+    // rules: [
+    //     {
+    //         test: /\.(png)$/i,
+    //         use: [
+    //             {
+    //                 loader: 'file-loader',
+    //             },
+    //         ],
+    //     },
+    // ],
 }

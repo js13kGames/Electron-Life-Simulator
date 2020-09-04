@@ -40,30 +40,6 @@ function zoomContext( srcContext, zoom ){
 
     return { canvas : dstCanvas, imageData : dstData }
 }
-// function compress2( srcContext ){
-//     const srcCanvas = srcContext.canvas,
-//           srcData = srcContext.getImageData(0,0,srcCanvas.width,srcCanvas.height).data
-//     const bin = new Uint8Array( srcData.length / 4 / 8 )
-//     for ( let i = 0 ; i < srcData.length ; i+=4 ){
-//         const x = (srcData[ i ] !== 0)?1:0,
-//               ii = Math.floor( i / 4 ),
-//               nbyte = Math.floor( ii / 8  ),
-//               nbit = ii % 8
-//         bin[ nbyte ] = bin[ nbyte ] | ( x << nbit )
-//     }
-//     console.log('rebin!!!!!!!!!!')
-//     let grps = [0],
-//         prev = 0
-//     for ( let i = 0 ; i < srcData.length ; i+=4 ){
-//         if ( srcData[ i ] === prev ){
-//             grps[ grps.length - 1 ]++
-//         } else {
-//             grps[ grps.length ] = 1
-//         }
-//         prev = srcData[ i ]
-//     }
-//     console.log('OOOOOOOO',grps)
-// }
 
 import { FontInfo } from './mo5font.js'
 
