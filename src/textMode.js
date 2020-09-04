@@ -100,7 +100,7 @@ export function TextMode( textScreen, font ){
     function draw(){
 
         //textScreen.cls()
-        textScreen.print(0,0,''+Math.random())
+        //textScreen.print(0,0,''+Math.random())
         textScreen.print(width-1,height-1,'*')
         textScreen.print(width-2,height-1,'*')
         textScreen.print(width-1,height-2,'*')
@@ -121,17 +121,14 @@ export function TextMode( textScreen, font ){
                 if ( fontImageData && tp ){
                     ctx.putImageData(
                         fontImageData,
-                        //0,0)/*
                         Math.floor(x-tp.x),
                         Math.floor(y-tp.y),
                         tp.x,
                         tp.y,
                         dim,dim)
-                    
-                    } else {
-                
-                    ctx.fillStyle = 'rgba(255,255,0,1)'
-                    ctx.fillRect(x+1,y+1,dim-2,dim -2)
+                } else {
+                    //ctx.fillStyle = 'rgba(255,255,0,1)'
+                    //ctx.fillRect(x+1,y+1,dim-2,dim -2)
                 }
                 
             }

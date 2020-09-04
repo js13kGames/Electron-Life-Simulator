@@ -11,7 +11,7 @@ import { KeyboardControllers } from './keyboardControllers.js'
 import { mkChoices } from './levelCreator.js'
 import { Cols } from './cols.js'
 import { textCanvas } from './textPlane.js'
-import { V2, cloneV2, copyV2, subV2, addV2, multScalar, divScalar, clampV2, ceilV2, floorV2, lerpV2} from './v2.js'
+import { V2, cloneV2, copyV2, lerpV2} from './v2.js'
 import { Roller } from './roller.js'
 import { canvasStyle, bodyStyle } from './css.js'
 import { FeedbackBuffer } from './feedbackBuffer.js'
@@ -119,9 +119,8 @@ function Display(){
     const context = canvas.getContext('2d')
 
     const feedbackBuffer = FeedbackBuffer( context )
-    const textScreen2 = TextScreen( 5, 5 )
     
-    const textMode = TextMode( textScreen2, font2 )
+    const textMode = TextMode( textScreen, font2 )
     
 
     
@@ -313,7 +312,11 @@ function Display(){
             drawMap()
 
         textMode.draw()
-        context.drawImage( textMode.canvas,0,0 )
+        {
+            const dx = Math.floor( ( canvas.width - textMode.canvas.width  )/ 2 ),
+                  dy = Math.floor( ( canvas.height - textMode.canvas.height ) / 2 )
+            context.drawImage( textMode.canvas,dx,dy )
+        }
         
         const t2 = Date.now()
         if ( player.visible ) 
@@ -711,6 +714,7 @@ function LifeBar(){
         L : 5 // max
     }
 }
+const textScreen = TextScreen( 30, 15 )    
 const keyboardController = KeyboardControllers()
 const gameState = GameState()
 const display = Display()
@@ -719,7 +723,9 @@ const particles = Particles()
 const texts = Texts()
 const timeoutBar = TimeoutBar()
 const lifeBar = LifeBar()
-
+console.log(textScreen,textScreen.print)
+textScreen.print(10,10,'yo!')
+    
 const step = (dt,T) =>{
     const timeoutBarVisibility = ['G1','S1','S2','R0','L1']
     const textVisibility = {
