@@ -69,7 +69,7 @@ function Texts(){
         ['instructions','!routr!','white','cbu'/*,'a:sscroll'*/],
         ['ready?','connecting...','white','cbu'/*,'a:sscroll'*/],
         ['subwin','hop covered !','white','cbu'],
-        ['redirecting','redirecting...','white','cbu'],
+        ['redirecting','redirecting to next hop...','white','cbu'],
         ['levelwin','network covered !','white','cbu'],
         ['win','you won it all !','white'],
         //['go','fetch','green'],
@@ -178,7 +178,7 @@ function Display(){
         function drawPanel2( tp )
         {
             for ( let j = 0 ; j < tp.canvas.height ; j++ ){
-                let off = Math.floor(10 + Math.sin( j / 10 + Date.now() / 100 ) * 10)
+                let off = Math.floor(10 + Math.sin( j / 10 + Date.now() / 25 ) * 10)
                 context.putImageData(
                     tp.imageData,
                     off,j,
@@ -309,7 +309,7 @@ function Display(){
         if (level && level.visible)
             drawMap()
 
-                textMode.draw(context)
+        //textMode.draw(context)
 
         
         const t2 = Date.now()
@@ -1059,52 +1059,67 @@ function lerp(a,b,p){ return ( 1 - p ) * a + p * b }
 //     }
 // 
 //}
-import { play } from './music.js'
+import { Square01Buffer, play } from './music.js'
 
 let done = false
 window.addEventListener('keydown', e => {
     if ( done ) return
     done = true
-//    play()
+  //  play()
 })
 
 function PlayerNoises(){
 
-    
-    const ac = new AudioContext(),
-          osc = ac.createOscillator(),
-          gain = ac.createGain()
+    const globalVolume = 0.5
+    const ac = new AudioContext()
 
-    build()
-    function build(){
-        console.log('BUILED')
-        
-        const t = ac.currentTime
-        
-        osc.frequency.value = 220
-        gain.gain.value = 0.0
-        osc.connect(gain)
-        gain.connect( ac.destination )        
-        osc.start( t + 0.1 )
-        console.log('*BUILED',ac,osc,gain)
-        return ac
+
+    function Sonar(){
+        const osc = ac.createOscillator(),
+              gain = ac.createGain(),
+              osc01 = ac.createBufferSource(),
+              gain01 = ac.createGain()
+        function build(){
+            
+            const t = ac.currentTime
+            const osc01buffer = Square01Buffer(ac,1)
+            
+            osc.frequency.value = 0        
+            gain.gain.value = 0              
+            osc01.playbackRate.value = 1
+            osc01.buffer = osc01buffer
+            osc01.loop = true
+            osc01.loopEnd = osc01buffer.length
+            gain01.gain.value = 0       
+            osc.connect( gain )
+                .connect( gain01 )
+                .connect( ac.destination )
+            osc01.connect( gain01.gain )
+            osc.start( t + 0.1 )
+            osc01.start( t + 0.1)
+            return ac
+        }
+        return { build, gain, osc, osc01 }
     }
-    function update( d ){
-        return
-        //console.log( JSON.stringify( d ) )
-        //'energy','hasCollision','damage','wallDist'
+    const sonar = Sonar()
+    sonar.build()
+    
+    function  update( d ){
         if (ac){
             ac.resume()
         }
-            const t = ac.currentTime
-        if ( d.wallDist !== undefined ){
-            gain.gain.linearRampToValueAtTime( 0.5, t + 1/32 )
-            osc.frequency.linearRampToValueAtTime( 220 + 220 * d.wallDist, t + 1/32 )
-        } else {
-            gain.gain.linearRampToValueAtTime( 0, t + 1/32 )
-        }
-
+        const t = ac.currentTime,
+              t1 = t + 1 / 32
         
+        if ( d.wallDist !== undefined ){ 
+            const lWallDist = Math.pow(d.wallDist,3)
+            sonar.gain.gain.linearRampToValueAtTime( globalVolume, t1 )
+            sonar.osc.frequency.linearRampToValueAtTime( 440 + 20 * lWallDist , t1 )
+            sonar.osc01.playbackRate.linearRampToValueAtTime( 1 + lWallDist * 10, t1 )
+        } else {
+            sonar.gain.gain.linearRampToValueAtTime( 0, t1 )
+            sonar.osc01.playbackRate.linearRampToValueAtTime( 1, t1 )
+        }
     }
     return { update }
 }

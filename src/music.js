@@ -103,8 +103,21 @@ function periodWaveFromKeys( ac, chord, { size, nearestBins } ){
     })
     return ac.createPeriodicWave(real, imag, {disableNormalization: true});
 }
-function NoiseBuffer(ac, noiseLength=0.25){
-    const bs = ac.sampleRate * noiseLength,
+export function Square01Buffer( ac, length ){
+    const bs = ac.sampleRate * length,
+          hbs = bs / 2,
+          ab =  ac.createBuffer(1, bs, ac.sampleRate),
+          cd  = ab.getChannelData(0)
+    for (let i = 0; i < hbs ; i++) {
+        cd[i] = 0
+    }
+     for (let i = hbs; i < bs ; i++) {
+        cd[i] = 1
+    } 
+    return ab    
+}
+function NoiseBuffer(ac, length=0.25){
+    const bs = ac.sampleRate * length,
           ab =  ac.createBuffer(1, bs, ac.sampleRate),
           cd  = ab.getChannelData(0)
     for (let i = 0; i < bs; i++) {
@@ -220,7 +233,7 @@ export function play(){
                           1.3    // hero
                         ]
         const sum = volumes.reduce((r,x)=>r+x,0)
-        const boost = 2
+        const boost = 3
         const vels = volumes.map( x => boost * vel * x / sum )
         
         const endChord = playChord( chord, vels[0], t )
