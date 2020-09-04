@@ -1,10 +1,14 @@
-"use strict";
+import { FontInfo } from './mo5font.js'
+
 function TextScreen( width, height ){
     const data = new Uint8Array( width * height )
     function print(x,y,string){
         let off = x + y * width
         for ( let i = 0 ; i < string.length ; i++ ){
-            data[ off + i ] = string.charCodeAt( i )
+            data[  off + i  ] = string.charCodeAt( i )
+            if ( ( off + i ) >= data.length ){
+                // console.error('out of bounds',x,y,string,i)
+            }
         }
     }
     function cls(){
@@ -13,6 +17,7 @@ function TextScreen( width, height ){
     }
     return { data, print, cls, width, height }
 }
+
 function zoomContext( srcContext, zoom ){
     const srcCanvas = srcContext.canvas,
           srcData = srcContext.getImageData(0,0,srcCanvas.width,srcCanvas.height).data
@@ -33,78 +38,78 @@ function zoomContext( srcContext, zoom ){
         dstData[ dIdx ] = srcData[ sIdx ]
     }
     dstContext.putImageData(dstIData,0,0)
-    
-    //document.body.innerHTML = ''
-    //document.body.appendChild( srcCanvas )
-    document.body.appendChild( dstCanvas )
-
-    return { canvas : dstCanvas, imageData : dstData }
+    return { canvas : dstCanvas, ctx : dstContext, imageData : dstData }
 }
 
-import { FontInfo } from './mo5font.js'
-
-//FontInfo.src = 
-
-
-function Font( fontInfo ){
-     // const $img = document.getElementById("mo5font")
-    
+function loadImageToCanvas( src, f ){
     let fontImage = new Image( ),
         fontImageData = undefined
-    
     fontImage.onload = function() {        
-        var fontCanvas = document.createElement('canvas');
+        const fontCanvas = document.createElement('canvas');
         fontCanvas.width = fontImage.width
         fontCanvas.height = fontImage.height
-        var fontCtx = fontCanvas.getContext('2d');
+        const fontCtx = fontCanvas.getContext('2d');        
         fontCtx.drawImage( fontImage, 0, 0 );
-
-        // console.log(0,0,fontCtx.width,fontCtx.height)
-        
-        fontImageData = fontCtx.getImageData(
+        /*fontImageData = fontCtx.getImageData(
             0,0,fontCanvas.width,fontCanvas.height
-        )
-        //compress2(fontCtx)
-        const zoomed = zoomContext(fontCtx,4)
-        zoomed.canvas.setAttribute('name',"bbbbbbbbb")
-        
+        )*/
+        f( fontCanvas, fontCtx/*, fontImageData */ )
     }
-    fontImage.src = fontInfo.src;
+    fontImage.src = src;
+}
 
-    /*
-    const fontDim = fontInfo.dim
-    const fontTable = fontInfo.table
-    const codeIndex = fontInfo.codeIndex
-    */
-    // console.log(fontTable,'codeIndex',codeIndex)
+function Font( fontInfo, scale ){
+    let fontImageData = undefined
+    loadImageToCanvas( fontInfo.src, (canvas,ctx) => {
+        if ( scale === 1 ){
+            fontImageData = ctx.getImageData( 0,0,canvas.width,canvas.height )
+        } else {
+            const zoomed = zoomContext(ctx,scale)
+            document.body.appendChild( zoomed.canvas )
+            
+            //fontImageData = zoomed.imageData
+            fontImageData = zoomed.ctx.getImageData( 0,0,zoomed.canvas.width,zoomed.canvas.height )
+        }
+    })
     return {
         getImageData : () => fontImageData,
-        //fontDim, codeIndex, fontTable,
-        fontInfo,
+        fontInfo : {
+            dim : fontInfo.dim * scale,
+            table : fontInfo.table,
+            codeIndex : fontInfo.codeIndex.map( ci => ({
+                ...ci,
+                x : ci.x*scale,
+                y : ci.y*scale
+            }))
+        }
     }
 }
-const font = Font( FontInfo )
-
+const font = Font( FontInfo, 4 )
+console.log('font',font)
 
 export function TextMode( canvas ){
     const dim = font.fontInfo.dim,
-          width = Math.floor(canvas.width / dim) / 2, 
-          height = Math.floor(canvas.height / dim) / 2,
+          width = Math.floor(canvas.width / dim / 2) , 
+          height = Math.floor(canvas.height / dim / 2) ,
           textScreen = TextScreen( width, height )
 
-    textScreen.print(0,0,font.fontInfo.table.join(''))
+    //textScreen.print(0,0,font.fontInfo.table.join(''))
     function draw(ctx){
-        //textScreen.print(0,0,''+Math.random())
         //textScreen.cls()
-        textScreen.print(8,8,'TEXTs'+':'+Math.random())
+        textScreen.print(0,0,''+Math.random())
+
+        //textScreen.print(0,1,'TEXTs'+':'+Math.random())
         textScreen.print(width-1,height-1,'*')
         textScreen.print(width-2,height-1,'*')
         textScreen.print(width-1,height-2,'*')
-        
-        // clear
-        ctx.fillStyle = 'rgba(0,255,0,0)'        
-        ctx.fillRect(0,0,width,height)
 
+        
+        textScreen.print(0,0,'A')
+        // clear
+        ctx.fillStyle = 'rgba(0,255,0,1)'        
+        ctx.fillRect(0,0,width*dim,height*dim)
+        //textScreen.print(0,0,'abc')
+        
         // write each char
         const data = textScreen.data
         for ( let i = 0 ; i < width ; i++ ){
@@ -114,14 +119,19 @@ export function TextMode( canvas ){
                       y = dim * j,
                       tp = font.fontInfo.codeIndex[ c ],
                       fontImageData  = font.getImageData()
-                //ctx.fillStyle = 'rgba(0,255,0,0.5)'
-                //ctx.fillRect(x+1,y+1,dim-2,dim -2)
                 if ( fontImageData && tp ){
                     ctx.putImageData(
                         fontImageData,
-                        Math.floor(x-tp.x),
-                        Math.floor(y-tp.y), tp.x,tp.y,dim,dim
-                    )
+                        //0,0)/*
+                              Math.floor(x-tp.x),
+                              Math.floor(y-tp.y),
+                              tp.x,
+                              tp.y,
+                        dim,dim)
+                
+                } else {
+                    ctx.fillStyle = 'rgba(255,255,0,1)'
+                    ctx.fillRect(x+1,y+1,dim-2,dim -2)
                 }
                 
             }
