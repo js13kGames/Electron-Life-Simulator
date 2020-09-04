@@ -97,9 +97,16 @@ export function TextScreen( width, height ){
         print(lmargin,y,string,prog)
                                  
     }
-    function cls(){
-        for ( let i = 0 ; i < data.length ; i++ )
-            data[ i ] = 0
+    function cls(prog){
+        if ( prog ){
+            for ( let i = 0 ; i < data.length ; i++ )
+                if ( data[ i ] > 0 ){
+                    data[ i ]--
+                }
+        } else {
+            for ( let i = 0 ; i < data.length ; i++ )
+                data[ i ] = 0
+        }
     }
     return { data, print, printCenter, cls, width, height }
 }

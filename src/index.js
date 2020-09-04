@@ -65,9 +65,9 @@ function Texts(){
         //['title','incentive title screen','white'],
         ['title','ip racer 2030','white'],        
         ['intro','the story begins...','white'],
-        ['levelnum','!levelnum!','white','ct'],
-        ['sublevelnum','!sublevelnum','white','cbu'],
-        ['instructions','!routr!','white','cbu'/*,'a:sscroll'*/],
+        //['levelnum','!levelnum!','white','ct'],
+//        ['sublevelnum','!sublevelnum','white','cbu'],
+        //['instructions','!routr!','white','cbu'/*,'a:sscroll'*/],
         ['ready?','connecting...','white','cbu'/*,'a:sscroll'*/],
         ['subwin','hop covered !','white','cbu'],
         ['redirecting','redirecting to next hop...','white','cbu'],
@@ -211,7 +211,8 @@ function Display(){
             for ( let j = 0 ; j < tp.canvas.height ; j++ ){
                 let xoff=0,yoff=0
                 if ( tp.animation  === 'a:floffle' ){ 
-                    xoff = 10 + Math.sin( j / 10 + Date.now() / 200 ) * 5
+                    // xoff = 10 + Math.sin( j / 10 + Date.now() / 200 ) * 5
+                    xoff = 10 + Math.sin( j / 10 + Date.now() / 400 ) * 5
                 } else if ( tp.animation  === 'a:sscroll'){
                     xoff = remainingTo * canvas.width / 10
                 }
@@ -463,9 +464,9 @@ function GameState(){
                     choices : mkChoices(),
                 })
                 const dirs = gameState.state.choices.directions
-                texts.updateMessage('levelnum',`network #${ gameState.state.level}`)
-                texts.updateMessage('sublevelnum',`hop #${ gameState.state.sublevel }`)
-                texts.updateMessage('instructions','route : '+ dirs.join('.'))
+                //texts.updateMessage('levelnum',`network #${ gameState.state.level}`)
+                //texts.updateMessage('sublevelnum',`hop #${ gameState.state.sublevel }`)
+                //texts.updateMessage('instructions','route : '+ dirs.join('.'))
                 copyV2(gameState.state.choices.startPosition, player.position)
                 copyV2(player.position,display.camera.center)
                 timeout( () => event('next'),5000)
@@ -733,8 +734,8 @@ const step = (dt,T) =>{
         'I0' : ['welcome','anykey'],
         'I1' : ['title'],
         'G0' : ['intro','anykey'],
-        'G1' : ['levelnum','sublevelnum'],
-        'S1' : ['instructions','anykey'],
+        'G1' : [/*'levelnum','sublevelnum'*/],
+        'S1' : [/*'instructions',*/'anykey'],
         'S2' : ['ready?'/*,'instructions'*/],
         'W1' : ['subwin'],
         'R0' : ['redirecting'],
@@ -747,10 +748,11 @@ const step = (dt,T) =>{
     const playerVisibility = ['S1','S2','S3','W1','R0','L1']
     const lifeBarVisibility = ['G1','S1','S2','S3','W1','W2','R0','L1','L2']
     const feedbackEffect = {
-        'I0' : ['blur'],
-        //'I0' : ['none','broadway','blur'],
-        'I1' : ['broadway','left-grey','blue-blur'],
-        'G0' : ['broadway','left-grey'],
+        //'I0' : ['blur'],
+        'I0' : ['none','broadway','blur'],
+        'I1' : ['broadway-save','left-grey','blue-blur'],
+        //'G0' : ['broadway','left-grey'],
+        'G0' : ['blur'],
         'G1' : ['broadway','blue-blur'],
         'S1' : ['blur'],
         'S2' : ['blue-blur'],
@@ -773,7 +775,7 @@ const step = (dt,T) =>{
     timeoutBar.visible =  (remainingTo !== undefined) 
         && timeoutBarVisibility.includes( gameState.state.name ) 
     if ( keyboardController.anyKeyStroke.length ){
-        textScreen.cls()
+      //  textScreen.cls()
     }
     const TIME_BEFORE_SKIP_STATE = 600
     // grab input
@@ -845,7 +847,7 @@ const step = (dt,T) =>{
 
     if( gameState.state.name === 'S3' ){
         // checkLaps
-        if (gameState.state.choices) {
+      //  if (gameState.state.choices) {
             const choices = gameState.state.choices.choices
             // console.log( player.position,player.lastpos )
             let idx = -1
@@ -860,7 +862,7 @@ const step = (dt,T) =>{
                 gameState.event('checkLine',idx, choices.length - 2)
                 console.log('step',idx,'/', choices.length - 2)
             }
-        }
+        //        }
         // front raycast
         function frontRaycast( position, length, types ) {
             const { ij2idx, map } = gameState.state.choices,
@@ -983,12 +985,16 @@ const step = (dt,T) =>{
         console.log('->',rmode)
         const mode = display.feedbackBuffer.setMode(rmode)
         }
-    */    
-    writeMission( textScreen,
-                  gameState.state.level || 1,
-                  gameState.state.sublevel || 1,
-                  (gameState.state.choices && gameState.state.choices.directions) || [0])
-    
+    */
+    //if ( ['G0','G1','S1','S2'].includes(gameState.state.name) ){
+        writeMission( textScreen,
+                      gameState.state.level || 1,
+                      gameState.state.sublevel || 1,
+                      (gameState.state.choices && gameState.state.choices.directions) || [0])
+        
+/*    } else {
+        textScreen.cls(false)
+    }*/
     const elapsed1 = display.draw( camera, choices, player, particles, texts, timeoutBar, lifeBar, remainingTo )
     
     stats.end()
