@@ -309,7 +309,7 @@ function Display(){
         if (level && level.visible)
             drawMap()
 
-        //textMode.draw(context)
+        textMode.draw(context)
 
         
         const t2 = Date.now()
@@ -949,7 +949,7 @@ const step = (dt,T) =>{
         hasCollision : HASCOLLIDSION,
         damage : DAMAGE,
         wallDist : WALLDIST,
-        gain : 1,
+        gain : 0,
         
     })
 
@@ -1067,7 +1067,7 @@ let done = false
 window.addEventListener('keydown', e => {
     if ( done ) return
     done = true
-    const musicPlayer = play()
+    //const musicPlayer = play()
     // setTimeout( () => musicPlayer.update({gain:1.0}), 5000 )
 })
 
@@ -1129,11 +1129,11 @@ function PlayerNoises(){
     sonar.build()
     const scratching = Scratching()
     scratching.build()
+
     
     function update( d ){
-        if (ac){
-            ac.resume()
-        }
+        return
+        ac.resume()
         const t = ac.currentTime,
               t1 = t + 1 / 32
         
