@@ -191,9 +191,9 @@ export function play(){
     
     const delayChain = DelayChain(ac, [[0.3,0.6]/*,[0.1,0.6]*/] )
 
-    const globalOutput = ac.createGain()
-    globalOutput.gain.value = 1.0
-    globalOutput.connect( ac.destination )
+    const globalGain = ac.createGain()
+    globalGain.gain.value = 1.0
+    globalGain.connect( ac.destination )
     
     let OUTPUT 
     {
@@ -216,18 +216,18 @@ export function play(){
         distortion.connect( gain.gain )
 
         OUTPUT = gain
-        OUTPUT.connect( globalOutput )
+        OUTPUT.connect( globalGain )
         
     }
         
     
-    //distortion.connect( globalOutput )
+    //distortion.connect( globalGain )
    
         
     //delayChain.output.connect( OUTPUT )
-    delayChain.output.connect( globalOutput )
+    delayChain.output.connect( globalGain )
 //    OUTPUT = delayChain.input
-    //distortion.connect( globalOutput )
+    //distortion.connect( globalGain )
     
 //     OUTPUT = delayChain
     
@@ -318,7 +318,7 @@ export function play(){
         osc.stop( end ) 
         osc.connect( gainNode )
         gainNode.connect( delayChain.input )
-        //globalOutput
+        //globalGain
 
     }
  
@@ -347,7 +347,7 @@ export function play(){
         osc.start( t )
         osc.stop( end ) 
         osc.connect( gainNode )
-        gainNode.connect( globalOutput)
+        gainNode.connect( globalGain)
 
     }
     
@@ -410,7 +410,7 @@ export function play(){
             biquad.connect( delayChain.input )
         } else {
 //            biquad.connect( delayChain.input )
-            biquad.connect(globalOutput)
+            biquad.connect(globalGain)
         }
         
 
@@ -484,7 +484,7 @@ export function play(){
         })
         
         osc.connect(gainNode)
-        gainNode.connect( globalOutput )
+        gainNode.connect( globalGain )
         //gainNode.connect( delayChain.input )
         osc.start( t )
         osc.stop( t + dur )
@@ -498,7 +498,7 @@ export function play(){
         osc.frequency.value = f
         gainNode.gain.value = vel 
         osc.connect(gainNode)
-       // gainNode.connect( globalOutput )
+       // gainNode.connect( globalGain )
         //gainNode.connect( delayChain.input )
         gainNode.connect( OUTPUT )
         osc.start( t )
@@ -548,8 +548,20 @@ export function play(){
         t += ( envEnd - t ) * 1
         return t
     }
+    function update(d){
+        const t = ac.currentTime,
+              t1 = t + 1 / 32
+ 
+       if ( d.gain ){
+            globalGain.gain.linearRampToValueAtTime( d.gain , t1 )
+        } else {
+            globalGain.gain.linearRampToValueAtTime( 0 , t1 )
+        }
+        
+    }
     return {
-        globalOutput
+        update,
+        ac
     }
 }
 

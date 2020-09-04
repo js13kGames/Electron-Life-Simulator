@@ -252,12 +252,12 @@ function Display(){
             } else {
                 col = [Math.pow(player.energy,0.25),0,0]
             }/*
-            
-            if (( player.hasCollision )&&(Math.random()<0.8)){
-                col = [ 1 - player.energy / 1000,Math.random(),Math.random()]
-            } else {
-                col = [ 1 - player.energy / 1000,0,0]
-            }
+               
+               if (( player.hasCollision )&&(Math.random()<0.8)){
+               col = [ 1 - player.energy / 1000,Math.random(),Math.random()]
+               } else {
+               col = [ 1 - player.energy / 1000,0,0]
+               }
              */
             //            console.log(player.energy)
             context.fillStyle = cssrgba( ...col/*NOMINAL_ENERGY*/)
@@ -948,27 +948,29 @@ const step = (dt,T) =>{
         energy : gameState.state.energy,
         hasCollision : HASCOLLIDSION,
         damage : DAMAGE,
-        wallDist : WALLDIST
+        wallDist : WALLDIST,
+        gain : 1,
+        
     })
 
     
-  /*  
-    const justChange = Math.random() > 0.98,
-          mustChange = !(feedBackChoices.includes(currentFeedBackMode))
-    //&& ( Math.random() < 1/20 )
-    if ( justChange || mustChange ){
+    /*  
+        const justChange = Math.random() > 0.98,
+        mustChange = !(feedBackChoices.includes(currentFeedBackMode))
+        //&& ( Math.random() < 1/20 )
+        if ( justChange || mustChange ){
         let rmode
         if ( Math.random() > 0.8 ) {
-            rmode = feedBackChoices[ 0 ]
+        rmode = feedBackChoices[ 0 ]
         } else {
-            rmode = feedBackChoices[
-                1 +  Math.floor( ( feedBackChoices.length - 1 ) * Math.random() )
-            ]
+        rmode = feedBackChoices[
+        1 +  Math.floor( ( feedBackChoices.length - 1 ) * Math.random() )
+        ]
         }
         console.log('->',rmode)
         const mode = display.feedbackBuffer.setMode(rmode)
-    }
-*/    
+        }
+    */    
     
     const elapsed1 = display.draw( camera, choices, player, particles, texts, timeoutBar, lifeBar, remainingTo )
     
@@ -1065,47 +1067,37 @@ let done = false
 window.addEventListener('keydown', e => {
     if ( done ) return
     done = true
-  //  play()
+    const musicPlayer = play()
+    // setTimeout( () => musicPlayer.update({gain:1.0}), 5000 )
 })
 
 function PlayerNoises(){
-
-    const globalVolume = 0.5
-    const ac = new AudioContext()
-
     function Scratching(){
-
         const noise = ac.createBufferSource(),
               gain = ac.createGain(),
               biquad = ac.createBiquadFilter()
-              
-        const t = ac.currentTime
-        
-        const noisebuffer = ScratchBuffer(ac,2)
-        
-        noise.playbackRate.value = 1
-        noise.buffer = noisebuffer
-        noise.loop = true
-        noise.loopEnd = noisebuffer.length
-
-        biquad.type = 'bandpass'
-        biquad.frequency.value = 300
-        biquad.Q.value = 0.1
-        gain.gain.value = 1.0
-        biquad.frequency.value
-        
-
-        noise.connect(biquad).connect( gain ).connect( ac.destination )
-        noise.start( t + 0.1 )
-        
-        return { gain, biquad }
+        function build(){
+            const t = ac.currentTime
+            const noisebuffer = ScratchBuffer(ac,2)
+            noise.playbackRate.value = 1
+            noise.buffer = noisebuffer
+            noise.loop = true
+            noise.loopEnd = noisebuffer.length
+            biquad.type = 'bandpass'
+            biquad.frequency.value = 300
+            biquad.Q.value = 0.1
+            gain.gain.value = 1.0
+            biquad.frequency.value
+            noise.connect(biquad).connect( gain ).connect( globalGain )
+            noise.start( t + 0.1 )
+        }
+        return { build, gain, biquad }
     }
     function Sonar(){
         const osc = ac.createOscillator(),
               gain = ac.createGain(),
               osc01 = ac.createBufferSource(),
               gain01 = ac.createGain()
-              
         function build(){
             
             const t = ac.currentTime
@@ -1119,7 +1111,7 @@ function PlayerNoises(){
             gain01.gain.value = 0       
             osc.connect( gain )
                 .connect( gain01 )
-                .connect( ac.destination )
+                .connect( globalGain )
             osc01.connect( gain01.gain )
             osc.start( t + 0.1 )
             osc01.start( t + 0.1)
@@ -1127,11 +1119,18 @@ function PlayerNoises(){
         }
         return { build, gain, osc, osc01 }
     }
+
+    const ac = new AudioContext()
+    const globalGain = ac.createGain()
+    globalGain.connect( ac.destination )
+    globalGain.gain.value = 0
+
     const sonar = Sonar()
     sonar.build()
     const scratching = Scratching()
+    scratching.build()
     
-    function  update( d ){
+    function update( d ){
         if (ac){
             ac.resume()
         }
@@ -1140,7 +1139,7 @@ function PlayerNoises(){
         
         if ( d.wallDist !== undefined ){ 
             const lWallDist = Math.pow(d.wallDist,3)
-            sonar.gain.gain.linearRampToValueAtTime( globalVolume/2, t1 )
+            sonar.gain.gain.linearRampToValueAtTime( 1/5, t1 )
             sonar.osc.frequency.linearRampToValueAtTime( 440 + 20 * lWallDist , t1 )
             sonar.osc01.playbackRate.linearRampToValueAtTime( 1 + lWallDist * 10, t1 )
         } else {
@@ -1154,7 +1153,12 @@ function PlayerNoises(){
             scratching.gain.gain.linearRampToValueAtTime( 0, t1 )
             scratching.biquad.frequency.linearRampToValueAtTime( 0 , t1 )
         }
-       // console.log(d)
+        if ( d.gain ){
+            globalGain.gain.linearRampToValueAtTime( d.gain , t1 )
+        } else {
+            globalGain.gain.linearRampToValueAtTime( 0 , t1 )
+        }
+        // console.log(d)
     }
     return { update }
 }
