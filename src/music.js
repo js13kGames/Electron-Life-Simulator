@@ -116,12 +116,26 @@ export function Square01Buffer( ac, length ){
     } 
     return ab    
 }
-function NoiseBuffer(ac, length=0.25){
+export function NoiseBuffer(ac, length=0.25){
     const bs = ac.sampleRate * length,
           ab =  ac.createBuffer(1, bs, ac.sampleRate),
           cd  = ab.getChannelData(0)
     for (let i = 0; i < bs; i++) {
         cd[i] = Math.random() * 2 - 1;
+    }
+    return ab
+}
+
+export function ScratchBuffer(ac, length=0.25){
+    const bs = ac.sampleRate * length,
+          ab =  ac.createBuffer(1, bs, ac.sampleRate),
+          cd  = ab.getChannelData(0)
+    for (let i = 0; i < bs; i++) {
+        if ( Math.random() > 0.985 ){
+            cd[ i ] = 1
+        } else {
+            cd[i] = 0
+        }
     }
     return ab
 }

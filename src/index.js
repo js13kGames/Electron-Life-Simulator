@@ -1058,8 +1058,8 @@ function lerp(a,b,p){ return ( 1 - p ) * a + p * b }
 //         }
 //     }
 // 
-//}
-import { Square01Buffer, play } from './music.js'
+//}ScratchBuffer
+import { Square01Buffer, ScratchBuffer, play } from './music.js'
 
 let done = false
 window.addEventListener('keydown', e => {
@@ -1073,17 +1073,43 @@ function PlayerNoises(){
     const globalVolume = 0.5
     const ac = new AudioContext()
 
+    function Scratching(){
 
+        const noise = ac.createBufferSource(),
+              gain = ac.createGain(),
+              biquad = ac.createBiquadFilter()
+              
+        const t = ac.currentTime
+        
+        const noisebuffer = ScratchBuffer(ac,2)
+        
+        noise.playbackRate.value = 1
+        noise.buffer = noisebuffer
+        noise.loop = true
+        noise.loopEnd = noisebuffer.length
+
+        biquad.type = 'bandpass'
+        biquad.frequency.value = 300
+        biquad.Q.value = 0.1
+        gain.gain.value = 1.0
+        biquad.frequency.value
+        
+
+        noise.connect(biquad).connect( gain ).connect( ac.destination )
+        noise.start( t + 0.1 )
+        
+        return { gain, biquad }
+    }
     function Sonar(){
         const osc = ac.createOscillator(),
               gain = ac.createGain(),
               osc01 = ac.createBufferSource(),
               gain01 = ac.createGain()
+              
         function build(){
             
             const t = ac.currentTime
             const osc01buffer = Square01Buffer(ac,1)
-            
             osc.frequency.value = 0        
             gain.gain.value = 0              
             osc01.playbackRate.value = 1
@@ -1103,6 +1129,7 @@ function PlayerNoises(){
     }
     const sonar = Sonar()
     sonar.build()
+    const scratching = Scratching()
     
     function  update( d ){
         if (ac){
@@ -1113,13 +1140,21 @@ function PlayerNoises(){
         
         if ( d.wallDist !== undefined ){ 
             const lWallDist = Math.pow(d.wallDist,3)
-            sonar.gain.gain.linearRampToValueAtTime( globalVolume, t1 )
+            sonar.gain.gain.linearRampToValueAtTime( globalVolume/2, t1 )
             sonar.osc.frequency.linearRampToValueAtTime( 440 + 20 * lWallDist , t1 )
             sonar.osc01.playbackRate.linearRampToValueAtTime( 1 + lWallDist * 10, t1 )
         } else {
             sonar.gain.gain.linearRampToValueAtTime( 0, t1 )
             sonar.osc01.playbackRate.linearRampToValueAtTime( 1, t1 )
         }
+        if ( d.hasCollision ){
+            scratching.gain.gain.linearRampToValueAtTime( 2, t1 )
+            scratching.biquad.frequency.linearRampToValueAtTime( 300 , t1 )
+        } else {
+            scratching.gain.gain.linearRampToValueAtTime( 0, t1 )
+            scratching.biquad.frequency.linearRampToValueAtTime( 0 , t1 )
+        }
+       // console.log(d)
     }
     return { update }
 }
