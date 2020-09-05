@@ -13,21 +13,20 @@ import { textCanvas } from './textPlane.js'
 import { V2, cloneV2, copyV2, lerpV2} from './v2.js'
 import { Roller } from './roller.js'
 import { canvasStyle, bodyStyle } from './css.js'
-import { FeedbackBuffer } from './feedbackBuffer.js'
+import { FeedbackBuffer } from './feedbackBuffer2.js'
 import { TextMode, font2, font4, TextScreen } from './textMode.js'
 import { writeMission, Mission } from './missions.js'
 import { PlayerNoises } from './playerNoises.js'
 import { OneShotSampler } from './oneShotSampler.js'
 
 import { playBuffer } from './webaudioUtils.js'
-
-
-document.body.style = 'background:#111;';
+import * as measureFunction from './measureFunction'
 
 const levels = []
 //    minspeed, width, height, mainBranchesCount,
 
 const ac = new AudioContext()
+console.log('st',ac.sampleRate)
 const playerNoises = PlayerNoises(ac)
 
 const sounds = {
@@ -48,20 +47,28 @@ const oneShot = oneShotSampler.players
 
 let done = false
 window.addEventListener('keydown', e => {
-  if ( done ) return
+    if ( done ) return
     done = true
     //if ( e.key === 's'){
-    const offlineAc = new OfflineAudioContext(2,44100*60,44100)
+    const offlineAc = new OfflineAudioContext(2,44100*4,ac.sampleRate)
+                        //60*0.25,ac.sampleRate)
     console.log(offlineAc);
+    const sd = Date.now()
     const musicPlayer = Music.play(offlineAc)
     musicPlayer.globalGain.connect( offlineAc.destination )
-    musicPlayer.update({gain:1.0})
+    musicPlayer.update({gain:1.0})    
     offlineAc.startRendering().then(function(renderedBuffer) {
         console.log('rendered',renderedBuffer)
-        playBuffer(ac,renderedBuffer,ac.destination,ac.currentTime)
+        playBuffer(ac,renderedBuffer,ac.destination,ac.currentTime,true)
     })
-    
-    //}
+    setInterval(
+        () => {
+            if (offlineAc.state === 'closed') return
+            const sd2 = Date.now()
+            const el = ( sd2 - sd ) / 1000
+            console.log( 'ot',offlineAc.currentTime, el, offlineAc.currentTime / el)
+        }, 1000
+    )
 })
 
 
@@ -84,8 +91,8 @@ playerNoises.globalGain.connect( ac.destination )
 
 const ar = 16/9
 const targetSize = {
-    width : 2*256,
-    height : Math.floor(2*256/ar)
+    width : 256,
+    height : Math.floor(256/ar)
 }
 var stats = new Stats();
 stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -159,12 +166,8 @@ function Display(){
     
     const textMode = TextMode( textScreen, font2 )
     
-
-    
-    
-    //const choices = mkChoices() 
-    //const nominalScale = 16
-    const nominalScale = 32
+    const nominalScale = 8
+    //const nominalScale = 2//32
     
     const camera = {
         //center : { ...startPosition },
@@ -176,12 +179,6 @@ function Display(){
     const hcWidth = canvas.width / 2,
           hcHeight = canvas.height / 2
     
-    function newframe(  ){
-        feedbackBuffer.copy()
-        //context.fillStyle = 'rgba(0,127,200,1)'
-        context.fillStyle = 'rgba(0,0,0,1)'
-        context.fillRect(0,0,canvas.width,canvas.height)
-    }
     function draw( { center, scale }, level, player, particles, texts, timeoutBar, lifeBar, remainingTo ){
         
         
@@ -190,14 +187,14 @@ function Display(){
                     ij2idx, outij } = level
             const  cpx = center.x + 0.5,
                   cpy = center.y + 0.5,
-                  visiblemap = {
-                      l : clamp(Math.floor( cpx - hcWidth / scale ),0,width-1),
-                      r : clamp(Math.ceil( cpx + hcWidth / scale ),0,width-1),
-                      b : clamp(Math.floor( cpy - hcHeight / scale ),0,height-1),
-                      t : clamp(Math.ceil( cpy + hcHeight / scale ),0,height-1),
-                  }
-            for ( let i = visiblemap.l ; i < visiblemap.r  ; i++ ){
-                for ( let j = visiblemap.b ; j < visiblemap.t ; j++ ){
+                  //visiblemap = {
+                  l = clamp(Math.floor( cpx - hcWidth / scale ),0,width-1),
+                  r = clamp(Math.ceil( cpx + hcWidth / scale ),0,width-1),
+                  b = clamp(Math.floor( cpy - hcHeight / scale ),0,height-1),
+                  t = clamp(Math.ceil( cpy + hcHeight / scale ),0,height-1)
+
+            for ( let i = l ; i < r  ; i++ ){
+                for ( let j = b ; j < t ; j++ ){
                     let col
                     if ( outij(i,j) ){
                         col = [1,0,0]
@@ -205,13 +202,16 @@ function Display(){
                         const c = map[ ij2idx( i,j ) ]
                         col = Cols[c] || [1,0,0]
                     }
+                    col = [...col]
+                    //col[0]+=0.9*Math.random()
                     const rgba = cssrgba( ...col ),
                           x = Math.floor( (i - cpx) * scale + hcWidth ),
                           y = Math.floor( (j - cpy) * scale + hcHeight )
                     context.fillStyle = rgba
                     //context.fillRect(x, y, scale-1, scale-1)
                     //context.fillRect(x, y, scale, scale)
-                    context.fillRect(x+1, y+1, scale-1, scale-1)
+                    //context.fillRect(x+1, y+1, scale-1, scale-1)
+                    context.fillRect(x, y, scale, scale)
                 }
             }
         }        
@@ -306,12 +306,12 @@ function Display(){
                                              player.position.y,
                                              dim, dim, sb ) )
         }
-        function drawParticle( context, { center, scale }, particle,  i ){
+        function drawParticle( context, { center, scale }, { color, position, dim },  i ){
             const sb = []
-            context.fillStyle = cssrgba(...particle.color)
-            context.fillRect( ...box2screen( particle.position.x,
-                                             particle.position.y,
-                                             particle.dim, particle.dim, sb ) )
+            context.fillStyle = cssrgba(...color)
+            context.fillRect( ...box2screen( position.x,
+                                             position.y,
+                                             dim, dim, sb ) )
         }
         function drawTimeoutBar(){
             const height = 20
@@ -345,55 +345,63 @@ function Display(){
             
             
         }
-
-        const t1 = Date.now()
-        if (level && level.visible)
-            drawMap()
-
-        textMode.draw()
-        {
-            const dx = Math.floor( ( canvas.width - textMode.canvas.width  )/ 2 ),
-                  dy = Math.floor( ( canvas.height - textMode.canvas.height ) / 2 )
-            context.drawImage( textMode.canvas,dx,dy )
-        }
-        
-        const t2 = Date.now()
-        if ( player.visible ) 
-            drawPlayer( context, camera)
-        const t3 = Date.now()
-        
-        particles.els.forEach( (particle,i) => {
-            if ( particle.visible )
-                drawParticle( context, camera, particle, i )
-        })
-        
-        const t4 = Date.now()
-        Object.values(texts.textPanels).forEach( tp => {
-            if ( tp.visible ){
-                drawPanel(tp)
+        const draws = [
+            () => {
+                //feedbackBuffer.copy()
+                //context.fillStyle = 'rgba(0,127,200,1)'
+                context.fillStyle = 'rgba(0,0,0,1)'
+                context.fillRect(0,0,canvas.width,canvas.height)
+                //display.newframe( )
+            },
+            () => {
+                if (level && level.visible) drawMap()
+            },
+            () => {
+                textMode.draw()
+            },
+            () => {
+                const dx = Math.floor( ( canvas.width - textMode.canvas.width  )/ 2 ),
+                      dy = Math.floor( ( canvas.height - textMode.canvas.height ) / 2 )
+                context.drawImage( textMode.canvas,dx,dy )
+            },
+            () => {
+                if ( player.visible ) drawPlayer( context, camera)
+            },
+            () => {
+                particles.els.forEach( (particle,i) => {
+                    if ( particle.visible )
+                        drawParticle( context, camera, particle, i )
+                })
+            },
+            () => {
+                Object.values(texts.textPanels).forEach( tp => {
+                    if ( tp.visible ){
+                        drawPanel(tp)
+                    }
+                })
+            },
+            () => {
+                if ( timeoutBar.visible ){
+                    drawTimeoutBar()
+                }
+            },
+            () => {
+                // feedbackBuffer.paste()
+            },
+            () => {
+                feedbackBuffer.alter(context)
+            },
+            () => {
+                if ( lifeBar.visible ){
+                    drawLifeBar()
+                }
             }
-        })
-        const t5 = Date.now()
-        if ( timeoutBar.visible ){
-            drawTimeoutBar()
-        }
-        feedbackBuffer.paste()
-        const t6 = Date.now()
-        if ( lifeBar.visible ){
-            drawLifeBar()
-        }
-
+        ]
+        const start = Date.now()
+        return [ ...draws.map( measureFunction.time ), Date.now() - start ]
         
-        const e2 = t2 - t1
-        const e3 = t3 - t2
-        const e4 = t4 - t3
-        const e5 = t5 - t4
-        const e6 = t6 - t5
-        const e = t6 - t1
-        //console.log(e2,e3,'p',e4,e5,e)
-        return e
     }
-    return { newframe, draw, camera, feedbackBuffer, textMode }
+    return { draw, camera, feedbackBuffer, textMode }
 }
 
 
@@ -723,7 +731,7 @@ function Player(){
     }
 }
 function Particles(){
-    const PARTICLE_COUNT = 50
+    const PARTICLE_COUNT = 25
     const els = []
     for ( let i = 0 ; i < PARTICLE_COUNT ; i++ ){
         els[i] = {
@@ -926,7 +934,7 @@ const step = (dt,T) =>{
       copyV2( nextPosition, camera.center )
     */
     // display
-    display.newframe( )                
+    
     /* camera.center.x += ( -1*l + r ) * dt / 1000
        camera.center.y += ( -1*u + d ) * dt / 1000*/
     camera.scale *= ( 1 + ( -1*o + p ) / 10 ) 
@@ -963,7 +971,7 @@ const step = (dt,T) =>{
 
     
 
-    
+    /*
     const currentFeedBackMode = display.feedbackBuffer.getMode()
     //console.log('cr',currentFeedBackMode)
     const feedBackChoices = feedbackEffect[ gameState.state.name ]
@@ -977,6 +985,7 @@ const step = (dt,T) =>{
         const rmode = feedBackChoices[ 0 ]
         const mode = display.feedbackBuffer.setMode(rmode)
     }
+*/
     // let rmode = currentFeedBackMode
     // if ( fbcFirst ){
     //     // rarely change to other
@@ -1031,9 +1040,15 @@ const step = (dt,T) =>{
         
 /*    } else {
         textScreen.cls(false)
-    }*/
-    const elapsed1 = display.draw( camera, choices, player, particles, texts, timeoutBar, lifeBar, remainingTo )
+        }*/
     
+    
+    const elapsed = display.draw( camera, choices, player, particles, texts, timeoutBar, lifeBar, remainingTo )
+    if ( elapsed[ elapsed.length - 1 ] >= 8 ){
+        console.log(elapsed)
+    } else {
+        console.log('<8')
+    }
     stats.end()
 
     //    texts.updateMessage('welcome','BONJOUR')

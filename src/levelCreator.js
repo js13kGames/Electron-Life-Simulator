@@ -5,9 +5,9 @@ import { V2, cloneV2, subV2, addV2, multScalar, divScalar } from './v2.js'
 export function mkChoices(){
 
     // options
-    const width = 100*3,
+    const width = 100*30,
           height = 30    
-    const mainBranchesCount = 4,
+    const mainBranchesCount = 2,
           branchHeight = 4,
           hpad = 1,
           branchTop = height - branchHeight - hpad ,

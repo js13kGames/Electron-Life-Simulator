@@ -116,13 +116,15 @@ export const font4 = Font( fontInfo, 4 )
 
 export function TextMode( textScreen, font ){
     const { fontInfo } = font,
-          { dim } = fontInfo,
+          { dim, codeIndex } = fontInfo,
           { width, height } = textScreen
     
     const canvas = document.createElement('canvas')
     canvas.width = textScreen.width * dim
     canvas.height = textScreen.height * dim
     const ctx = canvas.getContext('2d')
+
+    const fontImageData  = font.getImageData()
 
     function draw(){
 
@@ -143,8 +145,7 @@ export function TextMode( textScreen, font ){
                 const c = data[ i + j * width ],
                       x = dim * i,
                       y = dim * j,
-                      tp = font.fontInfo.codeIndex[ c ],
-                      fontImageData  = font.getImageData()
+                      tp = codeIndex[ c ]
                 if ( fontImageData && tp ){
                     ctx.putImageData(
                         fontImageData,

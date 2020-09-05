@@ -137,10 +137,11 @@ export function ScratchBuffer(ac, length=0.25){
     }
     return ab
 }
-export function playBuffer( ac, b, d, t ){
+export function playBuffer( ac, b, d, t, loop = false ){
     const source = ac.createBufferSource();
     source.buffer = b;
     source.connect(d);
+    source.loop = loop
     source.start(t);
     return source;    
 }

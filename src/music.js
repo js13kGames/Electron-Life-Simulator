@@ -56,30 +56,6 @@ export function play(ac){
 
     const globalGain = ac.createGain()
     
-    let OUTPUT 
-    {
-        function makeDistortionCurve(amount=0.1) {
-            let n_samples = 512, curve = new Float32Array(n_samples);
-            for (let i = 0 ; i < n_samples; ++i ) {
-                let x = i * 2 / n_samples - 1;                
-                curve[i] = x//(Math.PI + amount) * x / (Math.PI + amount * Math.abs(x));
-            }
-            return curve;
-        } 
-        const distortion = ac.createWaveShaper(),
-              mod = ac.createOscillator(),
-              gain = ac.createGain()
-        
-        distortion.curve = makeDistortionCurve(400);
-        mod.frequency.value = 10
-        mod.start()
-        mod.connect( distortion )
-        distortion.connect( gain.gain )
-
-        OUTPUT = gain
-        OUTPUT.connect( globalGain )
-        
-    }
         
     
     //distortion.connect( globalGain )
@@ -361,6 +337,33 @@ export function play(ac){
         osc.connect(gainNode)
        // gainNode.connect( globalGain )
         //gainNode.connect( delayChain.input )
+
+
+
+        let OUTPUT 
+        {
+            function makeDistortionCurve(amount=0.1) {
+                let n_samples = 512, curve = new Float32Array(n_samples);
+                for (let i = 0 ; i < n_samples; ++i ) {
+                    let x = i * 2 / n_samples - 1;                
+                    curve[i] = x//(Math.PI + amount) * x / (Math.PI + amount * Math.abs(x));
+                }
+                return curve;
+            } 
+            const distortion = ac.createWaveShaper(),
+                  mod = ac.createOscillator(),
+                  gain = ac.createGain()
+            
+            distortion.curve = makeDistortionCurve(400);
+            mod.frequency.value = 10
+            mod.start()
+            mod.connect( distortion )
+            distortion.connect( gain.gain )
+            
+            OUTPUT = gain
+            OUTPUT.connect( globalGain )
+        }
+        
         gainNode.connect( OUTPUT )
         osc.start( t )
         osc.stop( t + dur )
