@@ -6,7 +6,6 @@ const Stats = require('stats.js')
 //const tunnel = require('./tunnel.js')
 //require('./zzfx.js')
 
-import * as Build from './build.js'
 import { KeyboardControllers } from './keyboardControllers.js'
 import { mkChoices } from './levelCreator.js'
 import { Cols } from './cols.js'
@@ -17,14 +16,9 @@ import { canvasStyle, bodyStyle } from './css.js'
 import { FeedbackBuffer } from './feedbackBuffer.js'
 import { TextMode, font2, font4, TextScreen } from './textMode.js'
 import { writeMission, Mission } from './missions.js'
+import { PlayerNoises } from './playerNoises.js'
+import { OneShotSampler } from './oneShotSampler.js'
 
-const playerNoises = PlayerNoises()
-
-//const { zzfx } = require('./zz.js')
-function zzfx (){
-}
-
-console.log(Build.date, Build.timestamp)
 
 
 document.body.style = 'background:#111;';
@@ -32,19 +26,39 @@ document.body.style = 'background:#111;';
 const levels = []
 //    minspeed, width, height, mainBranchesCount,
 
+const ac = new AudioContext()
+const playerNoises = PlayerNoises(ac)
+
 const sounds = {
     u : [,,1049,,.09,.25,,.45,,,442,.05,,.1,,,,.51,.08,.1],
-    v : [,,1322,.05,.12,.03,1,.02,31,7.7,,,,,,,.27,.33,.04,.01],
-    w : [,,34,.02,,.04,2,2.05,,1,-14,.16,,.8,,,.09,,.16,.17],
-    x : [,,565,.04,.19,0,,.33,,-4.1,,,,,,,.12,.05,,.55],
-    y : [,,27,.02,.16,.18,3,.7,,-0.7,,,,.1,,,,.34,.21,.09], // prout
-    z : [,,674,.07,.18,.01,,.9,-25,,,,.02,.7],
+    v : [1.2,,1322,.05,.12,.03,1,.02,31,7.7,,,,,,,.27,.33,.04,.01],
+    w : [2.3,,34,.02,,.04,2,2.05,,1,-14,.16,,.8,,,.09,,.16,.17],
+    x : [3.3,,565,.04,.19,0,,.33,,-4.1,,,,,,,.12,.05,,.55],
+    y : [1.7,,27,.02,.16,.18,3,.7,,-0.7,,,,.1,,,,.34,.21,.09], // prout
+    z : [1.2,,674,.07,.18,.01,,.9,-25,,,,.02,.7],
     wo : [,,803,.05,.43,.55,,1.86,,,-97,.02,.27,,,,,.64,.04],
-    l1 : [,,72,.01,,.32,2,1.51,,-0.6,,,.02,,,,.07,.63],
-    l2 : [,,29,,.21,.15,4,1.63,,.7,-137,.03,,,,,.11,,.1]
+    ///l1 : [2.7,,72,.01,,.32,2,1.51,,-0.6,,,.02,,,,.07,.63],
+    l1 : [2,,476,.04,.09,.64,4,3.96,.2,,,,,1,,.4,,.55,.04],
+    l2 : [0.8,,29,,.21,.15,4,1.63,,.7,-137,.03,,,,,.11,,.1]
 }
 
-//
+const oneShotSampler = OneShotSampler(ac, sounds)
+const oneShot = oneShotSampler.players
+
+import * as Music from './music.js'
+
+let done = false
+window.addEventListener('keydown', e => {
+    if ( done ) return
+    done = true
+    const musicPlayer = Music.play(ac)
+    musicPlayer.globalGain.connect( ac.destination )
+    musicPlayer.update({gain:1.0})
+})
+
+oneShotSampler.globalGain.connect( ac.destination )
+oneShotSampler.globalGain.gain.value = 1.0
+playerNoises.globalGain.connect( ac.destination )
 
 const ar = 16/9
 const targetSize = {
@@ -127,7 +141,8 @@ function Display(){
     
     
     //const choices = mkChoices() 
-    const nominalScale = 16 
+    //const nominalScale = 16
+    const nominalScale = 32
     
     const camera = {
         //center : { ...startPosition },
@@ -434,14 +449,14 @@ function GameState(){
             //'#' : 1000,
             'next' : d => {
                 update({name:'I1'})
-                zzfx(...sounds.u)
+                oneShot.u()
             }
         },
         // incentive title screen
         I1 : {
             'next' : d => {
                 update({name:'G0'})
-                zzfx(...sounds.v)
+                oneShot.v()
             }
         },
         // global mission explanation and good luck player !
@@ -454,7 +469,7 @@ function GameState(){
                     sublevel : 1,
                     name:'G1'
                 })
-                zzfx(...sounds.w)
+                oneShot.w()
             }
         },
         // sublevel generation
@@ -476,7 +491,7 @@ function GameState(){
                     //choices : mkChoices(),
                     name:'S1'
                 })
-                zzfx(...sounds.x)
+                oneShot.x()
             },
         },
         // level / sublevel presentation
@@ -494,7 +509,7 @@ function GameState(){
                 // ????
                 copyV2(gameState.state.choices.startPosition, player.position)
                 copyV2(player.position,display.camera.center)
-                zzfx(...sounds.y)
+                oneShot.y()
             }
         },
         // ready / set / go
@@ -508,14 +523,14 @@ function GameState(){
                     checkLines : [],
                     name : 'S3',
                 })
-                zzfx(...sounds.z)
+                oneShot.z()
             }
         },
         // runnning
         S3 : {
             'checkLine' : num => {
                 state.checkLines.push( { num, t : state.T } )
-                zzfx(...sounds.v)
+                oneShot.v()
                 console.log('state.checkLines',state.checkLines)
             },
             'damage' : d => {
@@ -532,7 +547,7 @@ function GameState(){
                 update({
                     name : 'W1'
                 })
-                zzfx(...sounds.wo)
+                oneShot.wo()
             },
             'sublevel-lose' : d => {
                 if ( state.lives > 1 ){
@@ -540,13 +555,13 @@ function GameState(){
                         lives : state.lives - 1,
                         name : 'L1'
                     })
-                    zzfx(...sounds.l1)
+                    oneShot.l1()
                 } else {
                     update({
                         lives : 0,
                         name : 'L2'
                     })
-                    zzfx(...sounds.l2)
+                    oneShot.l2()
                     
                 }
             }
@@ -964,7 +979,7 @@ const step = (dt,T) =>{
         hasCollision : HASCOLLIDSION,
         damage : DAMAGE,
         wallDist : WALLDIST,
-        gain : 0,
+        gain : 1,
         
     })
 
@@ -1084,105 +1099,4 @@ function lerp(a,b,p){ return ( 1 - p ) * a + p * b }
 //     }
 // 
 //}ScratchBuffer
-import { Square01Buffer, ScratchBuffer, play } from './music.js'
-
-let done = false
-window.addEventListener('keydown', e => {
-    if ( done ) return
-    done = true
-    //const musicPlayer = play()
-    // setTimeout( () => musicPlayer.update({gain:1.0}), 5000 )
-})
-
-function PlayerNoises(){
-    function Scratching(){
-        const noise = ac.createBufferSource(),
-              gain = ac.createGain(),
-              biquad = ac.createBiquadFilter()
-        function build(){
-            const t = ac.currentTime
-            const noisebuffer = ScratchBuffer(ac,2)
-            noise.playbackRate.value = 1
-            noise.buffer = noisebuffer
-            noise.loop = true
-            noise.loopEnd = noisebuffer.length
-            biquad.type = 'bandpass'
-            biquad.frequency.value = 300
-            biquad.Q.value = 0.1
-            gain.gain.value = 1.0
-            biquad.frequency.value
-            noise.connect(biquad).connect( gain ).connect( globalGain )
-            noise.start( t + 0.1 )
-        }
-        return { build, gain, biquad }
-    }
-    function Sonar(){
-        const osc = ac.createOscillator(),
-              gain = ac.createGain(),
-              osc01 = ac.createBufferSource(),
-              gain01 = ac.createGain()
-        function build(){
-            
-            const t = ac.currentTime
-            const osc01buffer = Square01Buffer(ac,1)
-            osc.frequency.value = 0        
-            gain.gain.value = 0              
-            osc01.playbackRate.value = 1
-            osc01.buffer = osc01buffer
-            osc01.loop = true
-            osc01.loopEnd = osc01buffer.length
-            gain01.gain.value = 0       
-            osc.connect( gain )
-                .connect( gain01 )
-                .connect( globalGain )
-            osc01.connect( gain01.gain )
-            osc.start( t + 0.1 )
-            osc01.start( t + 0.1)
-            return ac
-        }
-        return { build, gain, osc, osc01 }
-    }
-
-    const ac = new AudioContext()
-    const globalGain = ac.createGain()
-    globalGain.connect( ac.destination )
-    globalGain.gain.value = 0
-
-    const sonar = Sonar()
-    sonar.build()
-    const scratching = Scratching()
-    scratching.build()
-
-    
-    function update( d ){
-        return
-        ac.resume()
-        const t = ac.currentTime,
-              t1 = t + 1 / 32
-        
-        if ( d.wallDist !== undefined ){ 
-            const lWallDist = Math.pow(d.wallDist,3)
-            sonar.gain.gain.linearRampToValueAtTime( 1/5, t1 )
-            sonar.osc.frequency.linearRampToValueAtTime( 440 + 20 * lWallDist , t1 )
-            sonar.osc01.playbackRate.linearRampToValueAtTime( 1 + lWallDist * 10, t1 )
-        } else {
-            sonar.gain.gain.linearRampToValueAtTime( 0, t1 )
-            sonar.osc01.playbackRate.linearRampToValueAtTime( 1, t1 )
-        }
-        if ( d.hasCollision ){
-            scratching.gain.gain.linearRampToValueAtTime( 2, t1 )
-            scratching.biquad.frequency.linearRampToValueAtTime( 300 , t1 )
-        } else {
-            scratching.gain.gain.linearRampToValueAtTime( 0, t1 )
-            scratching.biquad.frequency.linearRampToValueAtTime( 0 , t1 )
-        }
-        if ( d.gain ){
-            globalGain.gain.linearRampToValueAtTime( d.gain , t1 )
-        } else {
-            globalGain.gain.linearRampToValueAtTime( 0 , t1 )
-        }
-        // console.log(d)
-    }
-    return { update }
-}
 
