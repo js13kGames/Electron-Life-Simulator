@@ -19,6 +19,7 @@ import { writeMission, Mission } from './missions.js'
 import { PlayerNoises } from './playerNoises.js'
 import { OneShotSampler } from './oneShotSampler.js'
 
+import { playBuffer } from './webaudioUtils.js'
 
 
 document.body.style = 'background:#111;';
@@ -45,8 +46,27 @@ const sounds = {
 const oneShotSampler = OneShotSampler(ac, sounds)
 const oneShot = oneShotSampler.players
 
-import * as Music from './music.js'
+let done = false
+window.addEventListener('keydown', e => {
+  if ( done ) return
+    done = true
+    //if ( e.key === 's'){
+    const offlineAc = new OfflineAudioContext(2,44100*60,44100)
+    console.log(offlineAc);
+    const musicPlayer = Music.play(offlineAc)
+    musicPlayer.globalGain.connect( offlineAc.destination )
+    musicPlayer.update({gain:1.0})
+    offlineAc.startRendering().then(function(renderedBuffer) {
+        console.log('rendered',renderedBuffer)
+        playBuffer(ac,renderedBuffer,ac.destination,ac.currentTime)
+    })
+    
+    //}
+})
 
+
+import * as Music from './music.js'
+/*
 let done = false
 window.addEventListener('keydown', e => {
     if ( done ) return
@@ -59,6 +79,8 @@ window.addEventListener('keydown', e => {
 oneShotSampler.globalGain.connect( ac.destination )
 oneShotSampler.globalGain.gain.value = 1.0
 playerNoises.globalGain.connect( ac.destination )
+*/
+
 
 const ar = 16/9
 const targetSize = {
