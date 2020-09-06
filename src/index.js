@@ -8,7 +8,7 @@ import { Roller } from './roller.js'
 import { canvasStyle, bodyStyle } from './css.js'
 import { FeedbackBuffer } from './feedbackBuffer2.js'
 import { TextMode, font1, font2, font4, TextScreen } from './textMode.js'
-import { writeMission, Missions } from './missions.js'
+import { Missions } from './missions.js'
 import { PlayerNoises } from './audio/playerNoises.js'
 import { OneShotSampler } from './audio/oneShotSampler.js'
 import { playBuffer, Record } from './audio/webaudioUtils.js'
@@ -46,7 +46,7 @@ const playerNoises = PlayerNoises(ac)
 const musicPlayer = Music.play(ac)
 
 oneShotSampler.globalGain.connect( ac.destination )
-oneShotSampler.globalGain.gain.value = 1.0
+oneShotSampler.globalGain.gain.value = 0.8
 playerNoises.globalGain.connect( ac.destination )
 playerNoises.globalGain.gain.value = 1.0
 musicPlayer.globalGain.connect( ac.destination )
@@ -357,7 +357,7 @@ function GameState(){
                 update({name:'I1S'})
             }
         },
-        // alternating story
+        // story
         I1S : {
             '>' : () => {
                 timeout( () => event('next'),10000)
@@ -366,11 +366,11 @@ function GameState(){
                 update({name:'I1'})
             },
         },
-        // story before match
+        // controls
         I2 : {
             'next' : () => {
                 update({
-                    name:'M1',
+                    name:'I3',
                     level : 0,
                     sublevel : 0,
                     L : NLIVES,
@@ -380,6 +380,10 @@ function GameState(){
                     //E : NOMINAL_ENERGY,
                 })
             },
+        },
+        // ... snd screen
+        I3 : {            
+            'next' : () => update({name:'M1'})
         },
         // level briefing
         M1 : {
@@ -615,26 +619,19 @@ const lifeBar = LifeBar()
     
 const step = (dt,T) =>{
     const timeoutBarVisibility = ['G1','S1','S2','R0','L1']
-    const textVisibility = {
-        'I0' : ['welcome','anykey'],
-        'I1' : ['title'],
-        'G0' : ['intro','anykey'],
-        'G1' : ['intro','anykey'],
-        'G2' : [/*'levelnum','sublevelnum'*/],
-        'S1' : [/*'instructions',*/'anykey'],
-        'S2' : ['ready?'/*,'instructions'*/],
-        'W1' : ['subwin'],
-        'R0' : ['redirecting'],
-        'W2' : ['levelwin','anykey'],
-        'W3' : ['win'],
-        'L1' : ['failed'],
-        'L2' : ['gameover'],        
-    }
     const mapVisibility = ['S2','S3','W1','W2','L1']
-    const playerVisibility = ['S2','S3','W1','W2']
-    const lifeBarVisibility = ['M1','S2','S3','W1','W2','L1']
+    const playerVisibility = ['S2','S3']
+    const lifeBarVisibility = ['S2','S3','W1','W2','L1']
 
-    if ( gameState.state.name === 'S2'){
+    function stateName(){
+        return gameState.state.name
+    }
+    function stateIsOneOf( ...names ){
+        return names.flat().includes( stateName() )
+    }
+    
+    
+    if ( stateName() === 'S2'){
         copyV2(gameState.state.choices.startPosition, player.position)
     }
     
@@ -645,7 +642,7 @@ const step = (dt,T) =>{
     const remainingTo = gameState.checkTimeouts(T)
     timeoutBar.remain = remainingTo
     timeoutBar.visible =  (remainingTo !== undefined) 
-        && timeoutBarVisibility.includes( gameState.state.name ) 
+        && timeoutBarVisibility.includes( stateName() ) 
     if ( keyboardController.anyKeyStroke.length ){
         //  textScreen.cls()
     }
@@ -657,8 +654,8 @@ const step = (dt,T) =>{
     
     /*
     if ( ['I0','I1','G0','G1','G2','S1',
-    'L1','L2','W2','W3','R0'].includes( gameState.state.name ) ){*/
-    if ( gameState.state.name !== 'S3' ){
+    'L1','L2','W2','W3','R0'].includes( stateName() ) ){*/
+    if ( !stateIsOneOf('S3') ){
     
         if ( sinceStateStart > TIME_BEFORE_SKIP_STATE ){
             if ( keyboardController.anyKeyStroke.length ){
@@ -677,15 +674,17 @@ const step = (dt,T) =>{
         WALLDIST = undefined
     
     let collision
-    if ( ['S3','W1','W2'].includes( gameState.state.name ) ){
-        //        console.log('gameState',gameState)
-        // player move + collide
+    if ( stateIsOneOf(['S3','W1','W2']) ){
+        //
+        // move and collisions
+        //
+        
         const speed01 = 1,
               minspeed = 150,
               maxspeed = 40,
               ff = (1-speed01) * minspeed + speed01 * maxspeed
         let dx,dy
-        if ( ['S3'].includes( gameState.state.name ) ){
+        if ( ['S3'].includes( stateName() ) ){
             dx = 1
             //dx = ( -1*l + r ) 
             dy = ( -1*u + d )
@@ -697,17 +696,12 @@ const step = (dt,T) =>{
                                 choices, dx, dy, dt, ff )
         
         const { nextPosition, hasCollision, collisionType } =  collision
-        /*if ( hasCollision ){
-          console.log( 't',collisionType )
-          }*/
+
         copyV2(player.position,player.lastpos)
         copyV2(nextPosition,player.position)
-        //copyV2(player.position,display.camera.center)
         
-        // update particles
-        //if ( hasCollision ){
-        //}
-        if ( ['S3'].includes( gameState.state.name ) ){
+        if ( stateIsOneOf(['S3']) ){
+            
             // check victory
             if ( posCollide( choices, nextPosition, 'G' ) ){
                 gameState.event('sublevel-win')
@@ -724,7 +718,7 @@ const step = (dt,T) =>{
         }
     }
 
-    if( gameState.state.name === 'S3' ){
+    if( stateName() === 'S3' ){
         // checkLaps
       //  if (gameState.state.choices) {
             const choices = gameState.state.choices.choices
@@ -767,9 +761,9 @@ const step = (dt,T) =>{
     camera.scale = clamp( camera.scale, 4,32) // 4 wide zoom, 32 closeup
 
     if ( choices ){
-        choices.visible = mapVisibility.includes( gameState.state.name )
+        choices.visible = mapVisibility.includes( stateName() )
     }
-    player.visible = playerVisibility.includes(  gameState.state.name )
+    player.visible = playerVisibility.includes(  stateName() )
     player.energy =  gameState.state.energy
     player.hasCollision = HASCOLLIDSION
 
@@ -778,10 +772,10 @@ const step = (dt,T) =>{
     
     particles.hasCollision = HASCOLLIDSION
     {
-        // const running =  ['S3'].includes( gameState.state.name )
+        // const running =  ['S3'].includes( stateName() )
 
         const target = player.position
-        updateParticles( particles, target, HASCOLLIDSION, collision,gameState.state.energy,  gameState.state.name )
+        updateParticles( particles, target, HASCOLLIDSION, collision,gameState.state.energy,  stateName() )
     }
     //if ( choices ) choices.visible = true
     if ( ( gameState.state.lives !== undefined )
@@ -789,7 +783,7 @@ const step = (dt,T) =>{
         lifeBar.l = gameState.state.lives
         lifeBar.L = gameState.state.L
     }
-    lifeBar.visible = lifeBarVisibility.includes(  gameState.state.name )
+    lifeBar.visible = lifeBarVisibility.includes(  stateName() )
     copyV2( player.position, camera.center )
  
 
@@ -802,95 +796,111 @@ const step = (dt,T) =>{
         gain : 1,
         
     })
+    const printCenter = textScreen.printCenter
 
-    function printMission(showDirs){
+    function printMission(showDirs,showFailure, showSublevelWin ){
         const { level, sublevel, nsublevels } = gameState.state
         const ml = Missions[ level ],
               ms = ml.subs[ sublevel ]
         
-        textScreen.printCenter(0,`Mission #${level+1}`)
-        textScreen.printCenter(2,`"${ml.name}"`)
+        printCenter(0,`Mission #${level+1}`)
+        printCenter(2,`"${ml.name}"`)
 
-        textScreen.printCenter(4,`Hop #${sublevel+1}/${nsublevels}`)
-        textScreen.printCenter(6,`"${ms.name}"`)
+        printCenter(4,`Hop #${sublevel+1}/${nsublevels}`)
+        printCenter(6,`"${ms.name}"`)
         if ( showDirs ){
-            textScreen.printCenter(8,'you follow the directions:')
-            textScreen.printCenter(10,gameState.state.choices.directions.join('.'))
+            printCenter(8,'you follow the directions:')
+            printCenter(10,gameState.state.choices.directions.join('.'))
         }
-
+        if ( showFailure ){
+            printCenter(8,'you did not make it!')
+            printCenter(10,'* hop failed *')
+        }
+        if ( showSublevelWin ){
+            printCenter(8,'* hop successful *')
+            printCenter(10,'you made it!')
+        }
         /*
         let j = 4
         for ( let i = 0 ; i < nsublevels ; i++ ){
             //if ( i < level ){
-            textScreen.printCenter(j,`"${ml.subs[i].name}"`)
+            printCenter(j,`"${ml.subs[i].name}"`)
             j++
             //}
         }*/
         for ( let j = 0 ; j < (level+1) ; j++ ){
-            //textScreen.printCenter(6,`"${ms.name}"`)
+            //printCenter(6,`"${ms.name}"`)
         }
-        //textScreen.printCenter(j,`Hop #${sublevel+1}/${nsublevels}`)
-        //textScreen.printCenter(4,`Hop #${sublevel+1}/${nsublevels}`)
-        //textScreen.printCenter(6,`"${ms.name}"`)
-
+        //printCenter(j,`Hop #${sublevel+1}/${nsublevels}`)
+        //printCenter(4,`Hop #${sublevel+1}/${nsublevels}`)
+        //printCenter(6,`"${ms.name}"`)
     }
     
     display.textMode.visible = true
     textScreen.cls()
-    if ( ['I2','I1S'].includes(gameState.state.name) ){
-            
-            textScreen.printCenter(1,'The Odyssey Begins...')
-            
-        
+    if ( ['I2','I1S'].includes(stateName()) ){
+        printCenter(1,'The Odyssey Begins...')
         const paragraphs = 'So many years have passed since your days as a newborn electron, freely roaming in some metallic conductor...\n\nThe time has come for you to start your wondeful journey and fulfill your duty for the almighty gods of electrons to be pleased.'
         textScreen.printParagraphs( 3, paragraphs, 0 )
         
         //textScreen.print(0,5,'"Follow the correct route, ignore the incorrect one or you will die", you can remember your electron mother say. This is your life, now !')
         //textScreen.print(0,8,'Mission are awaiting you. May the god of electrons be with you.')
 
-    } else if ( ['M1'].includes(gameState.state.name) ){
+    } else  if ( ['I3'].includes(stateName()) ){
+        printCenter(1,'The Odyssey Begins...')
+        
+        const paragraphs = 'Now your destiny is to always follow the correct route. Every electron knows what happens when you fail to follow the correct route...\n\nElectronic DEATH!\n\nSo always remember the ordered up and down branches of the route!'
+        textScreen.printParagraphs( 3, paragraphs, 0 )
+        
+        //textScreen.print(0,5,'"Follow the correct route, ignore the incorrect one or you will die", you can remember your electron mother say. This is your life, now !')
+        //textScreen.print(0,8,'Mission are awaiting you. May the god of electrons be with you.'){
+    }
+
+    else if ( ['M1'].includes(stateName()) ){
         printMission()
-    } else if ( ['G1'].includes(gameState.state.name) ){
-        textScreen.printCenter(6,'level presentation')
+    } else if ( ['G1'].includes(stateName()) ){
+        printCenter(6,'level presentation')
         writeMission( textScreen, gameState.state.level )
-    } else if ( ['G2'].includes(gameState.state.name) ){
-        textScreen.printCenter(6,'sublevel'+gameState.state.sublevel, true )
+    } else if ( ['G2'].includes(stateName()) ){
+        printCenter(6,'sublevel'+gameState.state.sublevel, true )
         /*writeMission( textScreen,
                       gameState.state.level || 1,
                       gameState.state.sublevel || 1,
                       undefined)*/
         //(gameState.state.choices && gameState.state.choices.directions) || [0])
-    } else if ( ['I1'].includes(gameState.state.name) ){
-        textScreen.printCenter(6,'electron life simulator')
-    } else if ( ['I0'].includes(gameState.state.name) ){
-        textScreen.printCenter(6,'machin presents')
-    } else if ( ['R0'].includes(gameState.state.name) ){
-        textScreen.printCenter(6,'redirecting...')
-    } else if ( ['L1'].includes(gameState.state.name) ){
-        textScreen.printCenter(6,'level failed')
-    } else if ( ['L2'].includes(gameState.state.name) ){
-        textScreen.printCenter(6,'404')
-    } else if ( ['W1'].includes(gameState.state.name) ){
-        textScreen.printCenter(6,'sublevel won')
-    } else if ( ['W2'].includes(gameState.state.name) ){
-        textScreen.printCenter(6,'level won')
-    } else if ( ['W3'].includes(gameState.state.name) ){
-        textScreen.printCenter(6,'game won it all!')
-    } else if ( ['S1'].includes(gameState.state.name) ){
+    } else if ( ['I1'].includes(stateName()) ){
+        printCenter(6,'electron life simulator')
+    } else if ( ['I0'].includes(stateName()) ){
+        printCenter(6,'machin presents')
+    } else if ( ['L1'].includes(stateName()) ){
+        
+        printMission(false,true)
+
+    } else if ( ['L2'].includes(stateName()) ){
+        printCenter(6,'404')
+    } else if ( ['W1'].includes(stateName()) ){
+        printCenter(6,'sublevel won')
+        printMission(false,false,true)
+    } else if ( ['W2'].includes(stateName()) ){
+        printCenter(6,'level won')
+    } else if ( ['W3'].includes(stateName()) ){
+        printCenter(6,'You Won It All!')
+        printCenter(8,'Thanks for playing !')
+    } else if ( ['S1'].includes(stateName()) ){
         printMission(true)
         
         
         
-        //textScreen.printCenter(6,'follow the route')
+        //printCenter(6,'follow the route')
         //writeMission(textScreen,undefined,gameState.state.sublevel,gameState.state.choices.directions)
         
-    } else if ( ['S2'].includes(gameState.state.name) ){
-        textScreen.printCenter(6,'ready?')
+    } else if ( ['S2'].includes(stateName()) ){
+        printCenter(14,'ready?')
     } else {
         //display.textMode.visible = false
     }
     
-    textScreen.print(0,14,gameState.state.name)
+    textScreen.print(0,14,stateName())
     {
         let { level, nlevels, sublevel, nsublevels, lives, L } = gameState.state
         if ( level === undefined ) level = '??'
@@ -914,10 +924,12 @@ const step = (dt,T) =>{
                          +' lives')*/
     }
 
-    if ( (['S3'].includes(gameState.state.name)) ){
+    if ( (['S3'].includes(stateName())) ){
         display.feedbackBuffer.o.a = 1
-    } else if ( (['S2'].includes(gameState.state.name)) ){
-        display.feedbackBuffer.o.a = clamp(sinceStateStart,0,2000)/2000
+    } else if ( (['S2'].includes(stateName())) ){
+        if ( sinceStateStart > 10 ){
+            display.feedbackBuffer.o.a = clamp(sinceStateStart,0,2000)/2000
+        }
     } else {
         display.feedbackBuffer.o.a = 0.05
     }
@@ -934,7 +946,6 @@ const step = (dt,T) =>{
     //    texts.updateMessage('welcome','BONJOUR')
 }
 const roller = Roller(step)
-roller.command(1)
 gameState.event('start')
 
 

@@ -4,8 +4,10 @@ export function FeedbackBuffer(  ){
     //function lerp(x,y,a){ return (1-a)*x+a*y }
     const o = { a : 1 }
     function alter( context, a = o.a ){
-        const { width, height } = context.canvas,
-              dst = context.getImageData(0,0,width,height)
+        const { width, height } = context.canvas
+        if ( a === 1 )
+            return 
+        const dst = context.getImageData(0,0,width,height)
         /*// const a = 0.05  /// very blurry
         // b = 0.1
         //const a = 0.5

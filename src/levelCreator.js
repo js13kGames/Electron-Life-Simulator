@@ -8,11 +8,14 @@ export function mkChoices( level, sublevel ){
     const ld = Missions[ level ].subs[ sublevel ].level
     console.log('MKCJOICES','for',level,sublevel,ld)
     
+    const [ p0,p1,p2,p3 ] = ld
     
     // options
-    const width = 300,
-          height = 30    
-    const mainBranchesCount = 3,
+    const width = p0,
+          height = p1,    
+          npossible = p2,
+          mainBranchesCount = p3.length,
+          path = p3,
           branchHeight = 4,
           hpad = 1,
           branchTop = height - branchHeight - hpad ,
@@ -35,8 +38,8 @@ export function mkChoices( level, sublevel ){
     // choices
     const choices = new Array( mainBranchesCount + 3 ).fill(0).map( (_,i) => {
         //const npossible = 2 + Math.floor( Math.random() * 2 )
-        let npossible = 3
-        const good = Math.floor( Math.random() * npossible )
+        //const good = Math.floor( Math.random() * npossible )
+        const good = path[ Math.max(0,i-2) ]
         const x = i * width / ( mainBranchesCount + 2 )
         const ys = [
             [],

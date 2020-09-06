@@ -1,20 +1,43 @@
+// level :
+// width, height, mainBranchesCount, path
 export const Missions = [{
+    name : 'test',
+    subs : [{
+        name : 'test1',
+        level : [500,100,2,[0,0,1,1,1,0,0]]
+    }]
+},{
+    name : 'Cable Worker',
+    subs : [{
+        name : 'Stay Still!',
+        level : [500,100,1,[0,0,0,0,0,0,0,0,0]]
+    },{
+        name : 'Bad Ideas!',
+        level : [500,100,2,[0,0,0,0,0,0,0,0,0]]
+    },{
+        name : 'Control yourself',
+        level : [500,100,2,[0,0,1,1,1,0,0]]
+    }]
+},{
     name : 'Printing is a simple task',
     subs : [{
         name : 'Reach for the printer',
         succes : 'the printer seems to refuse the packet...',
-        level : [300,30,3,[0,1,2]]
+        level : [400*3,30,3,[0,1,2,0,1,2,0,1,2]]
     },{
         name : 'Damn printer!',
-        succes : 'the printer was out of paper'
+        succes : 'the printer was out of paper',
+        level : [200*3,30,3,[0,1,2,0,1,2,0,1,2]]
     },{
         name : 'Now we are printing',
-        succes : 'the warm noise of the printer suits your electron ears'
+        succes : 'the warm noise of the printer suits your electron ears',
+        level : [100*3,30,3,[0,1,2,0,1,2,0,1,2]]
     }]
 },{
     name : 'The space transmission',
     subs : [{
         name : 'from the home to wide area network',
+        level : [400*3,40,4,[0,0,0,4,1,2,0,1,2,0,4,1,2]]
     },{
         name : 'in the wide area',
     },{
@@ -28,6 +51,7 @@ export const Missions = [{
         name : 'from the home to wide area network',
     }]
 }]
+/*
 console.log({Missions})
 export function writeMission( textScreen, level, sublevel, dirs ){
     const { width, height } = textScreen
@@ -45,8 +69,9 @@ export function writeMission( textScreen, level, sublevel, dirs ){
     if ( dirs ){
         textScreen.print(1,8,'routing instructions for hop')
         textScreen.printCenter(10,dirs.join(' . '),true)
-    }
+    } 
 
 
 
 }
+*/
