@@ -1,8 +1,6 @@
 import { fontInfo } from './mo5font.js'
 import { scaleContext, loadImageToCanvas } from './canvasUtils.js'
 
-
-
 function Font( fontInfo, scale ){
     let fontImageData = undefined
     loadImageToCanvas( fontInfo.src, (canvas,ctx) => {
@@ -33,48 +31,21 @@ function Font( fontInfo, scale ){
 
 export function TextScreen( width, height ){
     const data = new Uint8Array( width * height )
-    function print(x,y,string,prog=false){
-        prog = false
+    function print(x,y,string){
         let off = x + y * width
         for ( let i = 0 ; i < string.length ; i++ ){
-            const code = string.charCodeAt( i )
-            if ( prog ){
-                const d = code - data[  off + i  ]
-                if ( Math.abs( d ) > 128 ){
-                    data[  off + i  ] += 32
-                } else if ( d > 0 ){
-                    data[  off + i  ]++ 
-                } else if ( d < 0 ){
-                    data[  off + i  ]--
-                }
-
-            } else {
-                data[  off + i  ] = code
-            }
-            if ( ( off + i ) >= data.length ){
-                // console.error('out of bounds',x,y,string,i)
-            }
+            data[  off + i  ] = string.charCodeAt( i )
         }
     }
-    function printCenter(y,string,prog){
-        prog = false
+    function printCenter(y,string){
         const lmargin = Math.max(
             0,Math.floor((width-string.length)/2)
         )
-        print(lmargin,y,string,prog)
-                                 
+        print(lmargin,y,string)
     }
     function cls(prog){
-        prog = false
-        if ( prog ){
-            for ( let i = 0 ; i < data.length ; i++ )
-                if ( data[ i ] > 0 ){
-                    data[ i ]--
-                }
-        } else {
-            for ( let i = 0 ; i < data.length ; i++ )
-                data[ i ] = 0
-        }
+        for ( let i = 0 ; i < data.length ; i++ )
+            data[ i ] = 0
     }
     return { data, print, printCenter, cls, width, height }
 }
