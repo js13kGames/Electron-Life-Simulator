@@ -1,6 +1,6 @@
 //const THREE = require('three')
-import { BezierCurve } from './bezier.js'
-import { V2, cloneV2, subV2, addV2, multScalar, divScalar } from './v2.js'
+import { BezierCurve } from './maths/bezier.js'
+import { V2, cloneV2, subV2, addV2, multScalar, divScalar } from './maths/v2.js'
 export function mkChoices(){
 
     // options

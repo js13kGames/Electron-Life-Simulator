@@ -2,8 +2,8 @@
 import { KeyboardControllers } from './keyboardControllers.js'
 import { mkChoices } from './levelCreator.js'
 import { Cols } from './cols.js'
-import { lerp, clamp } from './v1.js'
-import { V2, cloneV2, copyV2, lerpV2} from './v2.js'
+import { lerp, clamp } from './maths/v1.js'
+import { V2, cloneV2, copyV2, lerpV2} from './maths/v2.js'
 import { Roller } from './roller.js'
 import { canvasStyle, bodyStyle } from './css.js'
 import { FeedbackBuffer } from './feedbackBuffer2.js'
@@ -20,7 +20,7 @@ const Stats = require('stats.js')
 var stats = new Stats();
 stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild( stats.dom );
-import * as measureFunction from './measureFunction'
+import * as measureFunction from './debug/measureFunction'
 
 
 
@@ -44,15 +44,16 @@ const oneShotSampler = OneShotSampler(ac, sounds)
 const oneShot = oneShotSampler.players
 const playerNoises = PlayerNoises(ac)
 const musicPlayer = Music.play(ac)
-/*
+
+
 oneShotSampler.globalGain.connect( ac.destination )
 oneShotSampler.globalGain.gain.value = 1.0
 playerNoises.globalGain.connect( ac.destination )
 playerNoises.globalGain.gain.value = 1.0
 musicPlayer.globalGain.connect( ac.destination )
 musicPlayer.globalGain.gain.value = 1.0
-*/
 
+/*
 Record(2,ac.sampleRate * 60,ac.sampleRate,
        ac => {
            const musicPlayer = Music.play( ac )
@@ -62,8 +63,11 @@ Record(2,ac.sampleRate * 60,ac.sampleRate,
        buffer => {
            console.log('rendered',buffer)
            playBuffer( ac, buffer, ac.destination, ac.currentTime, false )
+       },
+       ratio => {
+           console.log('progress',ratio*100,"%")
        })
-
+*/
 /*
 let done = false
 window.addEventListener('keydown', e => {
@@ -176,67 +180,6 @@ function Display(){
                 }
             }
         }        
-        // function drawPanel2( tp )
-        // {
-        //     for ( let j = 0 ; j < tp.canvas.height ; j++ ){
-        //         let off = Math.floor(10 + Math.sin( j / 10 + Date.now() / 25 ) * 10)
-        //         context.putImageData(
-        //             tp.imageData,
-        //             off,j,
-        //             0,j,
-        //             tp.canvas.width,2
-        //         )
-        //     }
-        // }
-        // function drawPanel( tp )
-        // {
-        //     let l=0,b =0
-        //     if ( tp.position === 'c' ){
-        //         l += Math.floor( (canvas.width - tp.canvas.width )/ 2 )
-        //         b += Math.floor( (canvas.height - tp.canvas.height) / 2 ) 
-        //     } else if ( tp.position === 'br' ){
-        //         l += canvas.width - tp.canvas.width
-        //         b += canvas.height  - tp.canvas.height
-        //     } else if ( tp.position === 'ct' ){
-        //         l += Math.floor( (canvas.width - tp.canvas.width )/ 2 )
-        //         b += tp.canvas.height
-        //     } else if ( tp.position === 'cbu' ){
-        //         l += Math.floor( (canvas.width - tp.canvas.width )/ 2 )
-        //         b += canvas.height  - tp.canvas.height - 40
-        //     }
-        //     l=Math.floor(l);
-        //     b=Math.floor(b)
-        //     for ( let j = 0 ; j < tp.canvas.height ; j++ ){
-        //         let xoff=0,yoff=0
-        //         if ( tp.animation  === 'a:floffle' ){ 
-        //             // xoff = 10 + Math.sin( j / 10 + Date.now() / 200 ) * 5
-        //             xoff = 10 + Math.sin( j / 10 + Date.now() / 400 ) * 5
-        //         } else if ( tp.animation  === 'a:sscroll'){
-        //             xoff = remainingTo * canvas.width / 10
-        //         }
-        //         /*context.putImageData(
-        //           tp.imageData,
-        //           300+off,j,
-        //           0,j,
-        //           tp.canvas.width,2
-        //           )*/
-        //         context.drawImage( tp.canvas,
-        //                            0, j,
-        //                            tp.canvas.width, 2,
-        //                            Math.floor(l+xoff),Math.floor(b+j+yoff),
-        //                            tp.canvas.width, 2)
-        //         /*
-        //           void ctx.putImageData(imageData, dx, dy);
-        //           void ctx.putImageData(imageData, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight);
-        //         */
-        //         /*
-        //           void ctx.drawImage(image, dx, dy);
-        //           void ctx.drawImage(image, dx, dy, dWidth, dHeight);
-        //           void ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-        //         */
-                
-        //     }
-        // }
         function box2screen( x,y,w,h, target ){
             target[0] = (x - w/2 - center.x) * scale + hcWidth
             target[1] = (y - h/2 - center.y) * scale + hcHeight

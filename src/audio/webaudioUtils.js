@@ -151,8 +151,16 @@ export function GlobalGain( ac ){
     g.gain.value = 0
     return g 
 }
-export function Record( channels, length, sampleRate, setup, ondone ){
+export function Record( channels, length, sampleRate, setup, ondone, onprogress ){
+    onprogress(0)
     const fwac = new OfflineAudioContext(channels,length,sampleRate)
+    const intv = setInterval( () => {
+        onprogress( fwac.currentTime / length * sampleRate )
+    },1000)
     setup( fwac )
-    fwac.startRendering().then( ondone )
+    fwac.startRendering().then( b => {
+        clearInterval( intv )
+        onprogress(1)
+        ondone(b)
+    })
 }

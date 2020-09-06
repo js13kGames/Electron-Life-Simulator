@@ -42,7 +42,7 @@ export function writeMission( textScreen, level, sublevel, dirs ){
         textScreen.printCenter(1,'Mission #'+level)
         textScreen.printCenter(2,'* '+mlevel.name.toUpperCase()+' *', true)
     }
-    if ( sublevel ){
+    if ( sublevel && mlevel ){
         const  msublevel = mlevel.subs[ sublevel - 1 ]
         textScreen.printCenter(5,'Next Hop #'+sublevel)
         textScreen.printCenter(6,msublevel.name, true )
