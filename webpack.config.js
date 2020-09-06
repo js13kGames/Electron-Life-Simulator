@@ -13,15 +13,5 @@ module.exports = {
     },
     watchOptions: {
         ignored: /\.#|node_modules|~$/,
-    }// ,
-    // rules: [
-    //     {
-    //         test: /\.(png)$/i,
-    //         use: [
-    //             {
-    //                 loader: 'file-loader',
-    //             },
-    //         ],
-    //     },
-    // ],
+    }
 }

@@ -1,8 +1,9 @@
 export const Missions = [{
     name : 'Printing is a simple task',
     subs : [{
-        name : 'Reach the printer',
-        succes : 'the printer seems to refuse the packet...'
+        name : 'Reach for the printer',
+        succes : 'the printer seems to refuse the packet...',
+        level : [300,30,3,[0,1,2]]
     },{
         name : 'Damn printer!',
         succes : 'the printer was out of paper'
@@ -25,12 +26,6 @@ export const Missions = [{
     name : 'A Journey in the local Network',
     subs : [{
         name : 'from the home to wide area network',
-    },{
-        name : 'in the wide area',
-    },{
-        name : 'reaching the server'
-    },{
-        name : ''
     }]
 }]
 console.log({Missions})

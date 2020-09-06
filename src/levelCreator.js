@@ -1,12 +1,18 @@
 //const THREE = require('three')
 import { BezierCurve } from './maths/bezier.js'
 import { V2, cloneV2, subV2, addV2, multScalar, divScalar } from './maths/v2.js'
-export function mkChoices(){
+import { Missions } from './missions.js'
 
+export function mkChoices( level, sublevel ){
+
+    const ld = Missions[ level ].subs[ sublevel ].level
+    console.log('MKCJOICES','for',level,sublevel,ld)
+    
+    
     // options
-    const width = 100,
+    const width = 300,
           height = 30    
-    const mainBranchesCount = 0,
+    const mainBranchesCount = 3,
           branchHeight = 4,
           hpad = 1,
           branchTop = height - branchHeight - hpad ,
