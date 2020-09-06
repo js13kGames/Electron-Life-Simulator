@@ -1,5 +1,9 @@
 // level :
 // width, height, mainBranchesCount, path
+const levelIntro = () => ({
+    name : 'Introduction',
+    level : [400,30,2,[0,0,0,1,1,1,1]]
+})
 export const Missions = [{
     name : 'test',
     subs : [{
@@ -21,22 +25,26 @@ export const Missions = [{
     }]
 },{
     name : 'Printing is a simple task',
-    subs : [{
-        name : 'Reach for the printer',
-        succes : 'the printer seems to refuse the packet...',
-        level : [400*3,30,3,[0,1,2,0,1,2,0,1,2]]
-    },{
-        name : 'Damn printer!',
-        succes : 'the printer was out of paper',
-        level : [200*3,30,3,[0,1,2,0,1,2,0,1,2]]
-    },{
-        name : 'Now we are printing',
-        succes : 'the warm noise of the printer suits your electron ears',
-        level : [100*3,30,3,[0,1,2,0,1,2,0,1,2]]
-    }]
+    subs : [
+        levelIntro(),
+        {
+            name : 'Reach for the printer',
+            succes : 'the printer seems to refuse the packet...',
+            level : [400*3,30,3,[0,1,2,0,1,2,0,1,2]]
+        },{
+            name : 'Damn printer!',
+            succes : 'the printer was out of paper',
+            level : [200*3,30,3,[0,1,2,0,1,2,0,1,2]]
+        },{
+            name : 'Now we are printing',
+            succes : 'the warm noise of the printer suits your electron ears',
+            level : [100*3,30,3,[0,1,2,0,1,2,0,1,2]]
+        }]
 },{
     name : 'The space transmission',
-    subs : [{
+    subs : [
+        levelIntro(),
+        {
         name : 'from the home to wide area network',
         level : [400*3,40,4,[0,0,0,4,1,2,0,1,2,0,4,1,2]]
     },{

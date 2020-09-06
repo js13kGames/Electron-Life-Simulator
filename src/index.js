@@ -109,7 +109,7 @@ function Display(){
     const hcWidth = canvas.width / 2,
           hcHeight = canvas.height / 2
     
-    function draw( { center, scale }, level, player, particles, timeoutBar, lifeBar, remainingTo ){
+    function draw( { center, scale }, level, player, particles, timeoutBar, lifeBar, remainingTo, Cols ){
         
         
         function drawMap(){
@@ -134,7 +134,7 @@ function Display(){
                     }
                     col = [...col]
                     //col[0]+=0.9*Math.random()
-                    const rgba = cssrgba( ...col ),
+                    const rgba = csshsl( ...col ),
                           x = Math.floor( (i - cpx) * scale + hcWidth ),
                           y = Math.floor( (j - cpy) * scale + hcHeight )
                     context.fillStyle = rgba
@@ -280,6 +280,9 @@ function cssrgba( r01,g01,b01,a=1){
           g = Math.floor( 256 * g01 ),
           b = Math.floor( 256 * b01 )
     return `rgba(${r},${g},${b},${a})`
+}
+function csshsl( h,s,l){
+    return `hsl(${360*h},${100*s}%,${100*l}%)`
 }
 function posCollide( level, pos, cells ){
     const { ij2idx, map, outij } = level,
@@ -930,13 +933,27 @@ const step = (dt,T) =>{
     const { feedbackBuffer } = display
     
     if ( stateNameIs('S3') ){
-        feedbackBuffer.o.a = 1
-    } else if ( (['S2'].includes(stateName())) ){
+        let a = feedbackBuffer.o.a
+        feedbackBuffer.o.a = clamp(a+1/60/3,0,1)
+    } /*else if ( (['S2'].includes(stateName())) ){
         feedbackBuffer.o.a = 0.02
-    } else {
+    }*/ else {
         feedbackBuffer.o.a = 0.05
     }
-    const elapsed = display.draw( camera, choices, player, particles, timeoutBar, lifeBar, remainingTo )
+    let cols
+    {
+        const slicedur = 1000
+        const disc = 8
+        const s = Math.floor(T/slicedur)
+        const slicen = s%disc
+        const slicea = slicen/disc
+        console.log(s,slicen,slicea)
+        const tcol = T/1000
+        cols = Cols(slicea)
+    }
+    
+    
+    const elapsed = display.draw( camera, choices, player, particles, timeoutBar, lifeBar, remainingTo, cols )
     if ( false ){
     if ( elapsed[ elapsed.length - 1 ] >= 8 ){
         console.log(elapsed)
