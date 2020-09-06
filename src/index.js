@@ -627,7 +627,7 @@ const step = (dt,T) =>{
     const timeoutBarVisibility = ['G1','S1','S2','R0','L1']
     const mapVisibility = ['S2','S3','W1','W2','L1']
     const playerVisibility = ['S2','S3']
-    const lifeBarVisibility = ['S2','S3','W1','W2','L1']
+    const lifeBarVisibility = ['S1','S2','S3','W1','W2','L1']
 
     function stateName(){
         return gameState.state.name
@@ -888,7 +888,7 @@ const step = (dt,T) =>{
     } else if ( ['L2'].includes(stateName()) ){
         printCenter(6,'404')
     } else if ( ['W1'].includes(stateName()) ){
-        printCenter(6,'sublevel won')
+//        printCenter(6,'sublevel won')
         printMission(false,false,true)
     } else if ( ['W2'].includes(stateName()) ){
         printCenter(6,'level won')
@@ -947,19 +947,21 @@ const step = (dt,T) =>{
     {
         const slicedur = 200 // ms
         const disc = 32
-        const s = (Math.floor(T/slicedur)%disc)/disc
+        const f = (Math.floor(T/slicedur)%disc)/disc
         const tcol = T/1000
-        cols = Cols(s)
+
+        const s = ( Math.sin(2*Math.PI*T/2000) * 2 ) - 1
+        cols = Cols(f,s)
     }
     
     
     const elapsed = display.draw( camera, choices, player, particles, timeoutBar, lifeBar, remainingTo, cols )
     if ( false ){
-    if ( elapsed[ elapsed.length - 1 ] >= 8 ){
-        console.log(elapsed)
-    } else {
-         console.log('<8')
-    }
+        if ( elapsed[ elapsed.length - 1 ] >= 8 ){
+            console.log(elapsed)
+        } else {
+            console.log('<8')
+        }
     }
 //    stats.end()
 

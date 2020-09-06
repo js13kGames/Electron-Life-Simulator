@@ -18,7 +18,7 @@ const base = [
 export function Cols( fond=0, sat=0.5, target = {} ){
     base.forEach( ([c,hsl]) => {
         const [h,s,l] = hsl
-        target[c] = [ (h+fond)%1, 0.5*s, l ]
+        target[c] = [ (h+fond)%1, 0.5*s*sat, l ]
     })
     return target
 }
