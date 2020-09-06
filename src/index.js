@@ -1,36 +1,32 @@
 "use strict";
-// cooridor debut / fin
-//const { OrbitControls } = require('three/examples/jsm/controls/OrbitControls.js')
-// const THREE = require('three')
-const Stats = require('stats.js')
-//const tunnel = require('./tunnel.js')
-//require('./zzfx.js')
-
 import { KeyboardControllers } from './keyboardControllers.js'
 import { mkChoices } from './levelCreator.js'
 import { Cols } from './cols.js'
-//import { textCanvas } from './textPlane.js'
+import { lerp, clamp } from './v1.js'
 import { V2, cloneV2, copyV2, lerpV2} from './v2.js'
 import { Roller } from './roller.js'
 import { canvasStyle, bodyStyle } from './css.js'
 import { FeedbackBuffer } from './feedbackBuffer2.js'
 import { TextMode, font1, font2, font4, TextScreen } from './textMode.js'
 import { writeMission, Mission } from './missions.js'
-import { PlayerNoises } from './playerNoises.js'
-import { OneShotSampler } from './oneShotSampler.js'
+import { PlayerNoises } from './audio/playerNoises.js'
+import { OneShotSampler } from './audio/oneShotSampler.js'
+import { playBuffer, Record } from './audio/webaudioUtils.js'
+import * as Music from './audio/music.js'
 
-import { playBuffer } from './webaudioUtils.js'
+
+// time measurement
+const Stats = require('stats.js')
+var stats = new Stats();
+stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild( stats.dom );
 import * as measureFunction from './measureFunction'
+
+
 
 document.body.style = bodyStyle
 
-const levels = []
-//    minspeed, width, height, mainBranchesCount,
-
 const ac = new AudioContext()
-console.log('st',ac.sampleRate)
-const playerNoises = PlayerNoises(ac)
-
 const sounds = {
     u : [,,1049,,.09,.25,,.45,,,442,.05,,.1,,,,.51,.08,.1],
     v : [1.2,,1322,.05,.12,.03,1,.02,31,7.7,,,,,,,.27,.33,.04,.01],
@@ -46,8 +42,41 @@ const sounds = {
 
 const oneShotSampler = OneShotSampler(ac, sounds)
 const oneShot = oneShotSampler.players
+const playerNoises = PlayerNoises(ac)
+const musicPlayer = Music.play(ac)
+/*
+oneShotSampler.globalGain.connect( ac.destination )
+oneShotSampler.globalGain.gain.value = 1.0
+playerNoises.globalGain.connect( ac.destination )
+playerNoises.globalGain.gain.value = 1.0
+musicPlayer.globalGain.connect( ac.destination )
+musicPlayer.globalGain.gain.value = 1.0
+*/
 
+Record(2,ac.sampleRate * 60,ac.sampleRate,
+       ac => {
+           const musicPlayer = Music.play( ac )
+           musicPlayer.globalGain.connect( ac.destination )
+           musicPlayer.globalGain.gain.value = 1.0           
+       },
+       buffer => {
+           console.log('rendered',buffer)
+           playBuffer( ac, buffer, ac.destination, ac.currentTime, false )
+       })
+
+/*
 let done = false
+window.addEventListener('keydown', e => {
+    if ( done ) return
+    done = true
+    const musicPlayer = Music.play(ac)
+    musicPlayer.globalGain.connect( ac.destination )
+    musicPlayer.update({gain:1.0})
+})
+
+
+
+let done = true
 window.addEventListener('keydown', e => {
     if ( done ) return
     done = true
@@ -72,22 +101,6 @@ window.addEventListener('keydown', e => {
         }, 1000
     )
 })
-
-
-import * as Music from './music.js'
-/*
-let done = false
-window.addEventListener('keydown', e => {
-    if ( done ) return
-    done = true
-    const musicPlayer = Music.play(ac)
-    musicPlayer.globalGain.connect( ac.destination )
-    musicPlayer.update({gain:1.0})
-})
-
-oneShotSampler.globalGain.connect( ac.destination )
-oneShotSampler.globalGain.gain.value = 1.0
-playerNoises.globalGain.connect( ac.destination )
 */
 
 
@@ -96,60 +109,6 @@ const targetSize = {
     width : 256,
     height : Math.floor(256/ar)
 }
-var stats = new Stats();
-stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-document.body.appendChild( stats.dom );
-
-// function Texts(){
-//     let textPanels ={}
-//     const family = 'monospace'
-//     const textTargetSize = {  width : targetSize.width/2,
-//                               height : targetSize.height/2 }
-//     const desc = [ 
-//         ['welcome','icentive title screen software limited presents','green'],
-//         //['title','incentive title screen','white'],
-//         ['title','ip racer 2030','white'],        
-//         ['intro','the story begins...','white'],
-//         //['levelnum','!levelnum!','white','ct'],
-// //        ['sublevelnum','!sublevelnum','white','cbu'],
-//         //['instructions','!routr!','white','cbu'/*,'a:sscroll'*/],
-//         ['ready?','connecting...','white','cbu'/*,'a:sscroll'*/],
-//         ['subwin','hop covered !','white','cbu'],
-//         ['redirecting','redirecting to next hop...','white','cbu'],
-//         ['levelwin','network covered !','white','cbu'],
-//         ['win','you won it all !','white'],
-//         //['go','fetch','green'],
-//         ['failed','401 Unauthorized','white','cbu','a:sscroll'],
-//         ['nextlevel','301 Moved permanently','orange'],
-//         ['success','host contacted','orange'], //200
-//         ['gameover','404 Not found!','white'],
-//         ['c0','zero','brown'],
-//         ['c1','one','white'],
-//         ['c.','.','grey'],
-//         ['anykey','[press any key to continue...]','grey','br','a:none']
-//     ]
-//     desc.forEach( ([k,msg,style,position='c',animation = 'a:floffle']) => {
-//         //        console.log('***',msg,family,style,textTargetSize)
-//         const panel = textCanvas( msg,family,style,textTargetSize )
-//         panel.position=position
-//         panel.animation = animation
-//         textPanels[k] = panel
-//     })
-//     function updateInstructions(){
-//         return updateMessage('instructions')
-//     }
-//     function updateMessage(name,msg){
-//         const panel = textPanels[ name ]
-//         const d = desc.find( d => d[0] === name )
-//         //        console.log('***>',d)
-//         //        console.log('***',msg, textTargetSize)
-//         const tcid = textCanvas( msg, family, d[2], textTargetSize)
-//         textPanels[ name ] 
-//         panel.canvas = tcid.canvas
-//         panel.imageData = tcid.imageData
-//     }
-//     return { textPanels, updateMessage }
-// }
 
 function Display(){
     
@@ -408,9 +367,6 @@ function Display(){
 }
 
 
-function clamp(x,min,max){
-    return Math.max(min,Math.min(x,max))
-}
 function cssrgba( r01,g01,b01,a=1){
     const r = Math.floor( 256 * r01 ),
           g = Math.floor( 256 * g01 ),
@@ -941,29 +897,16 @@ const step = (dt,T) =>{
         const rayLength = 100
         const wallDist = frontRaycast( player.position, rayLength,['*'] )
         if ( wallDist !== undefined ){
-            const wallProx = clamp((rayLength - wallDist - 1) / ( rayLength - 2 ),0,1
-                                  )
+            const wallProx = clamp((rayLength - wallDist - 1) / ( rayLength - 2 ),0,1 )
             WALLDIST = wallProx
             //console.log('seen',wallProx)
         }
         
     }
-    /*
-      
-      copyV2( nextPosition, camera.center )
-    */
-    // display
-    
-    /* camera.center.x += ( -1*l + r ) * dt / 1000
-       camera.center.y += ( -1*u + d ) * dt / 1000*/
+
     camera.scale *= ( 1 + ( -1*o + p ) / 10 ) 
     camera.scale = clamp( camera.scale, 4,32) // 4 wide zoom, 32 closeup
-    /*
-    Object.entries(texts.textPanels).forEach( ([pname,tp]) => {
-        const v = textVisibility[ gameState.state.name ]
-        tp.visible = ( v && v.includes(pname) )
-    })
-*/
+
     if ( choices ){
         choices.visible = mapVisibility.includes( gameState.state.name )
     }
@@ -989,42 +932,8 @@ const step = (dt,T) =>{
     }
     lifeBar.visible = lifeBarVisibility.includes(  gameState.state.name )
     copyV2( player.position, camera.center )
+ 
 
-    
-
-    /*
-    const currentFeedBackMode = display.feedbackBuffer.getMode()
-    //console.log('cr',currentFeedBackMode)
-    const feedBackChoices = feedbackEffect[ gameState.state.name ]
-    //const feedBackChoices = ['blur']
-
-    const justChange = Math.random() > 0.98,
-          fbcInList = feedBackChoices.includes(currentFeedBackMode),
-          fbcFirst = feedBackChoices[ 0 ] === currentFeedBackMode
-
-    if ( !fbcFirst ){
-        const rmode = feedBackChoices[ 0 ]
-        const mode = display.feedbackBuffer.setMode(rmode)
-    }
-*/
-    // let rmode = currentFeedBackMode
-    // if ( fbcFirst ){
-    //     // rarely change to other
-    //     if ( Math.random() < (3 / 1000) ){
-    //         rmode = feedBackChoices[ 1 +  Math.floor( ( feedBackChoices.length - 1 ) * Math.random() ) ]
-    //     }
-    // }  else if (fbcInList ){
-    //     // often change to first
-    //     if ( Math.random() < (10 /1000)){
-    //         rmode = feedBackChoices[ 0 ]
-    //     }        
-    // } else {
-    //     rmode = feedBackChoices[ 0 ]
-    // }
-    // if ( rmode !== currentFeedBackMode ){
-    //     const mode = display.feedbackBuffer.setMode(rmode)
-    //     console.log('+->',mode)
-    // }
 
     playerNoises.update({
         energy : gameState.state.energy,
@@ -1036,23 +945,6 @@ const step = (dt,T) =>{
     })
 
     
-    /*  
-        const justChange = Math.random() > 0.98,
-        mustChange = !(feedBackChoices.includes(currentFeedBackMode))
-        //&& ( Math.random() < 1/20 )
-        if ( justChange || mustChange ){
-        let rmode
-        if ( Math.random() > 0.8 ) {
-        rmode = feedBackChoices[ 0 ]
-        } else {
-        rmode = feedBackChoices[
-        1 +  Math.floor( ( feedBackChoices.length - 1 ) * Math.random() )
-        ]
-        }
-        console.log('->',rmode)
-        const mode = display.feedbackBuffer.setMode(rmode)
-        }
-    */
     textScreen.cls()        
     display.textMode.visible = true
     if ( ['G0'].includes(gameState.state.name) ){
@@ -1186,27 +1078,3 @@ function updateParticles(particles,pmp,targethasCollision,collision,playerEnergy
         }
     }
 }
-function lerp(a,b,p){ return ( 1 - p ) * a + p * b }
-/*
-  setTimeout( ()=> roller.command(), 1000)
-  setTimeout( ()=> roller.command(1), 2000)
-  setTimeout( ()=> roller.command(0), 3000)
-*/
-// function print(){
-//     const s = gameState.state
-//     console.log('->#',s.name,'l',s.level,'sl',s.sublevel,'lives',s.lives)
-// }
-// function say(m){
-//     return function(){
-//         gameState.event(m)
-//     }
-// }
-// function repeat(r){
-//     return function (...fs){
-//         for (let i = 0 ; i < r ; i++){
-//             fs.forEach( f => f() )
-//         }
-//     }
-// 
-//}ScratchBuffer
-
