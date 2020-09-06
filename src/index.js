@@ -117,7 +117,7 @@ function Display(){
                     ij2idx, outij } = level
             const  cpx = center.x + 0.5,
                   cpy = center.y + 0.5,
-                  //visiblemap = {
+                  //vismap = {
                   l = clamp(Math.floor( cpx - hcWidth / scale ),0,width-1),
                   r = clamp(Math.ceil( cpx + hcWidth / scale ),0,width-1),
                   b = clamp(Math.floor( cpy - hcHeight / scale ),0,height-1),
@@ -223,35 +223,35 @@ function Display(){
                 //display.newframe( )
             },
             () => {
-                if (level && level.visible) drawMap()
+                if (level && level.vis) drawMap()
             },
             () => {
-                if ( textMode.visible ) textMode.draw()
+                if ( textMode.vis ) textMode.draw()
             },
             () => {
                 const dx = Math.floor( ( canvas.width - textMode.canvas.width  )/ 2 ),
                       dy = Math.floor( ( canvas.height - textMode.canvas.height ) / 2 )
-                if ( textMode.visible )
+                if ( textMode.vis )
                     context.drawImage( textMode.canvas,dx,dy )
             },
             () => {
-                if ( player.visible ) drawPlayer( context, camera)
+                if ( player.vis ) drawPlayer( context, camera)
             },
             () => {
                 particles.els.forEach( (particle,i) => {
-                    if ( particle.visible )
+                    if ( particle.vis )
                         drawParticle( context, camera, particle, i )
                 })
             },
             // () => {
             //     /*Object.values(texts.textPanels).forEach( tp => {
-            //         if ( tp.visible ){
+            //         if ( tp.vis ){
             //             drawPanel(tp)
             //         }
             //     })*/
             // },
             () => {
-                if ( timeoutBar.visible ){
+                if ( timeoutBar.vis ){
                     drawTimeoutBar()
                 }
             },
@@ -262,7 +262,7 @@ function Display(){
                 feedbackBuffer.alter(context)
             },
             () => {
-                if ( lifeBar.visible ){
+                if ( lifeBar.vis ){
                     drawLifeBar()
                 }
             }
@@ -566,7 +566,7 @@ function GameState(){
 
 function Player(){
     return {
-        visible : true,
+        vis : true,
         position : V2(0,0),
         lastpos : V2(0,0)
     }
@@ -577,7 +577,7 @@ function Particles(){
     for ( let i = 0 ; i < PARTICLE_COUNT ; i++ ){
         els[i] = {
             dim : 0.25,
-            visible : true,
+            vis : true,
             position : {
                 x : 10,
                 y : 10
@@ -592,12 +592,12 @@ function Particles(){
 }
 function TimeoutBar(){
     return {
-        visible : true,
+        vis : true,
     }
 }
 function LifeBar(){
     return {
-        visible : true,
+        vis : true,
         l : 5, // current
         L : 5 // max
     }
@@ -626,6 +626,9 @@ const step = (dt,T) =>{
     function stateName(){
         return gameState.state.name
     }
+    function stateNameIs(n){
+        return gameState.state.name === n
+    }
     function stateIsOneOf( ...names ){
         return names.flat().includes( stateName() )
     }
@@ -641,12 +644,12 @@ const step = (dt,T) =>{
     // check timeouts
     const remainingTo = gameState.checkTimeouts(T)
     timeoutBar.remain = remainingTo
-    timeoutBar.visible =  (remainingTo !== undefined) 
+    timeoutBar.vis =  (remainingTo !== undefined) 
         && timeoutBarVisibility.includes( stateName() ) 
     if ( keyboardController.anyKeyStroke.length ){
         //  textScreen.cls()
     }
-    const TIME_BEFORE_SKIP_STATE = 600
+    const TIME_BEFORE_SKIP_STATE = 1600
     // grab input
 //    stats.begin()
 
@@ -655,7 +658,7 @@ const step = (dt,T) =>{
     /*
     if ( ['I0','I1','G0','G1','G2','S1',
     'L1','L2','W2','W3','R0'].includes( stateName() ) ){*/
-    if ( !stateIsOneOf('S3') ){
+    if ( !stateIsOneOf('S2','S3') ){
     
         if ( sinceStateStart > TIME_BEFORE_SKIP_STATE ){
             if ( keyboardController.anyKeyStroke.length ){
@@ -761,9 +764,9 @@ const step = (dt,T) =>{
     camera.scale = clamp( camera.scale, 4,32) // 4 wide zoom, 32 closeup
 
     if ( choices ){
-        choices.visible = mapVisibility.includes( stateName() )
+        choices.vis = mapVisibility.includes( stateName() )
     }
-    player.visible = playerVisibility.includes(  stateName() )
+    player.vis = playerVisibility.includes(  stateName() )
     player.energy =  gameState.state.energy
     player.hasCollision = HASCOLLIDSION
 
@@ -777,13 +780,13 @@ const step = (dt,T) =>{
         const target = player.position
         updateParticles( particles, target, HASCOLLIDSION, collision,gameState.state.energy,  stateName() )
     }
-    //if ( choices ) choices.visible = true
+    //if ( choices ) choices.vis = true
     if ( ( gameState.state.lives !== undefined )
          && ( gameState.state.lives !== undefined) ){
         lifeBar.l = gameState.state.lives
         lifeBar.L = gameState.state.L
     }
-    lifeBar.visible = lifeBarVisibility.includes(  stateName() )
+    lifeBar.vis = lifeBarVisibility.includes(  stateName() )
     copyV2( player.position, camera.center )
  
 
@@ -836,7 +839,7 @@ const step = (dt,T) =>{
         //printCenter(6,`"${ms.name}"`)
     }
     
-    display.textMode.visible = true
+    display.textMode.vis = true
     textScreen.cls()
     if ( ['I2','I1S'].includes(stateName()) ){
         printCenter(1,'The Odyssey Begins...')
@@ -897,7 +900,7 @@ const step = (dt,T) =>{
     } else if ( ['S2'].includes(stateName()) ){
         printCenter(14,'ready?')
     } else {
-        //display.textMode.visible = false
+        //display.textMode.vis = false
     }
     
     textScreen.print(0,14,stateName())
@@ -924,14 +927,14 @@ const step = (dt,T) =>{
                          +' lives')*/
     }
 
-    if ( (['S3'].includes(stateName())) ){
-        display.feedbackBuffer.o.a = 1
+    const { feedbackBuffer } = display
+    
+    if ( stateNameIs('S3') ){
+        feedbackBuffer.o.a = 1
     } else if ( (['S2'].includes(stateName())) ){
-        if ( sinceStateStart > 10 ){
-            display.feedbackBuffer.o.a = clamp(sinceStateStart,0,2000)/2000
-        }
+        feedbackBuffer.o.a = 0.02
     } else {
-        display.feedbackBuffer.o.a = 0.05
+        feedbackBuffer.o.a = 0.05
     }
     const elapsed = display.draw( camera, choices, player, particles, timeoutBar, lifeBar, remainingTo )
     if ( false ){

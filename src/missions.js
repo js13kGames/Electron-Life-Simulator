@@ -4,7 +4,8 @@ export const Missions = [{
     name : 'test',
     subs : [{
         name : 'test1',
-        level : [500,100,2,[0,0,1,1,1,0,0]]
+        level : [500,30,2,[0,0,1,1,1,0,0]], // challening for beginner
+        // level : [500,100,2,[0,0,1,1,1,0,0]] // challening for beginner
     }]
 },{
     name : 'Cable Worker',
@@ -16,7 +17,7 @@ export const Missions = [{
         level : [500,100,2,[0,0,0,0,0,0,0,0,0]]
     },{
         name : 'Control yourself',
-        level : [500,100,2,[0,0,1,1,1,0,0]]
+        level : [400,30,2,[0,0,0,1,1,1,1]]
     }]
 },{
     name : 'Printing is a simple task',
