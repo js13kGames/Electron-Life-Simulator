@@ -9,18 +9,20 @@ const Stats = require('stats.js')
 import { KeyboardControllers } from './keyboardControllers.js'
 import { mkChoices } from './levelCreator.js'
 import { Cols } from './cols.js'
-import { textCanvas } from './textPlane.js'
+//import { textCanvas } from './textPlane.js'
 import { V2, cloneV2, copyV2, lerpV2} from './v2.js'
 import { Roller } from './roller.js'
 import { canvasStyle, bodyStyle } from './css.js'
 import { FeedbackBuffer } from './feedbackBuffer2.js'
-import { TextMode, font2, font4, TextScreen } from './textMode.js'
+import { TextMode, font1, font2, font4, TextScreen } from './textMode.js'
 import { writeMission, Mission } from './missions.js'
 import { PlayerNoises } from './playerNoises.js'
 import { OneShotSampler } from './oneShotSampler.js'
 
 import { playBuffer } from './webaudioUtils.js'
 import * as measureFunction from './measureFunction'
+
+document.body.style = bodyStyle
 
 const levels = []
 //    minspeed, width, height, mainBranchesCount,
@@ -51,7 +53,7 @@ window.addEventListener('keydown', e => {
     done = true
     //if ( e.key === 's'){
     const offlineAc = new OfflineAudioContext(2,44100*4,ac.sampleRate)
-                        //60*0.25,ac.sampleRate)
+    //60*0.25,ac.sampleRate)
     console.log(offlineAc);
     const sd = Date.now()
     const musicPlayer = Music.play(offlineAc)
@@ -98,56 +100,56 @@ var stats = new Stats();
 stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild( stats.dom );
 
-function Texts(){
-    let textPanels ={}
-    const family = 'monospace'
-    const textTargetSize = {  width : targetSize.width/2,
-                              height : targetSize.height/2 }
-    const desc = [ 
-        ['welcome','icentive title screen software limited presents','green'],
-        //['title','incentive title screen','white'],
-        ['title','ip racer 2030','white'],        
-        ['intro','the story begins...','white'],
-        //['levelnum','!levelnum!','white','ct'],
-//        ['sublevelnum','!sublevelnum','white','cbu'],
-        //['instructions','!routr!','white','cbu'/*,'a:sscroll'*/],
-        ['ready?','connecting...','white','cbu'/*,'a:sscroll'*/],
-        ['subwin','hop covered !','white','cbu'],
-        ['redirecting','redirecting to next hop...','white','cbu'],
-        ['levelwin','network covered !','white','cbu'],
-        ['win','you won it all !','white'],
-        //['go','fetch','green'],
-        ['failed','401 Unauthorized','white','cbu','a:sscroll'],
-        ['nextlevel','301 Moved permanently','orange'],
-        ['success','host contacted','orange'], //200
-        ['gameover','404 Not found!','white'],
-        ['c0','zero','brown'],
-        ['c1','one','white'],
-        ['c.','.','grey'],
-        ['anykey','[press any key to continue...]','grey','br','a:none']
-    ]
-    desc.forEach( ([k,msg,style,position='c',animation = 'a:floffle']) => {
-        //        console.log('***',msg,family,style,textTargetSize)
-        const panel = textCanvas( msg,family,style,textTargetSize )
-        panel.position=position
-        panel.animation = animation
-        textPanels[k] = panel
-    })
-    function updateInstructions(){
-        return updateMessage('instructions')
-    }
-    function updateMessage(name,msg){
-        const panel = textPanels[ name ]
-        const d = desc.find( d => d[0] === name )
-        //        console.log('***>',d)
-        //        console.log('***',msg, textTargetSize)
-        const tcid = textCanvas( msg, family, d[2], textTargetSize)
-        textPanels[ name ] 
-        panel.canvas = tcid.canvas
-        panel.imageData = tcid.imageData
-    }
-    return { textPanels, updateMessage }
-}
+// function Texts(){
+//     let textPanels ={}
+//     const family = 'monospace'
+//     const textTargetSize = {  width : targetSize.width/2,
+//                               height : targetSize.height/2 }
+//     const desc = [ 
+//         ['welcome','icentive title screen software limited presents','green'],
+//         //['title','incentive title screen','white'],
+//         ['title','ip racer 2030','white'],        
+//         ['intro','the story begins...','white'],
+//         //['levelnum','!levelnum!','white','ct'],
+// //        ['sublevelnum','!sublevelnum','white','cbu'],
+//         //['instructions','!routr!','white','cbu'/*,'a:sscroll'*/],
+//         ['ready?','connecting...','white','cbu'/*,'a:sscroll'*/],
+//         ['subwin','hop covered !','white','cbu'],
+//         ['redirecting','redirecting to next hop...','white','cbu'],
+//         ['levelwin','network covered !','white','cbu'],
+//         ['win','you won it all !','white'],
+//         //['go','fetch','green'],
+//         ['failed','401 Unauthorized','white','cbu','a:sscroll'],
+//         ['nextlevel','301 Moved permanently','orange'],
+//         ['success','host contacted','orange'], //200
+//         ['gameover','404 Not found!','white'],
+//         ['c0','zero','brown'],
+//         ['c1','one','white'],
+//         ['c.','.','grey'],
+//         ['anykey','[press any key to continue...]','grey','br','a:none']
+//     ]
+//     desc.forEach( ([k,msg,style,position='c',animation = 'a:floffle']) => {
+//         //        console.log('***',msg,family,style,textTargetSize)
+//         const panel = textCanvas( msg,family,style,textTargetSize )
+//         panel.position=position
+//         panel.animation = animation
+//         textPanels[k] = panel
+//     })
+//     function updateInstructions(){
+//         return updateMessage('instructions')
+//     }
+//     function updateMessage(name,msg){
+//         const panel = textPanels[ name ]
+//         const d = desc.find( d => d[0] === name )
+//         //        console.log('***>',d)
+//         //        console.log('***',msg, textTargetSize)
+//         const tcid = textCanvas( msg, family, d[2], textTargetSize)
+//         textPanels[ name ] 
+//         panel.canvas = tcid.canvas
+//         panel.imageData = tcid.imageData
+//     }
+//     return { textPanels, updateMessage }
+// }
 
 function Display(){
     
@@ -164,7 +166,7 @@ function Display(){
 
     const feedbackBuffer = FeedbackBuffer( context )
     
-    const textMode = TextMode( textScreen, font2 )
+    const textMode = TextMode( textScreen, font1 )
     
     const nominalScale = 8
     //const nominalScale = 2//32
@@ -179,7 +181,7 @@ function Display(){
     const hcWidth = canvas.width / 2,
           hcHeight = canvas.height / 2
     
-    function draw( { center, scale }, level, player, particles, texts, timeoutBar, lifeBar, remainingTo ){
+    function draw( { center, scale }, level, player, particles, timeoutBar, lifeBar, remainingTo ){
         
         
         function drawMap(){
@@ -215,67 +217,67 @@ function Display(){
                 }
             }
         }        
-        function drawPanel2( tp )
-        {
-            for ( let j = 0 ; j < tp.canvas.height ; j++ ){
-                let off = Math.floor(10 + Math.sin( j / 10 + Date.now() / 25 ) * 10)
-                context.putImageData(
-                    tp.imageData,
-                    off,j,
-                    0,j,
-                    tp.canvas.width,2
-                )
-            }
-        }
-        function drawPanel( tp )
-        {
-            let l=0,b =0
-            if ( tp.position === 'c' ){
-                l += Math.floor( (canvas.width - tp.canvas.width )/ 2 )
-                b += Math.floor( (canvas.height - tp.canvas.height) / 2 ) 
-            } else if ( tp.position === 'br' ){
-                l += canvas.width - tp.canvas.width
-                b += canvas.height  - tp.canvas.height
-            } else if ( tp.position === 'ct' ){
-                l += Math.floor( (canvas.width - tp.canvas.width )/ 2 )
-                b += tp.canvas.height
-            } else if ( tp.position === 'cbu' ){
-                l += Math.floor( (canvas.width - tp.canvas.width )/ 2 )
-                b += canvas.height  - tp.canvas.height - 40
-            }
-            l=Math.floor(l);
-            b=Math.floor(b)
-            for ( let j = 0 ; j < tp.canvas.height ; j++ ){
-                let xoff=0,yoff=0
-                if ( tp.animation  === 'a:floffle' ){ 
-                    // xoff = 10 + Math.sin( j / 10 + Date.now() / 200 ) * 5
-                    xoff = 10 + Math.sin( j / 10 + Date.now() / 400 ) * 5
-                } else if ( tp.animation  === 'a:sscroll'){
-                    xoff = remainingTo * canvas.width / 10
-                }
-                /*context.putImageData(
-                  tp.imageData,
-                  300+off,j,
-                  0,j,
-                  tp.canvas.width,2
-                  )*/
-                context.drawImage( tp.canvas,
-                                   0, j,
-                                   tp.canvas.width, 2,
-                                   Math.floor(l+xoff),Math.floor(b+j+yoff),
-                                   tp.canvas.width, 2)
-                /*
-                  void ctx.putImageData(imageData, dx, dy);
-                  void ctx.putImageData(imageData, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight);
-                */
-                /*
-                  void ctx.drawImage(image, dx, dy);
-                  void ctx.drawImage(image, dx, dy, dWidth, dHeight);
-                  void ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-                */
+        // function drawPanel2( tp )
+        // {
+        //     for ( let j = 0 ; j < tp.canvas.height ; j++ ){
+        //         let off = Math.floor(10 + Math.sin( j / 10 + Date.now() / 25 ) * 10)
+        //         context.putImageData(
+        //             tp.imageData,
+        //             off,j,
+        //             0,j,
+        //             tp.canvas.width,2
+        //         )
+        //     }
+        // }
+        // function drawPanel( tp )
+        // {
+        //     let l=0,b =0
+        //     if ( tp.position === 'c' ){
+        //         l += Math.floor( (canvas.width - tp.canvas.width )/ 2 )
+        //         b += Math.floor( (canvas.height - tp.canvas.height) / 2 ) 
+        //     } else if ( tp.position === 'br' ){
+        //         l += canvas.width - tp.canvas.width
+        //         b += canvas.height  - tp.canvas.height
+        //     } else if ( tp.position === 'ct' ){
+        //         l += Math.floor( (canvas.width - tp.canvas.width )/ 2 )
+        //         b += tp.canvas.height
+        //     } else if ( tp.position === 'cbu' ){
+        //         l += Math.floor( (canvas.width - tp.canvas.width )/ 2 )
+        //         b += canvas.height  - tp.canvas.height - 40
+        //     }
+        //     l=Math.floor(l);
+        //     b=Math.floor(b)
+        //     for ( let j = 0 ; j < tp.canvas.height ; j++ ){
+        //         let xoff=0,yoff=0
+        //         if ( tp.animation  === 'a:floffle' ){ 
+        //             // xoff = 10 + Math.sin( j / 10 + Date.now() / 200 ) * 5
+        //             xoff = 10 + Math.sin( j / 10 + Date.now() / 400 ) * 5
+        //         } else if ( tp.animation  === 'a:sscroll'){
+        //             xoff = remainingTo * canvas.width / 10
+        //         }
+        //         /*context.putImageData(
+        //           tp.imageData,
+        //           300+off,j,
+        //           0,j,
+        //           tp.canvas.width,2
+        //           )*/
+        //         context.drawImage( tp.canvas,
+        //                            0, j,
+        //                            tp.canvas.width, 2,
+        //                            Math.floor(l+xoff),Math.floor(b+j+yoff),
+        //                            tp.canvas.width, 2)
+        //         /*
+        //           void ctx.putImageData(imageData, dx, dy);
+        //           void ctx.putImageData(imageData, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight);
+        //         */
+        //         /*
+        //           void ctx.drawImage(image, dx, dy);
+        //           void ctx.drawImage(image, dx, dy, dWidth, dHeight);
+        //           void ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+        //         */
                 
-            }
-        }
+        //     }
+        // }
         function box2screen( x,y,w,h, target ){
             target[0] = (x - w/2 - center.x) * scale + hcWidth
             target[1] = (y - h/2 - center.y) * scale + hcHeight
@@ -314,7 +316,7 @@ function Display(){
                                              dim, dim, sb ) )
         }
         function drawTimeoutBar(){
-            const height = 20
+            const height = 10
             context.fillStyle = cssrgba(1,1,1,0.25)
             context.fillRect(0,canvas.height-height,
                              canvas.width*timeoutBar.remain,canvas.height)
@@ -357,12 +359,13 @@ function Display(){
                 if (level && level.visible) drawMap()
             },
             () => {
-                textMode.draw()
+                if ( textMode.visible ) textMode.draw()
             },
             () => {
                 const dx = Math.floor( ( canvas.width - textMode.canvas.width  )/ 2 ),
                       dy = Math.floor( ( canvas.height - textMode.canvas.height ) / 2 )
-                context.drawImage( textMode.canvas,dx,dy )
+                if ( textMode.visible )
+                    context.drawImage( textMode.canvas,dx,dy )
             },
             () => {
                 if ( player.visible ) drawPlayer( context, camera)
@@ -373,13 +376,13 @@ function Display(){
                         drawParticle( context, camera, particle, i )
                 })
             },
-            () => {
-                Object.values(texts.textPanels).forEach( tp => {
-                    if ( tp.visible ){
-                        drawPanel(tp)
-                    }
-                })
-            },
+            // () => {
+            //     /*Object.values(texts.textPanels).forEach( tp => {
+            //         if ( tp.visible ){
+            //             drawPanel(tp)
+            //         }
+            //     })*/
+            // },
             () => {
                 if ( timeoutBar.visible ){
                     drawTimeoutBar()
@@ -468,7 +471,9 @@ function GameState(){
     const NOMINAL_ENERGY = 1
     const automata = {
         I : {
-            'start' : d => update({name:'I0'})
+            'start' : d => {
+                update({name:'I0'})
+            }
         },
         // boot intro and warm welcoming message
         I0 : {
@@ -492,18 +497,25 @@ function GameState(){
         // global mission explanation and good luck player !
         G0 : {
             'next' : d => {
+                update({name:'G1'})
+                oneShot.v()
+            }
+        },
+        // level presentation
+        G1 : {
+            'next' : d => {
                 update({
                     L : NLIVES,
                     lives : NLIVES,
                     level : 1,
                     sublevel : 1,
-                    name:'G1'
+                    name:'G2'
                 })
                 oneShot.w()
             }
         },
         // sublevel generation
-        G1 : {
+        G2 : {
             '>' : () => {
                 update({
                     choices : mkChoices(),
@@ -514,7 +526,7 @@ function GameState(){
                 //texts.updateMessage('instructions','route : '+ dirs.join('.'))
                 copyV2(gameState.state.choices.startPosition, player.position)
                 copyV2(player.position,display.camera.center)
-                timeout( () => event('next'),5000)
+                timeout( () => event('next'),50000)
             },
             'next' : d => {
                 update({
@@ -530,7 +542,7 @@ function GameState(){
                 const dirs = gameState.state.choices.directions
                 copyV2(gameState.state.choices.startPosition, player.position)
                 copyV2(player.position,display.camera.center)
-                timeout( () => event('next'), 1000 + dirs.length * 1000 )
+                timeout( () => event('next'), 10000 +1000 + dirs.length * 1000 )
             },
             'next' : d => {
                 update({
@@ -629,7 +641,7 @@ function GameState(){
             },            
             'next' :  d => update({
                 choices : undefined,
-                name : 'G1',
+                name : 'G2',
             })
         },
         // level win animation
@@ -638,7 +650,7 @@ function GameState(){
                 choices : undefined,
                 level : state.level + 1,
                 sublevel : 1,
-                name:'G1'
+                name:'G0'
             })
         },
         // game win animation
@@ -767,7 +779,7 @@ const gameState = GameState()
 const display = Display()
 const player = Player()
 const particles = Particles()
-const texts = Texts()
+//const texts = Texts()
 const timeoutBar = TimeoutBar()
 const lifeBar = LifeBar()
 
@@ -779,7 +791,8 @@ const step = (dt,T) =>{
         'I0' : ['welcome','anykey'],
         'I1' : ['title'],
         'G0' : ['intro','anykey'],
-        'G1' : [/*'levelnum','sublevelnum'*/],
+        'G1' : ['intro','anykey'],
+        'G2' : [/*'levelnum','sublevelnum'*/],
         'S1' : [/*'instructions',*/'anykey'],
         'S2' : ['ready?'/*,'instructions'*/],
         'W1' : ['subwin'],
@@ -791,8 +804,8 @@ const step = (dt,T) =>{
     }
     const mapVisibility = ['S2','S3','W1','L1']
     const playerVisibility = ['S1','S2','S3','W1','R0','L1']
-    const lifeBarVisibility = ['G1','S1','S2','S3','W1','W2','R0','L1','L2']
-    const feedbackEffect = {
+    const lifeBarVisibility = ['G2','S1','S2','S3','W1','W2','R0','L1','L2']
+    /*const feedbackEffect = {
         //'I0' : ['blur'],
         'I0' : ['none','broadway','blur'],
         'I1' : ['broadway-save','left-grey','blue-blur'],
@@ -810,6 +823,8 @@ const step = (dt,T) =>{
         'L2' : ['left-grey'],
         
     }
+    */
+    
     //    console.log(gameState.state.name)
     const camera = display.camera
     const choices = gameState.state.choices
@@ -820,12 +835,14 @@ const step = (dt,T) =>{
     timeoutBar.visible =  (remainingTo !== undefined) 
         && timeoutBarVisibility.includes( gameState.state.name ) 
     if ( keyboardController.anyKeyStroke.length ){
-      //  textScreen.cls()
+        //  textScreen.cls()
     }
     const TIME_BEFORE_SKIP_STATE = 600
     // grab input
     stats.begin()
-    if ( ['I0','I1','G0','G1','S1',
+
+    
+    if ( ['I0','I1','G0','G1','G2','S1',
           'L1','L2','W2','W3','R0'].includes( gameState.state.name ) ){
         const sinceStateStart = T - gameState.state.t
         if ( sinceStateStart > TIME_BEFORE_SKIP_STATE ){
@@ -833,8 +850,10 @@ const step = (dt,T) =>{
                 console.log('to!')
                 gameState.event('next')
             }
+            textScreen.print(15,14,"any key to skip")
         }
     }
+    
     const [[l,r],[d,u],[o,p]] = keyboardController.axesCtrlState
     keyboardController.resetKeyStrokes()
 
@@ -939,10 +958,12 @@ const step = (dt,T) =>{
        camera.center.y += ( -1*u + d ) * dt / 1000*/
     camera.scale *= ( 1 + ( -1*o + p ) / 10 ) 
     camera.scale = clamp( camera.scale, 4,32) // 4 wide zoom, 32 closeup
+    /*
     Object.entries(texts.textPanels).forEach( ([pname,tp]) => {
         const v = textVisibility[ gameState.state.name ]
         tp.visible = ( v && v.includes(pname) )
     })
+*/
     if ( choices ){
         choices.visible = mapVisibility.includes( gameState.state.name )
     }
@@ -1032,22 +1053,74 @@ const step = (dt,T) =>{
         const mode = display.feedbackBuffer.setMode(rmode)
         }
     */
-    //if ( ['G0','G1','S1','S2'].includes(gameState.state.name) ){
-        writeMission( textScreen,
+    textScreen.cls()        
+    display.textMode.visible = true
+    if ( ['G0'].includes(gameState.state.name) ){
+        textScreen.cls()
+        textScreen.printCenter(1,'the odyssey begins')
+        textScreen.print(0,3,'So many years have passed since your days as a newborn electron, freely roaming in a metallic conductor')
+        textScreen.print(0,8,'The time has come for you to fulfill your duty for the gods of electrons to be pleased.')
+        
+        //textScreen.print(0,5,'"Follow the correct route, ignore the incorrect one or you will die", you can remember your electron mother say. This is your life, now !')
+        //textScreen.print(0,8,'Mission are awaiting you. May the god of electrons be with you.')
+        
+        writeMission( textScreen, gameState.state.level )
+        //textScreen.printCenter(j++,'Mission #'+level)
+    } else if ( ['G1'].includes(gameState.state.name) ){
+        textScreen.printCenter(6,'level presentation')
+        writeMission( textScreen, gameState.state.level )
+    } else if ( ['G2'].includes(gameState.state.name) ){
+        textScreen.cls()     
+        textScreen.printCenter(6,'sublevel'+gameState.state.sublevel, true )
+        /*writeMission( textScreen,
                       gameState.state.level || 1,
                       gameState.state.sublevel || 1,
-                      (gameState.state.choices && gameState.state.choices.directions) || [0])
+                      undefined)*/
+        //(gameState.state.choices && gameState.state.choices.directions) || [0])
+    } else if ( ['I1'].includes(gameState.state.name) ){
+        textScreen.cls()
+        textScreen.printCenter(6,'electron life simulator')
+    } else if ( ['I0'].includes(gameState.state.name) ){
+        textScreen.cls()
+        textScreen.printCenter(6,'machin presents')
+    } else if ( ['R0'].includes(gameState.state.name) ){
+        textScreen.printCenter(6,'redirecting...')
+    } else if ( ['L1'].includes(gameState.state.name) ){
+        textScreen.printCenter(6,'retry level ?')
+    } else if ( ['L2'].includes(gameState.state.name) ){
+        textScreen.printCenter(6,'404')
+    } else if ( ['W1'].includes(gameState.state.name) ){
+        textScreen.printCenter(6,'sublevel won')
+    } else if ( ['W2'].includes(gameState.state.name) ){
+        textScreen.printCenter(6,'level won')
+    } else if ( ['W3'].includes(gameState.state.name) ){
+        textScreen.printCenter(6,'game won it all!')
+    } else if ( ['S1'].includes(gameState.state.name) ){
+        //textScreen.printCenter(6,'follow the route')
+        writeMission(textScreen,undefined,gameState.state.sublevel,gameState.state.choices.directions)
         
-/*    } else {
-        textScreen.cls(false)
-        }*/
+    } else if ( ['S2'].includes(gameState.state.name) ){
+        textScreen.printCenter(6,'ready?')
+    } else {
+        //display.textMode.visible = false
+        textScreen.cls()
+    }
     
+    textScreen.print(0,14,gameState.state.name)
+    {
+        const { level, sublevel, lives } = gameState.state
+        textScreen.print(4,14,(level || '??').toString())
+        textScreen.print(7,14,(sublevel|| '??').toString())
+        textScreen.print(10,14,(lives|| '??').toString()+' lives')
+    }
     
-    const elapsed = display.draw( camera, choices, player, particles, texts, timeoutBar, lifeBar, remainingTo )
+    const elapsed = display.draw( camera, choices, player, particles, timeoutBar, lifeBar, remainingTo )
+    if ( false ){
     if ( elapsed[ elapsed.length - 1 ] >= 8 ){
         console.log(elapsed)
     } else {
-        console.log('<8')
+         console.log('<8')
+    }
     }
     stats.end()
 
