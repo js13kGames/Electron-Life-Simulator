@@ -653,11 +653,13 @@ const step = (dt,T) =>{
     // grab input
 //    stats.begin()
 
+    const sinceStateStart = T - gameState.state.t
+    
     /*
     if ( ['I0','I1','G0','G1','G2','S1',
     'L1','L2','W2','W3','R0'].includes( gameState.state.name ) ){*/
     if ( gameState.state.name !== 'S3' ){
-        const sinceStateStart = T - gameState.state.t
+    
         if ( sinceStateStart > TIME_BEFORE_SKIP_STATE ){
             if ( keyboardController.anyKeyStroke.length ){
                 console.log('to!')
@@ -911,7 +913,14 @@ const step = (dt,T) =>{
                          +L.toString()
                          +' lives')*/
     }
-    
+
+    if ( (['S3'].includes(gameState.state.name)) ){
+        display.feedbackBuffer.o.a = 1
+    } else if ( (['S2'].includes(gameState.state.name)) ){
+        display.feedbackBuffer.o.a = clamp(sinceStateStart,0,2000)/2000
+    } else {
+        display.feedbackBuffer.o.a = 0.05
+    }
     const elapsed = display.draw( camera, choices, player, particles, timeoutBar, lifeBar, remainingTo )
     if ( false ){
     if ( elapsed[ elapsed.length - 1 ] >= 8 ){

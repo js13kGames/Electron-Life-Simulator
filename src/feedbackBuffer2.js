@@ -1,12 +1,15 @@
+import { lerp } from './maths/v1.js'
 export function FeedbackBuffer(  ){
     let lastImgData
-    function lerp(x,y,a){ return (1-a)*x+a*y }
-    function alter( context ){
+    //function lerp(x,y,a){ return (1-a)*x+a*y }
+    const o = { a : 1 }
+    function alter( context, a = o.a ){
         const { width, height } = context.canvas,
               dst = context.getImageData(0,0,width,height)
-        // const a = 0.05  /// very blurry
+        /*// const a = 0.05  /// very blurry
         // b = 0.1
-        const a = 0.5
+        //const a = 0.5
+        const a = 0.05*/
         if ( lastImgData ){
             const srcData = lastImgData.data,
                   dstData = dst.data
@@ -24,5 +27,5 @@ export function FeedbackBuffer(  ){
     function reset(){
         used = false
     }
-    return { alter }
+    return { alter, o }
 }
