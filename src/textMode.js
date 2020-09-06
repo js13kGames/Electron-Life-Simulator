@@ -1,3 +1,4 @@
+import { wordwrap } from './wordwrap.js'
 import { fontInfo } from './mo5font.js'
 import { scaleContext, loadImageToCanvas } from './canvasUtils.js'
 
@@ -43,11 +44,23 @@ export function TextScreen( width, height ){
         )
         print(lmargin,y,string)
     }
+    
+    function printParagraphs( j, paragraphs, indent = 2 ){
+        const lines = wordwrap(
+            paragraphs.split("\n").map( x => '   '.repeat(indent)+x ).join("\n"),
+            width
+        ).split("\n")
+        lines.forEach( (t,i) => {
+            printCenter(j,t)
+            j++
+        })
+        return j
+    }
     function cls(prog){
         for ( let i = 0 ; i < data.length ; i++ )
             data[ i ] = 0
     }
-    return { data, print, printCenter, cls, width, height }
+    return { data, print, printCenter, cls, width, height, printParagraphs }
 }
 
 export const font1 = Font( fontInfo, 1 )

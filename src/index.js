@@ -14,6 +14,9 @@ import { OneShotSampler } from './audio/oneShotSampler.js'
 import { playBuffer, Record } from './audio/webaudioUtils.js'
 import * as Music from './audio/music.js'
 
+    import { wordwrap } from './wordwrap.js'
+
+document.body.style = bodyStyle
 
 // time measurement
 const Stats = require('stats.js')
@@ -22,9 +25,6 @@ stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild( stats.dom );
 import * as measureFunction from './debug/measureFunction'
 
-
-
-document.body.style = bodyStyle
 
 const ac = new AudioContext()
 const sounds = {
@@ -45,7 +45,6 @@ const oneShot = oneShotSampler.players
 const playerNoises = PlayerNoises(ac)
 const musicPlayer = Music.play(ac)
 
-
 oneShotSampler.globalGain.connect( ac.destination )
 oneShotSampler.globalGain.gain.value = 1.0
 playerNoises.globalGain.connect( ac.destination )
@@ -54,6 +53,7 @@ musicPlayer.globalGain.connect( ac.destination )
 musicPlayer.globalGain.gain.value = 1.0
 
 /*
+offline
 Record(2,ac.sampleRate * 60,ac.sampleRate,
        ac => {
            const musicPlayer = Music.play( ac )
@@ -68,44 +68,8 @@ Record(2,ac.sampleRate * 60,ac.sampleRate,
            console.log('progress',ratio*100,"%")
        })
 */
-/*
-let done = false
-window.addEventListener('keydown', e => {
-    if ( done ) return
-    done = true
-    const musicPlayer = Music.play(ac)
-    musicPlayer.globalGain.connect( ac.destination )
-    musicPlayer.update({gain:1.0})
-})
 
 
-
-let done = true
-window.addEventListener('keydown', e => {
-    if ( done ) return
-    done = true
-    //if ( e.key === 's'){
-    const offlineAc = new OfflineAudioContext(2,44100*4,ac.sampleRate)
-    //60*0.25,ac.sampleRate)
-    console.log(offlineAc);
-    const sd = Date.now()
-    const musicPlayer = Music.play(offlineAc)
-    musicPlayer.globalGain.connect( offlineAc.destination )
-    musicPlayer.update({gain:1.0})    
-    offlineAc.startRendering().then(function(renderedBuffer) {
-        console.log('rendered',renderedBuffer)
-        playBuffer(ac,renderedBuffer,ac.destination,ac.currentTime,true)
-    })
-    setInterval(
-        () => {
-            if (offlineAc.state === 'closed') return
-            const sd2 = Date.now()
-            const el = ( sd2 - sd ) / 1000
-            console.log( 'ot',offlineAc.currentTime, el, offlineAc.currentTime / el)
-        }, 1000
-    )
-})
-*/
 
 
 const ar = 16/9
@@ -612,7 +576,7 @@ function GameState(){
             const mh = sm[ eName ]
             mh(eData)
         } catch (e){
-            console.error('wrong message',cStateName,eName,{state, eName, eData},e)
+            console.error('wrong message?',cStateName,eName,{state, eName, eData},e)
         }
         if ( cStateName !== state.name  ){
             //
@@ -672,7 +636,10 @@ function LifeBar(){
         L : 5 // max
     }
 }
-const textScreen = TextScreen( 30, 15 )    
+const textScreen = TextScreen( 30, 16 )
+
+
+
 const keyboardController = KeyboardControllers()
 const gameState = GameState()
 const display = Display()
@@ -704,27 +671,7 @@ const step = (dt,T) =>{
     const mapVisibility = ['S2','S3','W1','L1']
     const playerVisibility = ['S1','S2','S3','W1','R0','L1']
     const lifeBarVisibility = ['G2','S1','S2','S3','W1','W2','R0','L1','L2']
-    /*const feedbackEffect = {
-        //'I0' : ['blur'],
-        'I0' : ['none','broadway','blur'],
-        'I1' : ['broadway-save','left-grey','blue-blur'],
-        //'G0' : ['broadway','left-grey'],
-        'G0' : ['blur'],
-        'G1' : ['broadway','blue-blur'],
-        'S1' : ['blur'],
-        'S2' : ['blue-blur'],
-        'S3' : ['none'],
-        'W1' : ['color-blur'],
-        'R0' : ['blue-blur'],
-        'W2' : ['color-blur'],
-        'W3' : ['broadway','color-blur'],
-        'L1' : ['left-grey'],
-        'L2' : ['left-grey'],
-        
-    }
-    */
-    
-    //    console.log(gameState.state.name)
+
     const camera = display.camera
     const choices = gameState.state.choices
 
@@ -886,15 +833,21 @@ const step = (dt,T) =>{
         gain : 1,
         
     })
-
     
     textScreen.cls()        
     display.textMode.visible = true
     if ( ['G0'].includes(gameState.state.name) ){
+        
         textScreen.cls()
         textScreen.printCenter(1,'the odyssey begins')
-        textScreen.print(0,3,'So many years have passed since your days as a newborn electron, freely roaming in a metallic conductor')
-        textScreen.print(0,8,'The time has come for you to fulfill your duty for the gods of electrons to be pleased.')
+
+        
+        const paragraphs = 'So many years have passed since your days as a newborn electron, freely roaming in some metallic conductor...\n\nThe time has come for you to fulfill your duty for the almighty gods of electrons to be pleased.'
+        textScreen.printParagraphs( 3, paragraphs, 0 )
+        //textScreen.print(0,8,'The time has come for you to fulfill your duty for the gods of electrons to be pleased.')
+
+        //textScreen.printParagraph(0,7,'a bb cc dd eee ffff gggg Vsov AhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhB iiiiiiii and thre rest')
+//        textScreen.printParagraph(0,9,'booooooooooooooooooooooooooo AhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhB iiiiiiii and thre rest')
         
         //textScreen.print(0,5,'"Follow the correct route, ignore the incorrect one or you will die", you can remember your electron mother say. This is your life, now !')
         //textScreen.print(0,8,'Mission are awaiting you. May the god of electrons be with you.')
@@ -944,9 +897,9 @@ const step = (dt,T) =>{
     textScreen.print(0,14,gameState.state.name)
     {
         const { level, sublevel, lives } = gameState.state
-        textScreen.print(4,14,(level || '??').toString())
-        textScreen.print(7,14,(sublevel|| '??').toString())
-        textScreen.print(10,14,(lives|| '??').toString()+' lives')
+        textScreen.print(4,15,(level || '??').toString())
+        textScreen.print(7,15,(sublevel|| '??').toString())
+        textScreen.print(10,15,(lives|| '??').toString()+' lives')
     }
     
     const elapsed = display.draw( camera, choices, player, particles, timeoutBar, lifeBar, remainingTo )

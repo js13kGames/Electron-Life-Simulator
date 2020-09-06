@@ -80,7 +80,7 @@ export function play(ac){
                           1.1, // bass
                           0.3,   // lament
                           0.95,   // drums
-                          1.4,   // bass drum
+                          1.6,   // bass drum
                           1.3    // hero
                         ]
         const sum = volumes.reduce((r,x)=>r+x,0)
