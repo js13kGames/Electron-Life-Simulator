@@ -8,7 +8,8 @@ export const Missions = [{
     name : 'test',
     subs : [{
         name : 'test1',
-        level : [500,30,2,[0,0,1,1,1,0,0]], // challening for beginner
+        level : [5000,30,1,[0,0,0,0]], // challening for beginner
+        //level : [500,30,2,[0,0,1,1,1,0,0]], // ??
         // level : [500,100,2,[0,0,1,1,1,0,0]] // challening for beginner
     }]
 },{

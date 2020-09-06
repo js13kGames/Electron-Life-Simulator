@@ -14,6 +14,9 @@ import { OneShotSampler } from './audio/oneShotSampler.js'
 import { playBuffer, Record } from './audio/webaudioUtils.js'
 import * as Music from './audio/music.js'
 
+//
+// sometime you wonder if you are just having an arbitrary life
+//
 
 document.body.style = bodyStyle
 
@@ -68,10 +71,10 @@ Record(2,ac.sampleRate * 60,ac.sampleRate,
            console.log('progress',ratio*100,"%")
        })
 */
-
+/*
 import { PAD } from './pad.js'
 console.log(PAD)
-
+*/
 
 const ar = 16/9
 const targetSize = {
@@ -942,14 +945,11 @@ const step = (dt,T) =>{
     }
     let cols
     {
-        const slicedur = 1000
-        const disc = 8
-        const s = Math.floor(T/slicedur)
-        const slicen = s%disc
-        const slicea = slicen/disc
-        console.log(s,slicen,slicea)
+        const slicedur = 200 // ms
+        const disc = 32
+        const s = (Math.floor(T/slicedur)%disc)/disc
         const tcol = T/1000
-        cols = Cols(slicea)
+        cols = Cols(s)
     }
     
     
