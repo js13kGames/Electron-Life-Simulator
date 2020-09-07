@@ -1,9 +1,15 @@
 // general
 import { ms, sample1, ftok, ktof, itrvstot, FftFreqs, adsr,
-         asr, DelayChain, periodWaveFromKeys, Square01Buffer,
-         NoiseBuffer, ScratchBuffer } from './webaudioUtils.js'
+         asr, DelayChain, periodWaveFromKeys,
+         NoiseBuffer,linearRampToValueAtTime,setValueAtTime,
+         setValueNow, apFrequency, apGain, apQ, apDetune } from './webaudioUtils.js'
 
 export function play(ac){
+
+    const KEYS = new Array(128).fill(0).map( (_,i) => i )
+    const distoCurve = makeDistortionCurve(400)
+    const noiseBuffer = NoiseBuffer(ac,1)
+
     
     const sample = sample1(ac.sampleRate)
 
@@ -69,7 +75,6 @@ export function play(ac){
 //     OUTPUT = delayChain
     
 
-    const noiseBuffer = NoiseBuffer(ac,1)
 //    console.log('noiseBuffer',noiseBuffer)
 
     let t = 0
@@ -89,22 +94,22 @@ export function play(ac){
         
         const endChord = playChord( chord, vels[0], t )
         const dur = endChord - t
-        if ( ci > 3 ){
-            playBass( chord, dur, vels[1], t )
-        }
-        if ( ci > 7 ){
-            playDrums( chord, dur, vels[3], t )
-        }
-        if ( ci > 9 ){
-            playLament( chord, dur, vels[2], t )
-        }
-        if ( ci > 12 ){
-            playBassDrum( chord, dur, vels[4], t )
-        }
+        //if ( ci > 3 ){
+        playBass( chord, dur, vels[1], t )
+        //}
+        //if ( ci > 7 ){
+        playDrums( chord, dur, vels[3], t )
+        //}
+        //if ( ci > 9 ){
+        playLament( chord, dur, vels[2], t )
+        //}
+        //if ( ci > 12 ){
+        playBassDrum( chord, dur, vels[4], t )
+    //}
         const c32p = ci % 32
-        if ( c32p > 16 ){
-            playHero( chord, dur, vels[5],t )
-        }
+        //if ( c32p > 16 ){
+        playHero( chord, dur, vels[5],t )
+        //}
         t = endChord
     })
     function playHero( chord, dur, vel, t){
@@ -123,10 +128,20 @@ export function play(ac){
         const elDur = dur / notes.length
         let end
         
-
-
+        const oscFrequency = apFrequency(osc),
+              oscFrequencyLinearRamp = linearRampToValueAtTime(oscFrequency),
+              oscFrequencySetValueAtTime = setValueAtTime(oscFrequency),
+              gainGain = apGain(gainNode),
+              gainGainLinearRamp = linearRampToValueAtTime(gainGain),
+              gainGainSetValueAtTime = setValueAtTime(gainGain)
+        
+        /*
         osc.frequency.setValueAtTime( ktof(notes[0]), t )
         gainNode.gain.setValueAtTime( 0, t )
+        */
+        oscFrequencySetValueAtTime( ktof(notes[0]), t )
+        gainGainSetValueAtTime( 0, t )
+        
         notes.forEach( (k,ki) => {
             const f = ktof( k )
             let start = t + ki * elDur
@@ -134,14 +149,23 @@ export function play(ac){
             const t1 = start + 0.01 * dur,
                   t2 = start + 0.99 * dur
             //osc.frequency.setValueAtTime( start )
-            osc.frequency.linearRampToValueAtTime( f, t1)
-            osc.frequency.linearRampToValueAtTime( f, t2)
+            oscFrequencyLinearRamp( f, t1 )
+            oscFrequencyLinearRamp( f, t2 )
+            /*osc.frequency.linearRampToValueAtTime( f, t1)
+              osc.frequency.linearRampToValueAtTime( f, t2)*/
             
             //gainNode.gain.setValueAtTime( 0, start )
+            gainGainLinearRamp( 0, start)
+            gainGainLinearRamp( vel, (start+t1)/2)
+            gainGainLinearRamp( vel, (end+t2)/2)
+            gainGainLinearRamp( 0, end)
+            /*
             gainNode.gain.linearRampToValueAtTime( 0, start)
             gainNode.gain.linearRampToValueAtTime( vel, (start+t1)/2)
             gainNode.gain.linearRampToValueAtTime( vel, (end+t2)/2)
             gainNode.gain.linearRampToValueAtTime( 0, end)
+            */
+
             /*
             if ( ki === ( notes.length - 1 ) ){
                 gainNode.gain.linearRampToValueAtTime( 0, end )
@@ -169,16 +193,36 @@ export function play(ac){
                         1,0]
         const elDur = dur / rythme.length
         let end
+
+        const oscFrequency = apFrequency(osc),
+              oscFrequencySetValueAtTime = setValueAtTime(oscFrequency),
+              oscFrequencyLinearRamp = linearRampToValueAtTime(oscFrequency),
+              
+              gainGain = apGain(gainNode),
+              gainGainSetValueAtTime = setValueAtTime(gainGain),
+              gainGainLinearRamp = linearRampToValueAtTime(gainGain)
+        
+
+        
         rythme.forEach( (r,ri) => {
             if ( r ){
                 let start = t + ri * elDur
                 end = start + Math.min(elDur-sample(10),0.5)
+
+                oscFrequencySetValueAtTime( 100, start )
+                oscFrequencyLinearRamp( 0, end )
                 
+                gainGainSetValueAtTime( 0, start )
+                gainGainLinearRamp( vel, start+sample(100) )
+                gainGainLinearRamp( 0, end )
+                
+                /*
                 osc.frequency.setValueAtTime( 100, start )
                 osc.frequency.linearRampToValueAtTime( 0, end )
                 gainNode.gain.setValueAtTime( 0, start )
                 gainNode.gain.linearRampToValueAtTime( vel, start+sample(100) )
                 gainNode.gain.linearRampToValueAtTime( 0, end )
+                */
             }
         })
         osc.start( t )
@@ -198,28 +242,28 @@ export function play(ac){
         //const rythme = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         //const rythme = [1,1,1,0,1,1,1,0,1,1,1,0,1,1,1]
         let rythme
-        if ( flufshe ){
-            rythme = [
-                1,1,1,
-                1,0,1,
-                0,0,1,
-                1,0,1,
-                1,1,1,
-                1,0,0,
-                0,0,1,
-                1,0,1,
-                1,0,1,
-                0,1,1,
-            ]
-        } else {
-            /*rythme = [0,1,
-                      1,1,
-                      0,1,
-                      1,1,
-                      1,0,
-                      0,1,
-                      1,1,
-                      0,1]*/
+        //if ( flufshe ){
+            // rythme = [
+            //     1,1,1,
+            //     1,0,1,
+            //     0,0,1,
+            //     1,0,1,
+            //     1,1,1,
+            //     1,0,0,
+            //     0,0,1,
+            //     1,0,1,
+            //     1,0,1,
+            //     0,1,1,
+            // ]
+        // } else {
+        //     /*rythme = [0,1,
+        //               1,1,
+        //               0,1,
+        //               1,1,
+        //               1,0,
+        //               0,1,
+        //               1,1,
+        //               0,1]*/
             rythme = [2,0,
                       1,0,
                       1,0,
@@ -229,24 +273,37 @@ export function play(ac){
                       1,0,
                       1,0,
                       1,1]
-        }
-            
+        // }
+
         
-        gainNode.gain.value = vel
+        const apGainGain = apGain( gainNode ),
+              apGainGainSetValueNow = setValueNow( apGainGain ),
+              apBiquadQ = apQ( biquad ),
+              apBiquadQSetValueNow = setValueNow( apBiquadQ ),
+              //apBiquadQsetValueAtTime = setValueAtTime( apBiquadQ ),
+              //apBiquadQlinearRamp = linearRampToValueAtTime( apBiquadQ ),
+              apBiquadFrequency = apFrequency( biquad ),
+              //apBiquadFrequencySetValueNow = setValueNow( apBiquadFrequency ),
+              apBiquadFrequencysetValueAtTime = setValueAtTime( apBiquadFrequency ),
+              apBiquadFrequencylinearRamp = linearRampToValueAtTime( apBiquadFrequency )
+              
+        
+        //gainNode.gain.value = vel
         noise.buffer = noiseBuffer
         noise.loop = true
-        noise.loopEnd = noiseBuffer.duration
-        biquad.type = "bandpass"        
-        biquad.Q.value = 1 // default
+        noise.loopEnd = noiseBuffer.duration        
+
+        biquad.type = "bandpass"
         
-        gainNode.gain.value = 0
+        apBiquadQSetValueNow(1)
+        apGainGainSetValueNow(0)
 
         noise.connect(gainNode)        
         gainNode.connect(biquad)
+
         if ( flufshe ){
             biquad.connect( delayChain.input )
         } else {
-//            biquad.connect( delayChain.input )
             biquad.connect(globalGain)
         }
         
@@ -264,18 +321,24 @@ export function play(ac){
         const envelope = snareEnvelope
         let end
         let elDur = dur / rythme.length
+        /*
         if ( flufshe ){
             biquad.Q.setValueAtTime( 10, t )
             biquad.Q.linearRampToValueAtTime( 1, t+dur/2 )
             biquad.Q.linearRampToValueAtTime( 5, t+dur )
-        }
+        }*/
         
         rythme.forEach( (on,ri) => {
             const start = t + ri * elDur
             if ( on === 1 ){
-                end = adsr( gainNode.gain, envelope,  start )              
+                /*
+                end = adsr( gainNode.gain, envelope,  start )               
                 biquad.frequency.setValueAtTime( ktof(chord[0])*4, start )
                 biquad.frequency.linearRampToValueAtTime( ktof(chord[0])/4, end )
+                */
+                end = adsr( apGainGain, envelope,  start )               
+                apBiquadFrequencysetValueAtTime( ktof(chord[0])*4, start )
+                apBiquadFrequencylinearRamp( ktof(chord[0])/4, end )
             } else if ( on === 2 ){
                 
                 
@@ -289,9 +352,8 @@ export function play(ac){
 
         // get key
         const tk = ( chord[0] % 12 )
-        const ks = new Array(128).fill(0).map( (_,i) => i )
         const ambitus = [48-7,48+7]
-        const mk = ks
+        const mk = KEYS
               .filter( k => tk === k%12 )
               .filter( k => ( k >= ambitus[0] ) && ( k <= ambitus[1] ) )
         if ( mk.length === 0 ) return
@@ -300,7 +362,10 @@ export function play(ac){
         }
         const f = ktof( mk[0] ),
               osc = ac.createOscillator(),
-              gainNode = ac.createGain()
+              oscFrequencySetValueAtTime = setValueAtTime( apFrequency( osc ) ),
+              gainNode = ac.createGain(),
+              apGainGain = apGain(gainNode)
+              
         //osc.frequency.value = f
         osc.type ="triangle"
         
@@ -308,15 +373,17 @@ export function play(ac){
             values : [ 1.0, 0.8 ].map( x => x * vel ),
             durations : [ sample(100), sample(100), sample(4000), sample(500) ]
         }
+        
         //console.log(envelope)
         rythme.forEach( (on,ri) => {
             if ( on ){
 
                 const start = t + dur * ri / rythme.length
-                const end = adsr( gainNode.gain, envelope,  start )
+                const end = adsr( apGainGain, envelope,  start )
                 const f = ktof( mk[ ri % mk.length ] )
                 //console.log(ri,mk[ ri % mk.length ] ,f)
-                osc.frequency.setValueAtTime( f,  start)
+                //osc.frequency.setValueAtTime( f,  start)
+                oscFrequencySetValueAtTime( f,  start)
             }
         })
         
@@ -328,12 +395,26 @@ export function play(ac){
         
         
     }
+    function makeDistortionCurve(amount=0.1) {
+        let n_samples = 512, curve = new Float32Array(n_samples);
+        for (let i = 0 ; i < n_samples; ++i ) {
+            let x = i * 2 / n_samples - 1;                
+            curve[i] = x//(Math.PI + amount) * x / (Math.PI + amount * Math.abs(x));
+        }
+        return curve;
+    } 
     function playLament( chord, dur, vel, t){
         const f = ktof(chord[0]),
               osc = ac.createOscillator(),
-              gainNode = ac.createGain()
-        osc.frequency.value = f
-        gainNode.gain.value = vel 
+              oscFrequencySetValueNow = setValueNow( apFrequency( osc ) ),              
+              gainNode = ac.createGain(),
+              gainGainSetValueNow = setValueNow( apGain( gainNode  ) )
+
+        // osc.frequency.value = f
+        oscFrequencySetValueNow( f )
+        gainGainSetValueNow( vel )
+        //gainNode.gain.value = vel
+        
         osc.connect(gainNode)
        // gainNode.connect( globalGain )
         //gainNode.connect( delayChain.input )
@@ -342,23 +423,20 @@ export function play(ac){
 
         let OUTPUT 
         {
-            function makeDistortionCurve(amount=0.1) {
-                let n_samples = 512, curve = new Float32Array(n_samples);
-                for (let i = 0 ; i < n_samples; ++i ) {
-                    let x = i * 2 / n_samples - 1;                
-                    curve[i] = x//(Math.PI + amount) * x / (Math.PI + amount * Math.abs(x));
-                }
-                return curve;
-            } 
+        
             const distortion = ac.createWaveShaper(),
                   mod = ac.createOscillator(),
+                  modFrequencySetValueNow = setValueNow( apFrequency( mod ) ),
                   gain = ac.createGain()
             
-            distortion.curve = makeDistortionCurve(400);
-            mod.frequency.value = 10
+            distortion.curve = distoCurve
+            
+            //mod.frequency.value = 10
+            modFrequencySetValueNow(10)
+            
             mod.start()
             mod.connect( distortion )
-            distortion.connect( gain.gain )
+            distortion.connect( apGain( gain ) )
             
             OUTPUT = gain
             OUTPUT.connect( globalGain )
@@ -373,39 +451,58 @@ export function play(ac){
         
         const wave = periodWaveFromKeys( ac, chord, fftFreqs )
         
-        const osc = ac.createOscillator();
-        osc.frequency.value = fftFreqs.f0
+        const osc = ac.createOscillator(),
+              apOscFrequency = apFrequency( osc ),
+              apOscFrequencySetValueNow = setValueNow( apOscFrequency ),
+              apOscFrequencySetValueAtTime = setValueAtTime( apOscFrequency ),
+              apOscFrequencylinearRamp = linearRampToValueAtTime( apOscFrequency ),
+              gainNode = ac.createGain(),
+              apGainGain = apGain( gainNode )
+              
+              
+        
         osc.setPeriodicWave(wave);
-        
-        const gainNode = ac.createGain();
-        osc.connect(gainNode)
-        gainNode.connect(delayChain.input)
-        
-        const envelope = {
-            values : [ 1.0, 0.4 ].map( x => x * vel ),
-            durations : [ ms(16), ms(20), 2.0, 0.5 ]
-        }
-        const envEnd = adsr( gainNode.gain, envelope,  t )
 
+
+        
         const vibratoEnvelope = {
             values : [ 20, 22 ],
             durations : [ 0.5, 1.5, 0.3 ]
         }
+
+        const envelope = {
+            values : [ 1.0, 0.4 ].map( x => x * vel ),
+            durations : [ ms(16), ms(20), 2.0, 0.5 ]
+        }
+
         
         // freq osc
         {
-            const mod = ac.createOscillator();
-            mod.frequency.value = 5
+            const mod = ac.createOscillator()
+            setValueNow(apFrequency( mod ))( 5 )
+                  
+            //mod.frequency.value = 5
             const modGain = ac.createGain()
-            const vibEnvEnd = asr( modGain.gain, vibratoEnvelope, t )
-            modGain.connect( osc.detune )
+            const vibEnvEnd = asr( apGain(modGain), vibratoEnvelope, t )
+            modGain.connect( apDetune(osc) )
             mod.connect( modGain )
             mod.start(t)
         }
+        
+        
+        osc.connect(gainNode)
+        gainNode.connect(delayChain.input)
+
+        //osc.frequency.value = fftFreqs.f0
+        apOscFrequencySetValueNow( fftFreqs.f0 )
+
+        const envEnd = adsr( apGainGain, envelope,  t )
 
         // slight up ramp for frequency
-        osc.frequency.setValueAtTime( fftFreqs.f0, t )
-        osc.frequency.linearRampToValueAtTime( fftFreqs.f0*1.02, envEnd )
+        apOscFrequencySetValueAtTime( fftFreqs.f0, t )
+        //osc.frequency.setValueAtTime( fftFreqs.f0, t )
+        apOscFrequencylinearRamp( fftFreqs.f0*1.02, envEnd )
+        //osc.frequency.linearRampToValueAtTime( fftFreqs.f0*1.02, envEnd )
         
         osc.start( t )
         osc.stop( envEnd )

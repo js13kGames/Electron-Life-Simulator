@@ -11,6 +11,41 @@ export function itrvstot( itrvs, t0 ){
         return [ ...r, r[r.length-1] + x ]
     },[t0])
 }
+/*
+const linearRampToValueAtTime = p => n => (v,t) => n[p].linearRampToValueAtTime(v,t)
+const setValueAtTime = p => n => (v,t) => n[p].setValueAtTime(v,t)
+
+const gainLinearRampToValueAtTime = linearRampToValueAtTime('gain')
+const frequencyLinearRampToValueAtTime = linearRampToValueAtTime('frequency')
+const QLinearRampToValueAtTime = linearRampToValueAtTime('Q')
+
+const gainSetValueAtTime = setValueAtTime('gain')
+const frequencySetValueAtTime = setValueAtTime('frequency')
+const QSetValueAtTime = setValueAtTime('Q')
+*/
+export const ap = name => node => node[name]
+export const apGain = ap('gain')
+export const apFrequency = ap('frequency')
+export const apQ = ap('Q')
+export const apPlaybackRate = ap('playbackRate')
+export const apDelayTime = ap('delayTime')
+export const apDetune = ap('detune')
+
+export const linearRampToValueAtTime = ap => (v,t) => ap.linearRampToValueAtTime(v,t)
+export const setValueAtTime = ap => (v,t) => ap.linearRampToValueAtTime(v,t)
+export const setValueNow = ap => v => ap.value = v
+/*
+const node = createOscillator()
+setValueAtTime( apQ( node ) )( v, t)
+setValue( apQ( node ) )( v )
+*/
+//gainLinearRampToValueAtTime( node )( v, t )
+    
+/*
+const node = ctx.createGain()
+setValueAtTime( node, 'gain', v, t )
+*/
+
 export function FftFreqs(size,f0){
     // relation between frequency, midi key and fft bins
     const bins = new Array( size )
@@ -46,11 +81,22 @@ export function adsr( ap, { values, durations }, t ){
     //      ad sr
     //    0 12 3 4
     const times = itrvstot( durations, t )
+    /*
     ap.setValueAtTime(0, times[0] )        
     ap.linearRampToValueAtTime( values[0], times[1] )
     ap.linearRampToValueAtTime( values[1], times[2] )
     ap.linearRampToValueAtTime( values[1], times[3] )
     ap.linearRampToValueAtTime( 0, times[4] )
+    */
+    const s = setValueAtTime(ap),
+          l = linearRampToValueAtTime(ap)
+    
+    s(0, times[0] )        
+    l( values[0], times[1] )
+    l( values[1], times[2] )
+    l( values[1], times[3] )
+    l( 0, times[4] )
+    
     return times[4]
 }
 export function asr( ap, { values, durations }, t ){
@@ -61,6 +107,9 @@ export function asr( ap, { values, durations }, t ){
     //
     //    0  1  2 3    
     const times = itrvstot( durations, t )
+    const s = setValueAtTime(ap),
+          l = linearRampToValueAtTime(ap)
+    /*
     if ( times[0] === times[1] ){
         ap.setValueAtTime( values[0], times[1] )
     } else { 
@@ -71,6 +120,18 @@ export function asr( ap, { values, durations }, t ){
     if ( times[2] === times[3] ){
     } else {
         ap.linearRampToValueAtTime( 1, times[3])
+        }*/
+    
+    if ( times[0] === times[1] ){
+        s( values[0], times[1] )
+    } else { 
+        s( 1, times[0] )
+        l( values[0], times[1] )
+    }
+    l( values[1], times[2])
+    if ( times[2] === times[3] ){
+    } else {
+        l( 1, times[3])
     }
     return times[3]            
 }
@@ -101,20 +162,22 @@ export function periodWaveFromKeys( ac, chord, { size, nearestBins } ){
     })
     return ac.createPeriodicWave(real, imag, {disableNormalization: true});
 }
-export function Square01Buffer( ac, length ){
-    const bs = ac.sampleRate * length,
-          hbs = bs / 2,
-          ab =  ac.createBuffer(1, bs, ac.sampleRate),
-          cd  = ab.getChannelData(0)
-    for (let i = 0; i < hbs ; i++) {
-        cd[i] = 0
+
+export function MonoBuffer( f ){
+    return function(ac, length){
+        const bs = ac.sampleRate * length,
+              ab = ac.createBuffer(1, bs, ac.sampleRate),
+              cd = ab.getChannelData(0)
+        for (let i = 0; i < bs; i++)
+            cd[i] = f(i,bs)   
+        return ab
     }
-     for (let i = hbs; i < bs ; i++) {
-        cd[i] = 1
-    } 
-    return ab    
 }
-export function NoiseBuffer(ac, length=0.25){
+export const NoiseBuffer = MonoBuffer( i => Math.random() * 2 - 1 )
+export const ScratchBuffer = MonoBuffer( i => ( Math.random() > 0.985 )?1:0 )
+export const Square01Buffer = MonoBuffer( (i,l) => ( i < ( l / 2 ))?0:1 )
+/*
+export function NoiseBuffer2(ac, length=0.25){
     const bs = ac.sampleRate * length,
           ab =  ac.createBuffer(1, bs, ac.sampleRate),
           cd  = ab.getChannelData(0)
@@ -124,7 +187,7 @@ export function NoiseBuffer(ac, length=0.25){
     return ab
 }
 
-export function ScratchBuffer(ac, length=0.25){
+export function ScratchBuffer2(ac, length=0.25){
     const bs = ac.sampleRate * length,
           ab =  ac.createBuffer(1, bs, ac.sampleRate),
           cd  = ab.getChannelData(0)
@@ -137,6 +200,20 @@ export function ScratchBuffer(ac, length=0.25){
     }
     return ab
 }
+export function Square01Buffer2( ac, length ){
+    const bs = ac.sampleRate * length,
+          hbs = bs / 2,
+          ab =  ac.createBuffer(1, bs, ac.sampleRate),
+          cd  = ab.getChannelData(0)
+    for (let i = 0; i < hbs ; i++) {
+        cd[i] = 0
+    }
+     for (let i = hbs; i < bs ; i++) {
+        cd[i] = 1
+    } 
+    return ab    
+}
+*/
 export function playBuffer( ac, b, d, t, loop = false ){
     const source = ac.createBufferSource();
     source.buffer = b;
