@@ -10,6 +10,8 @@ module.exports = {
     optimization: {
         minimize: true,
         minimizer: [new TerserPlugin()],
+        namedModules: false,
+        moduleIds : 'size'
     },
     watchOptions: {
         ignored: /\.#|node_modules|~$/,
