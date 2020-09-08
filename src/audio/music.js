@@ -4,7 +4,6 @@ import { ms, sample1, ftok, ktof, itrvstot, FftFreqs, adsr,
          NoiseBuffer,linearRampToValueAtTime,setValueAtTime,
          setValueNow, apFrequency, apGain, apQ, apDetune } from './webaudioUtils.js'
 
-
 export function play(ac){
 
     const KEYS = new Array(128).fill(0).map( (_,i) => i )
@@ -24,9 +23,9 @@ export function play(ac){
     {
         const chordm = [48+12,48+12+3,48+12+7,
                         48+12+12,48+12+12+3,48+12+12+7],
-              chord7 = [48+12,48+12+4,48+12+7,48+12+10],
+              chord7 = [48+12,48+12+4,48+12+7,48+12+10]
               //chordO = [48+12,48+12+2,48+12],
-              chord = chordO
+              //chord = chordm
         const transpositions = [0,1,0,1,6,3,0,-3,-6 ]
         for ( let q = 0 ; q < 12 ; q++){
             transpositions.forEach( t => {
@@ -511,7 +510,7 @@ export function play(ac){
         t += ( envEnd - t ) * 1
         return t
     }
-    /*function update(d){
+    function update(d){
         const t = ac.currentTime,
               t1 = t + 1 / 32
  
@@ -521,11 +520,11 @@ export function play(ac){
             globalGain.gain.linearRampToValueAtTime( 0 , t1 )
         }
         
-    }*/
+    }
     return {
         globalGain,
-        //update,
-        //ac
+        update,
+        ac
     }
 }
 
