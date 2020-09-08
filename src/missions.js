@@ -9,12 +9,14 @@ const levelIntro = () => ({
 })
 export const Missions = [{
     name : 'test',
+    //    hs : [0,1],
+    hs : [0.5,1],
     subs : [{
         name : 'popo1',
-        level : [300,30,2,[0,1,0,1,0,1]], // challening for beginner
+        level : [300,30,2,[0,1,0,1,0,1]], // nice, challening for beginner
     },{
         name : 'test1',
-        level : [5000,30,1,[0,0,0,0]], // challening for beginner
+        level : [5000,30,1,[0,0,0,0]], 
         //level : [500,30,2,[0,0,1,1,1,0,0]], // ??
         // level : [500,100,2,[0,0,1,1,1,0,0]] // challening for beginner
     }]

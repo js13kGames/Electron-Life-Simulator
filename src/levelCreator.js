@@ -6,7 +6,7 @@ import { Missions } from './missions.js'
 export function mkChoices( level, sublevel ){
 
     const ld = Missions[ level ].subs[ sublevel ].level
-    console.log('MKCJOICES','for',level,sublevel,ld)
+    //console.log('MKCJOICES','for',level,sublevel,ld)
     
     const [ p0,p1,p2,p3 ] = ld
     

@@ -31,15 +31,15 @@ import * as measureFunction from './debug/measureFunction'
 
 const ac = new AudioContext()
 const sounds = {
-    u : [,,1049,,.09,.25,,.45,,,442,.05,,.1,,,,.51,.08,.1],
-    v : [1.2,,1322,.05,.12,.03,1,.02,31,7.7,,,,,,,.27,.33,.04,.01],
-    w : [2.3,,34,.02,,.04,2,2.05,,1,-14,.16,,.8,,,.09,,.16,.17],
-    x : [3.3,,565,.04,.19,0,,.33,,-4.1,,,,,,,.12,.05,,.55],
-    y : [1.7,,27,.02,.16,.18,3,.7,,-0.7,,,,.1,,,,.34,.21,.09], // prout
-    z : [1.2,,674,.07,.18,.01,,.9,-25,,,,.02,.7],
-    wo : [,,803,.05,.43,.55,,1.86,,,-97,.02,.27,,,,,.64,.04],
+    nxt : [0.5,,1049,,.09,.25,,.45,,,442,.05,,.1,,,,.51,.08,.1],
+    checkl : [1.2,,1322,.05,.12,.03,1,.02,31,7.7,,,,,,,.27,.33,.04,.01],
+    //mssn : [2.3,,34,.02,,.04,2,2.05,,1,-14,.16,,.8,,,.09,,.16,.17],
+    strt : [3.3,,565,.04,.19,0,,.33,,-4.1,,,,,,,.12,.05,,.55],
+    mssn : [1.7,,27,.02,.16,.18,3,.7,,-0.7,,,,.1,,,,.34,.21,.09], // prout
+    //z : [1.2,,674,.07,.18,.01,,.9,-25,,,,.02,.7],
+    slw : [1.5,,803,.05,.43,.55,,1.86,,,-97,.02,.27,,,,,.64,.04],
     ///l1 : [2.7,,72,.01,,.32,2,1.51,,-0.6,,,.02,,,,.07,.63],
-    l1 : [2,,476,.04,.09,.64,4,3.96,.2,,,,,1,,.4,,.55,.04],
+    sll : [3,,476,.04,.09,.64,4,3.96,.2,,,,,1,,.4,,.55,.04],
     l2 : [0.8,,29,,.21,.15,4,1.63,,.7,-137,.03,,,,,.11,,.1]
 }
 
@@ -112,7 +112,8 @@ function Display(){
     const hcWidth = canvas.width / 2,
           hcHeight = canvas.height / 2
     
-    function draw( { center, scale }, level, player, particles, timeoutBar, lifeBar, remainingTo, Cols ){
+    function draw( { center, scale }, level, player,
+                   particles, timeoutBar, lifeBar, remainingTo, Cols ){
         
         
         function drawMap(){
@@ -330,14 +331,12 @@ function GameState(){
     }
     const timeouts = [] 
     function update( ...ps ){
-         console.log('update',...ps)
+         // console.log('update',...ps)
         Object.assign( state, ...ps )
     }
 
 
-    const NLEVELS = 3
-    const NSUBLEVELS = 2
-    const NLIVES = 2
+    const NLIVES = 3
     const NOMINAL_ENERGY = 1
 
     const automata = {
@@ -349,6 +348,7 @@ function GameState(){
             },
             'next' : () => {
                 update({name:'I1'})
+                oneShot.nxt()
             }
         },
         // title
@@ -357,6 +357,7 @@ function GameState(){
                 timeout( () => event('story'),10000)
             },
             'next' : () => {
+                oneShot.nxt()
                 update({name:'I2'})
             },
             'story' : () => {
@@ -365,16 +366,18 @@ function GameState(){
         },
         // story
         I1S : {
-            '>' : () => {
+            '>' : () => {                
                 timeout( () => event('next'),10000)
             },
             'next' : () => {
+                oneShot.nxt()
                 update({name:'I1'})
             },
         },
-        // controls
+        // story+controls
         I2 : {
             'next' : () => {
+                oneShot.nxt()
                 update({
                     name:'I3',
                     level : 0,
@@ -388,12 +391,15 @@ function GameState(){
             },
         },
         // ... snd screen
-        I3 : {            
-            'next' : () => update({name:'M1'})
+        I3 : {              
+            'next' : () => {
+                oneShot.mssn()
+                update({name:'M1'})
+            }
         },
         // level briefing
         M1 : {
-            '>' : () => {
+            '>' : () => {                
                 update({                    
                     nsublevels : Missions[ state.level ].subs.length
                 })
@@ -405,6 +411,7 @@ function GameState(){
         // sublevel briefing
         S1 : {
             '>' : () => {
+                oneShot.mssn()
                 update({
                     choices: mkChoices(state.level,state.sublevel),
                     energy : NOMINAL_ENERGY,
@@ -418,19 +425,20 @@ function GameState(){
         // ready set go
         S2 : {
             '>' : () => {
+                oneShot.mssn()
                 timeout( () => event('next'),4000)
-              
             },
             'next' : () => {
                 update({name:'S3'})
+                oneShot.checkl()
             },
             
         },
         S3 : {
             'checkLine' : num => {
                 //state.checkLines.push( { num, t : state.T } )
-                oneShot.v()
-                console.log('state.checkLines',state.checkLines)
+                oneShot.checkl()
+                // console.log('state.checkLines',state.checkLines)
             },
             'damage' : d => {
                 const energy = state.energy - d
@@ -442,10 +450,10 @@ function GameState(){
             },
             'sublevel-win' : d =>{
                 update({ name : 'W1' })
-                oneShot.wo()
+                oneShot.slw()
             },
             'sublevel-lose' : d => {
-                oneShot.l1()
+                oneShot.sll()
                 update( {
                     name : 'L1',
                     lives : state.lives - 1
@@ -455,6 +463,7 @@ function GameState(){
         // sublevel won
         W1 : {
             'next' : () => {
+                oneShot.slw()
                 const sublevel = state.sublevel + 1
                 if ( sublevel < state.nsublevels ){
                     update({
@@ -493,7 +502,9 @@ function GameState(){
         },
         // congratulations, thanks for playing
         'W3' : {
-            
+            '>' : d => {
+                oneShot.slw()
+            }
         },
         L1 : {
             '>' : d => {
@@ -548,9 +559,11 @@ function GameState(){
             const mh = sm[ eName ]
             mh(eData)
         } catch (e){
-            console.error('wrong message?',cStateName,eName,{state, eName, eData},e)
+            //console.error('wrong message?',cStateName,eName,{state, eName, eData},e)
         }
         if ( cStateName !== state.name  ){
+            
+
             //
             state.t = state.T
             
@@ -560,7 +573,7 @@ function GameState(){
             if ( enter ){
                 enter()
             }
-            console.log('STATE CHANGE',cStateName,'->',state.name)
+            // console.log('STATE CHANGE',cStateName,'->',state.name)
         }
     }
     //setInterval( checkTimeouts, 200 )
@@ -742,7 +755,7 @@ const step = (dt,T) =>{
             }
             if ( idx !== -1 ){
                 gameState.event('checkLine',idx, choices.length - 2)
-                console.log('step',idx,'/', choices.length - 2)
+                // console.log('step',idx,'/', choices.length - 2)
             }
         //        }
         // front raycast
@@ -761,7 +774,7 @@ const step = (dt,T) =>{
         if ( wallDist !== undefined ){
             const wallProx = clamp((rayLength - wallDist - 1) / ( rayLength - 2 ),0,1 )
             WALLDIST = wallProx
-            //console.log('seen',wallProx)
+            //// console.log('seen',wallProx)
         }
         
     }
@@ -812,22 +825,22 @@ const step = (dt,T) =>{
         const ml = Missions[ level ],
               ms = ml.subs[ sublevel ]
         
-        printCenter(0,`Mission #${level+1}`)
-        printCenter(2,`"${ml.name}"`)
+        printCenter(1,`Mission #${level+1}`)
+        printCenter(3,`"${ml.name}"`)
 
-        printCenter(4,`Hop #${sublevel+1}/${nsublevels}`)
-        printCenter(6,`"${ms.name}"`)
+        printCenter(5,`Hop #${sublevel+1}/${nsublevels}`)
+        printCenter(7,`"${ms.name}"`)
         if ( showDirs ){
-            printCenter(8,'you follow the directions:')
-            printCenter(10,gameState.state.choices.directions.join('.'))
+            printCenter(9,'you follow the directions:')
+            printCenter(11,gameState.state.choices.directions.join('.'))
         }
         if ( showFailure ){
-            printCenter(8,'you did not make it!')
-            printCenter(10,'* hop failed *')
+            printCenter(9,'you did not make it!')
+            printCenter(11,'* hop failed *')
         }
         if ( showSublevelWin ){
-            printCenter(8,'* hop successful *')
-            printCenter(10,'you made it!')
+            printCenter(9,'* hop successful *')
+            printCenter(11,'you made it!')
         }
         /*
         let j = 4
@@ -858,7 +871,7 @@ const step = (dt,T) =>{
     } else  if ( ['I3'].includes(stateName()) ){
         printCenter(1,'The Odyssey Begins...')
         
-        const paragraphs = 'Now your destiny is to always follow the correct route. Every electron knows what happens when you fail to follow the correct route...\n\nElectronic DEATH!\n\nSo always remember the ordered up and down branches of the route!'
+        const paragraphs = 'Now your destiny is to always follow the correct route. Every electron knows what happens when you fail to follow the correct route...\n\nElectronic DEATH!\n\nSo ALWAYS remember the ordered up and down branches of the route!\n\nGOOD LUCK!'
         textScreen.printParagraphs( 3, paragraphs, 0 )
         
         //textScreen.print(0,5,'"Follow the correct route, ignore the incorrect one or you will die", you can remember your electron mother say. This is your life, now !')
@@ -878,7 +891,7 @@ const step = (dt,T) =>{
                       undefined)*/
         //(gameState.state.choices && gameState.state.choices.directions) || [0])
     } else if ( ['I1'].includes(stateName()) ){
-        printCenter(6,'electron life simulator')
+        printCenter(7,'electron life simulator')
     } else if ( ['I0'].includes(stateName()) ){
         printCenter(6,'machin presents')
     } else if ( ['L1'].includes(stateName()) ){
@@ -886,7 +899,7 @@ const step = (dt,T) =>{
         printMission(false,true)
 
     } else if ( ['L2'].includes(stateName()) ){
-        printCenter(6,'404')
+        printCenter(7,'404')
     } else if ( ['W1'].includes(stateName()) ){
 //        printCenter(6,'sublevel won')
         printMission(false,false,true)
@@ -894,7 +907,7 @@ const step = (dt,T) =>{
         printCenter(6,'level won')
     } else if ( ['W3'].includes(stateName()) ){
         printCenter(6,'You Won It All!')
-        printCenter(8,'Thanks for playing !')
+        printCenter(8,'Thanks for playing!')
     } else if ( ['S1'].includes(stateName()) ){
         printMission(true)
         
@@ -904,39 +917,40 @@ const step = (dt,T) =>{
         //writeMission(textScreen,undefined,gameState.state.sublevel,gameState.state.choices.directions)
         
     } else if ( ['S2'].includes(stateName()) ){
-        printCenter(14,'ready?')
+        printCenter(9,'ready?')
     } else {
         //display.textMode.vis = false
     }
-    
-    // {
-    //     textScreen.print(0,14,stateName())
-    //     let { level, nlevels, sublevel, nsublevels, lives, L } = gameState.state
-    //     if ( level === undefined ) level = '??'
-    //     if ( nlevels === undefined ) nlevels = '??'
-    //     if ( sublevel === undefined ) sublevel = '??'
-    //     if ( nsublevels === undefined ) nsublevels = '??'
-    //     if ( lives === undefined ) lives = '??'
-    //     if ( L === undefined ) L = '??'
-    //     const s = s => s.toString()
-    //     textScreen.print(0,15,
-    //                      `lev:${s(level)}/${s(nlevels)} `
-    //                      +`sub:${s(sublevel)}/${s(nsublevels)} `
-    //                      +`lL:${s(lives)}/${s(L)}`)
-    //                      /*
-    //     textScreen.print(4,15,s(level).toString())
-    //     textScreen.print(7,15,sublevel.toString())
-    //     textScreen.print(10,15,
-    //                      ''+lives.toString()
-    //                      +'/'
-    //                      +L.toString()
-    //                      +' lives')*/
-    // }
+    //hud()
+    function hud()
+    {
+        textScreen.print(0,14,stateName())
+        let { level, nlevels, sublevel, nsublevels, lives, L } = gameState.state
+        if ( level === undefined ) level = '??'
+        if ( nlevels === undefined ) nlevels = '??'
+        if ( sublevel === undefined ) sublevel = '??'
+        if ( nsublevels === undefined ) nsublevels = '??'
+        if ( lives === undefined ) lives = '??'
+        if ( L === undefined ) L = '??'
+        const s = s => s.toString()
+        textScreen.print(0,15,
+                         `lev:${s(level)}/${s(nlevels)} `
+                         +`sub:${s(sublevel)}/${s(nsublevels)} `
+                         +`lL:${s(lives)}/${s(L)}`)
+                         /*
+        textScreen.print(4,15,s(level).toString())
+        textScreen.print(7,15,sublevel.toString())
+        textScreen.print(10,15,
+                         ''+lives.toString()
+                         +'/'
+                         +L.toString()
+                         +' lives')*/
+    }
 
     const { feedbackBuffer } = display
     
-    if ( stateNameIs('S3') ){
-        let a = feedbackBuffer.o.a
+    if ( stateIsOneOf('S2','S3') ){
+        const a = feedbackBuffer.o.a
         feedbackBuffer.o.a = clamp(a+1/60/3,0,1)
     } /*else if ( (['S2'].includes(stateName())) ){
         feedbackBuffer.o.a = 0.02
@@ -945,22 +959,25 @@ const step = (dt,T) =>{
     }
     let cols
     {
-        const slicedur = 200 // ms
+        /*const slicedur = 200 // ms
         const disc = 32
         const f = (Math.floor(T/slicedur)%disc)/disc
         const tcol = T/1000
-
         const s = ( Math.sin(2*Math.PI*T/2000) * 2 ) - 1
-        cols = Cols(f,s)
+        */
+        if ( stateIsOneOf(mapVisibility) ){
+            const hs = Missions[ gameState.state.level ].hs
+            cols = Cols(...hs)
+        }
     }
     
     
     const elapsed = display.draw( camera, choices, player, particles, timeoutBar, lifeBar, remainingTo, cols )
     if ( false ){
         if ( elapsed[ elapsed.length - 1 ] >= 8 ){
-            console.log(elapsed)
+            // console.log(elapsed)
         } else {
-            console.log('<8')
+            // console.log('<8')
         }
     }
 //    stats.end()

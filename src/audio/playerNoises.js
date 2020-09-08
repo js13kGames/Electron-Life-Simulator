@@ -71,7 +71,7 @@ export function PlayerNoises(ac){
         
         if ( d.wallDist !== undefined ){ 
             const lWallDist = Math.pow(d.wallDist,3)
-            sonar.gain.gain.linearRampToValueAtTime( 1/5, t1 )
+            sonar.gain.gain.linearRampToValueAtTime( 2/5, t1 )
             sonar.osc.frequency.linearRampToValueAtTime( 440 + 20 * lWallDist , t1 )
             sonar.osc01.playbackRate.linearRampToValueAtTime( 1 + lWallDist * 10, t1 )
         } else {

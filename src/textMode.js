@@ -84,13 +84,13 @@ export function TextMode( textScreen, font ){
         
         //textScreen.cls()
         //textScreen.print(0,0,''+Math.random())
-        textScreen.print(0,0,'*')
-        textScreen.print(0,1,'*')
-        textScreen.print(1,0,'*')
+        // textScreen.print(0,0,'*')
+        // textScreen.print(0,1,'*')
+        // textScreen.print(1,0,'*')
         
-        textScreen.print(width-1,height-1,'*')
-        textScreen.print(width-2,height-1,'*')
-        textScreen.print(width-1,height-2,'*')
+        // textScreen.print(width-1,height-1,'*')
+        // textScreen.print(width-2,height-1,'*')
+        // textScreen.print(width-1,height-2,'*')
 
         // clear
         ctx.clearRect(0,0,width*dim,height*dim)
