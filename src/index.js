@@ -380,11 +380,14 @@ function posCollide( level, pos, cells ){
 function movePlayer( player, level, dx, dy, dt, ff){
     const pmp = player.position,
           nextPosition = cloneV2(pmp)
+
+    nextPosition.y+= dt/1000000
+    
     let hasCollision = false,
         collisionType = 0
     for ( let i = 3 ; i >= 1 ; i-- ){
         if ( i&1 ) nextPosition.x += dx * dt / ff
-        if ( i&2 ) nextPosition.y += dy * dt / ff 
+        if ( i&2 ) nextPosition.y += dy * dt / ff  
         const collide = posCollide( level, nextPosition, ['*'] )
         if ( !collide ) break;
         hasCollision = true
