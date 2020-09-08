@@ -53,9 +53,9 @@ const musicPlayer = Music.play(ac)
 oneShotSampler.globalGain.connect( ac.destination )
 oneShotSampler.globalGain.gain.value = 0.7
 playerNoises.globalGain.connect( ac.destination )
-playerNoises.globalGain.gain.value = 1.0
+playerNoises.globalGain.gain.value = 0.0
 musicPlayer.globalGain.connect( ac.destination )
-musicPlayer.globalGain.gain.value = 1.0
+musicPlayer.globalGain.gain.value = 0.0
 /*
 musicPlayer.globalGain.gain.value = 0.0
 playerNoises.globalGain.gain.value = 0.0
@@ -916,8 +916,9 @@ const step = (dt,T) =>{
         //printCenter(6,'level won')
         printMission(false,false, false, true )
     } else if ( ['W3'].includes(stateName()) ){
-        printCenter(6,'You Won It All!')
-        printCenter(8,'Thanks for playing!')
+        printCenter(5,'You Won It All!')
+        printCenter(7,'Electron Gods are please to meet you.!')
+        printCenter(10,'Thanks for playing!')
     } else if ( ['S1'].includes(stateName()) ){
         printMission(true)
         
