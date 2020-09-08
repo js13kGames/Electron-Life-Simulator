@@ -12,7 +12,7 @@ export function play(ac){
             setInterval( () => {
                 const ACT0 = ac.currentTime
                 if ( (!lastEnd) || ( ac.currentTime > (lastEnd-1) ) ){
-                    console.log('at',ACT0,'restart song for', lastEnd || ACT0 )
+                    //console.log('at',ACT0,'restart song for', lastEnd || ACT0 )
                     lastEnd = planify( 0.5 + lastEnd || ACT0 )
                 }
             },500)
