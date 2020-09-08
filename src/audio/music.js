@@ -5,7 +5,7 @@ import { ms, sample1, ftok, ktof, itrvstot, FftFreqs, adsr,
          setValueNow, apFrequency, apGain, apQ, apDetune } from './webaudioUtils.js'
 
 export function play(ac){
-
+    let chordIdx = 0
     let lastEnd
     ac.onstatechange = () => {
         if ( ac.state === 'running' )
@@ -47,26 +47,30 @@ export function play(ac){
     
     //const chords = [[48+12,48+12+7,45,65],[50,73]]
     let chords = []
-    if (true){
+   // if (true){
         const chordm = [48+12,48+12+3,48+12+7,
                         48+12+12,48+12+12+3,48+12+12+7],
               chord7 = [48+12,48+12+4,48+12+7,48+12+10]
               //chordO = [48+12,48+12+2,48+12],
               //chord = chordm
-        const transpositions = [0,1,0,1,6,3,0,-3,-6 ]
+    const transpositions = [0,1,0,1,6,3,0,-3,-6 ]
+    for ( let r = 0 ; r < 600 ; r++){
+        let q = 0
         for ( let q = 0 ; q < 12 ; q++){
+        transpositions.forEach( t => {
+            //chords.push( chord7.map( x => x + t ) )
+            //chords.push( chordm.map( x => x + t + ( 7 * q )%12 ))
+            chords.push( chordm.map( x => x + t + ( 7 * q )%12 ))
+        })
+        if ( q === 8 ){
             transpositions.forEach( t => {
-                //chords.push( chord7.map( x => x + t ) )
-                //chords.push( chordm.map( x => x + t + ( 7 * q )%12 ))
-                chords.push( chordm.map( x => x + t + ( 7 * q )%12 ))
+                chords.push( chord7.map( x => x + t + ( 7 * q )%12 ))
             })
-            if ( q === 8 ){
-                transpositions.forEach( t => {
-                    chords.push( chord7.map( x => x + t + ( 7 * q )%12 ))
-                })
-            }
         }
-        /*
+        }
+        transpositions[  Math.floor(Math.random() * transpositions.length) ] = Math.floor(Math.random() * 12 - 2)
+        }
+    /*
         for ( let q = 0 ; q < 12 ; q++){
             transpositions.forEach( t => {
                 //chords.push( chord7.map( x => x + t ) )
@@ -81,7 +85,7 @@ export function play(ac){
                 chords.push( chord7.map( x => x + t + ( 7 * q )%12 ))
             })
         }*/
-    }
+   // }
     //chords = chords.slice(0,3)
     // const rythme = [1,1,0,1,1,1,0,1,1] // BIEN
     const rythme = [1,1,0,1, 1,1,0,1]
@@ -104,7 +108,6 @@ export function play(ac){
     
 
     //    console.log('noiseBuffer',noiseBuffer)
-    let chordIdx = 0
     function planify( /*chords, */t ){
         //let t = 0
         const ci = chordIdx % chords.length,
@@ -116,7 +119,7 @@ export function play(ac){
                           0.3,   // lament
                           0.97,   // drums
                           1.6,   // bass drum
-                          0.8    // hero
+                          0.7    // hero
                         ]
         const sum = volumes.reduce((r,x)=>r+x,0)
         const boost = 1.5
@@ -137,7 +140,7 @@ export function play(ac){
             playBassDrum( chord, dur, vels[4], t )
         
         //const c32p = ci % 32
-        if ( ci > 33 )
+        if ( ci > 16 )
         //if ( ci %3 )
             playHero( chord, dur, vels[5],t )
         
