@@ -116,7 +116,7 @@ export function play(ac){
                           0.3,   // lament
                           0.97,   // drums
                           1.6,   // bass drum
-                          1.3    // hero
+                          0.8    // hero
                         ]
         const sum = volumes.reduce((r,x)=>r+x,0)
         const boost = 1.5
@@ -127,7 +127,7 @@ export function play(ac){
           if ( ci > 3 )
             playBass( chord, dur, vels[1], t )
         
-      if ( ci > 7 )
+        if ( ci > 7 )
             playDrums( chord, dur, vels[3], t )
         
         //if ( ci > 9 )
@@ -136,8 +136,9 @@ export function play(ac){
         if ( ci > 12 )
             playBassDrum( chord, dur, vels[4], t )
         
-        const c32p = ci % 32
-        if ( c32p > 16 )
+        //const c32p = ci % 32
+        if ( ci > 33 )
+        //if ( ci %3 )
             playHero( chord, dur, vels[5],t )
         
         //console.log(endChord,ac)
@@ -159,12 +160,15 @@ export function play(ac){
           heroGainGainSetValueAtTime = setValueAtTime(heroGainGain)
 
     heroOsc.start( 0 )
-    heroOsc.connect( heroGain ).connect( delayChain.input )
+    heroOsc.connect( heroGain )
+    //heroGain.connect( delayChain.input )
+    heroGain.connect( delayChain.input )
+    //heroGain.connect( globalGain )
+    
     heroGainGainSetValueAtTime( 0, 0 )
     
     function playHero( chord, dur, vel, t){
-        
-    
+     
         const nnotes = rythme.length * 2 + Math.floor( Math.random() * 3 )
         const choices = chord.flatMap( x => [x,x + 3,x-3,x+1,x-1])
         const notes = []
@@ -184,6 +188,7 @@ export function play(ac){
         heroOscFrequencySetValueAtTime( ktof(notes[0]), t )
         heroGainGainSetValueAtTime( 0, t )
         
+
         notes.forEach( (k,ki) => {
             const f = ktof( k )
             let start = t + ki * elDur
@@ -217,11 +222,19 @@ export function play(ac){
 
 
         })
+        
+        heroGainGainSetValueAtTime( 0, t + dur + 1 )
+    
+        
         //heroOsc.start( t )
         //heroOsc.stop( end ) 
         //heroOsc.connect( gain )
         //gain.connect( delayChain.input )
-       
+
+        //heroGainGainLinearRamp(0, t + dur+ 0.1 )
+        //heroOscFrequencyLinearRamp( 0, t + dur + 0.1 )
+       // heroGain.disconnect( delayChain.input )
+
         //globalGain
 
     }
