@@ -30,7 +30,8 @@ import * as measureFunction from './debug/measureFunction'
 
 
 const ac = new AudioContext()
-const sounds = {
+/*
+const sounds2 = {
     start : [0.5,,1049,,.09,.25,,.45,,,442,.05,,.1,,,,.51,.08,.1],
     nxt : [0.5,,1049,,.09,.25,,.45,,,442,.05,,.1,,,,.51,.08,.1],
     checkl : [1.2,,1322,.05,.12,.03,1,.02,31,7.7,,,,,,,.27,.33,.04,.01],
@@ -44,7 +45,66 @@ const sounds = {
     ///l1 : [2.7,,72,.01,,.32,2,1.51,,-0.6,,,.02,,,,.07,.63],
     sll : [2.2,,476,.04,.09,.64,4,3.96,.2,,,,,1,,.4,,.55,.04],
     l2 : [0.8,,29,,.21,.15,4,1.63,,.7,-137,.03,,,,,.11,,.1]
+}*/
+let SOUND
+{
+    const duration = 2
+
+    const gGainGainEnveloppe = undefined
+
+    const oscFrequencyEnveloppe = undefined
+    const oscGainGainEnveloppe  = [1,0.001,0]
+
+    const noiseGainGainEnveloppe = [0]
+    const noisePlaybackRateEnveloppe = undefined
+
+    const modFrequencyEnveloppe = undefined
+    const modGainGainEnveloppe = undefined
+
+    const biquadFrequencyEnveloppe =  [1000]
+    const biquadQEnveloppe =  [10]
+
+    const delayDelayTimeEnveloppe = [0.1]
+    const delayDelayGainEnveloppe = [0,0.22,1]
+
+
+    const ordered =  [
+        duration,
+        gGainGainEnveloppe,
+        oscFrequencyEnveloppe,
+        oscGainGainEnveloppe,
+        noiseGainGainEnveloppe,
+        noisePlaybackRateEnveloppe,
+        modFrequencyEnveloppe,
+        modGainGainEnveloppe,
+        biquadFrequencyEnveloppe,
+        biquadQEnveloppe,
+        delayDelayTimeEnveloppe,
+        delayDelayGainEnveloppe
+    ]
+    SOUND= ordered
+    console.log('ORDERED SOUND*********************')
+    console.log( JSON.stringify( SOUND).replace(/null/g,'') )
+    console.log('*********************ORDERED SOUND')
 }
+// monte bulle fantaise 
+// SOUND = [2,[0,0.05,0.5,0.3,1,0.2,0],[250,0.2,520],[0,0.01,0.4,2,0.01,3,1],[0],[1,0.01,5,0.1,0.2,0.5,0],[1],[0],[1000,-0.35,2000,0.5,800,0.45,2000,4,4000],[1,0.5,5,1,0],[1,0.5,0.25,0.25,0.75,0.1,0.1,1,0],[1,0.5,0.25,1,0.3]]
+// toc sourd
+//SOUND = [2,null,null,[1,0.001,0],[0],null,null,null,[1000],[10],[0.1],[0,0.22,1]]
+//SOUND = [2,,,[1,0.001,0],[0],,,,[1000],[10],[0.1],[0,0.22,1]]
+const sounds = {
+    nxt :  SOUND,
+    start :  SOUND,
+    checkl :  SOUND,
+    mssn :SOUND,
+    slw :SOUND,
+    sll :SOUND,
+    l2 :SOUND,
+}
+
+
+
+
 // win [,,506,.06,.26,.36,2,.45,.2,-1.1,282,.01,.04,,,,.01,.83,.02]
 const oneShotSampler = OneShotSampler(ac, sounds)
 const oneShot = oneShotSampler.players
