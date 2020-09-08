@@ -668,7 +668,7 @@ const step = (dt,T) =>{
     
         if ( sinceStateStart > TIME_BEFORE_SKIP_STATE ){
             if ( keyboardController.anyKeyStroke.length ){
-                console.log('to!')
+                //console.log('to!')
                 gameState.event('next')
             }
             textScreen.print(15,14,"any key to skip")
@@ -909,29 +909,29 @@ const step = (dt,T) =>{
         //display.textMode.vis = false
     }
     
-    textScreen.print(0,14,stateName())
-    {
-        let { level, nlevels, sublevel, nsublevels, lives, L } = gameState.state
-        if ( level === undefined ) level = '??'
-        if ( nlevels === undefined ) nlevels = '??'
-        if ( sublevel === undefined ) sublevel = '??'
-        if ( nsublevels === undefined ) nsublevels = '??'
-        if ( lives === undefined ) lives = '??'
-        if ( L === undefined ) L = '??'
-        const s = s => s.toString()
-        textScreen.print(0,15,
-                         `lev:${s(level)}/${s(nlevels)} `
-                         +`sub:${s(sublevel)}/${s(nsublevels)} `
-                         +`lL:${s(lives)}/${s(L)}`)
-                         /*
-        textScreen.print(4,15,s(level).toString())
-        textScreen.print(7,15,sublevel.toString())
-        textScreen.print(10,15,
-                         ''+lives.toString()
-                         +'/'
-                         +L.toString()
-                         +' lives')*/
-    }
+    // {
+    //     textScreen.print(0,14,stateName())
+    //     let { level, nlevels, sublevel, nsublevels, lives, L } = gameState.state
+    //     if ( level === undefined ) level = '??'
+    //     if ( nlevels === undefined ) nlevels = '??'
+    //     if ( sublevel === undefined ) sublevel = '??'
+    //     if ( nsublevels === undefined ) nsublevels = '??'
+    //     if ( lives === undefined ) lives = '??'
+    //     if ( L === undefined ) L = '??'
+    //     const s = s => s.toString()
+    //     textScreen.print(0,15,
+    //                      `lev:${s(level)}/${s(nlevels)} `
+    //                      +`sub:${s(sublevel)}/${s(nsublevels)} `
+    //                      +`lL:${s(lives)}/${s(L)}`)
+    //                      /*
+    //     textScreen.print(4,15,s(level).toString())
+    //     textScreen.print(7,15,sublevel.toString())
+    //     textScreen.print(10,15,
+    //                      ''+lives.toString()
+    //                      +'/'
+    //                      +L.toString()
+    //                      +' lives')*/
+    // }
 
     const { feedbackBuffer } = display
     

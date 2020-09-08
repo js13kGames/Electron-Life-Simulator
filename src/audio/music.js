@@ -309,10 +309,10 @@ export function play(ac){
         
 
         
-        const handClapEnvelope = {
+       /* const handClapEnvelope = {
             values : [ 1.0, 0.8 ].map( x => x * vel ),
             durations : [ sample(10), sample(100), sample(10), sample(20) ]
-        }
+        }*/
         const snareEnvelope = {
             values : [ 1.0, 0.8 ].map( x => x * vel ),
             durations : [ sample(20), sample(500), sample(3000), sample(500) ]
