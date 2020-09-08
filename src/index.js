@@ -663,12 +663,11 @@ const step = (dt,T) =>{
     // check timeouts
     const remainingTo = gameState.checkTimeouts(T)
     timeoutBar.remain = remainingTo
-    timeoutBar.vis =  (remainingTo !== undefined) 
-        && timeoutBarVisibility.includes( stateName() ) 
+    timeoutBar.vis =  (remainingTo !== undefined)   && timeoutBarVisibility.includes( stateName() ) 
     if ( keyboardController.anyKeyStroke.length ){
         //  textScreen.cls()
     }
-    const TIME_BEFORE_SKIP_STATE = 1600
+    const TIME_BEFORE_SKIP_STATE = 1000
     // grab input
 //    stats.begin()
 
