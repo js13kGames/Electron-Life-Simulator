@@ -20,7 +20,7 @@ export function play(ac){
     const fftFreqs = FftFreqs(size,f0)
     
     const chords = []
-    {
+    if (false){
         const chordm = [48+12,48+12+3,48+12+7,
                         48+12+12,48+12+12+3,48+12+12+7],
               chord7 = [48+12,48+12+4,48+12+7,48+12+10]
@@ -114,7 +114,7 @@ export function play(ac){
         t = endChord
     })
     function playHero( chord, dur, vel, t){
-
+        
         const osc = ac.createOscillator(),
               gainNode = ac.createGain()
 
