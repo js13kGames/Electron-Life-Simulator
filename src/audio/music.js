@@ -94,22 +94,22 @@ export function play(ac){
         
         const endChord = playChord( chord, vels[0], t )
         const dur = endChord - t
-        //if ( ci > 3 ){
-        playBass( chord, dur, vels[1], t )
-        //}
-        //if ( ci > 7 ){
-        playDrums( chord, dur, vels[3], t )
-        //}
-        //if ( ci > 9 ){
-        playLament( chord, dur, vels[2], t )
-        //}
-        //if ( ci > 12 ){
-        playBassDrum( chord, dur, vels[4], t )
-    //}
+        if ( ci > 3 ){
+            playBass( chord, dur, vels[1], t )
+        }
+        if ( ci > 7 ){
+            playDrums( chord, dur, vels[3], t )
+        }
+        if ( ci > 9 ){
+            playLament( chord, dur, vels[2], t )
+        }
+        if ( ci > 12 ){
+            playBassDrum( chord, dur, vels[4], t )
+        }
         const c32p = ci % 32
-        //if ( c32p > 16 ){
-        playHero( chord, dur, vels[5],t )
-        //}
+        if ( c32p > 16 ){
+            playHero( chord, dur, vels[5],t )
+        }
         t = endChord
     })
     function playHero( chord, dur, vel, t){

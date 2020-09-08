@@ -35,21 +35,23 @@ const sounds = {
     checkl : [1.2,,1322,.05,.12,.03,1,.02,31,7.7,,,,,,,.27,.33,.04,.01],
     //mssn : [2.3,,34,.02,,.04,2,2.05,,1,-14,.16,,.8,,,.09,,.16,.17],
     strt : [3.3,,565,.04,.19,0,,.33,,-4.1,,,,,,,.12,.05,,.55],
-    mssn : [1.7,,27,.02,.16,.18,3,.7,,-0.7,,,,.1,,,,.34,.21,.09], // prout
+    //mssn : [1.7,,27,.02,.16,.18,3,.7,,-0.7,,,,.1,,,,.34,.21,.09], // prout
+    //mssn : [,,1632,,.09,.12,,1.52,,,,,.09,,,,.09,.59,.08],
+    mssn : [0.9,,1,,.09,.03,,.69,14,2,,,,.1,1.4],
     //z : [1.2,,674,.07,.18,.01,,.9,-25,,,,.02,.7],
     slw : [1.5,,803,.05,.43,.55,,1.86,,,-97,.02,.27,,,,,.64,.04],
     ///l1 : [2.7,,72,.01,,.32,2,1.51,,-0.6,,,.02,,,,.07,.63],
-    sll : [3,,476,.04,.09,.64,4,3.96,.2,,,,,1,,.4,,.55,.04],
+    sll : [2.2,,476,.04,.09,.64,4,3.96,.2,,,,,1,,.4,,.55,.04],
     l2 : [0.8,,29,,.21,.15,4,1.63,,.7,-137,.03,,,,,.11,,.1]
 }
-
+// win [,,506,.06,.26,.36,2,.45,.2,-1.1,282,.01,.04,,,,.01,.83,.02]
 const oneShotSampler = OneShotSampler(ac, sounds)
 const oneShot = oneShotSampler.players
 const playerNoises = PlayerNoises(ac)
 const musicPlayer = Music.play(ac)
 
 oneShotSampler.globalGain.connect( ac.destination )
-oneShotSampler.globalGain.gain.value = 0.8
+oneShotSampler.globalGain.gain.value = 0.7
 playerNoises.globalGain.connect( ac.destination )
 playerNoises.globalGain.gain.value = 1.0
 musicPlayer.globalGain.connect( ac.destination )
@@ -819,16 +821,17 @@ const step = (dt,T) =>{
     })
     const printCenter = textScreen.printCenter
 
-    function printMission(showDirs,showFailure, showSublevelWin ){
+    function printMission(showDirs,showFailure, showSublevelWin, showLevelWin ){
         const { level, sublevel, nsublevels } = gameState.state
         const ml = Missions[ level ],
               ms = ml.subs[ sublevel ]
         
         printCenter(1,`Mission #${level+1}`)
         printCenter(3,`"${ml.name}"`)
-
-        printCenter(5,`Hop #${sublevel+1}/${nsublevels}`)
-        printCenter(7,`"${ms.name}"`)
+        if ( !showLevelWin){
+            printCenter(5,`Hop #${sublevel+1}/${nsublevels}`)
+            printCenter(7,`"${ms.name}"`)
+        }
         if ( showDirs ){
             printCenter(9,'you follow the directions:')
             printCenter(11,gameState.state.choices.directions.join('.'))
@@ -840,6 +843,9 @@ const step = (dt,T) =>{
         if ( showSublevelWin ){
             printCenter(9,'* hop successful *')
             printCenter(11,'you made it!')
+        }
+        if ( showLevelWin ){
+            printCenter(9,'* mission cleared! *')
         }
         /*
         let j = 4
@@ -900,10 +906,11 @@ const step = (dt,T) =>{
     } else if ( ['L2'].includes(stateName()) ){
         printCenter(7,'404')
     } else if ( ['W1'].includes(stateName()) ){
-//        printCenter(6,'sublevel won')
+        //        printCenter(6,'sublevel won')
         printMission(false,false,true)
     } else if ( ['W2'].includes(stateName()) ){
-        printCenter(6,'level won')
+        //printCenter(6,'level won')
+        printMission(false,false, false, true )
     } else if ( ['W3'].includes(stateName()) ){
         printCenter(6,'You Won It All!')
         printCenter(8,'Thanks for playing!')
