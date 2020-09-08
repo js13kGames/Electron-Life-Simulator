@@ -876,7 +876,7 @@ const step = (dt,T) =>{
     } else  if ( ['I3'].includes(stateName()) ){
         printCenter(1,'The Odyssey Begins...')
         
-        const paragraphs = 'Now your destiny is to always follow the correct route. Every electron knows what happens when you fail to follow the correct route...\n\nElectronic DEATH!\n\nSo ALWAYS remember the ordered up and down branches of the route!\n\nGOOD LUCK!'
+        const paragraphs = 'Now your destiny is to always follow the correct route. Every electron knows what happens when you fail to follow the correct route...\n\n404 : Electronic DEATH!\n\nSo ALWAYS remember the ordered up and down branches of the route!\n\nGOOD LUCK!'
         textScreen.printParagraphs( 3, paragraphs, 0 )
         
         //textScreen.print(0,5,'"Follow the correct route, ignore the incorrect one or you will die", you can remember your electron mother say. This is your life, now !')
