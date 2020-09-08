@@ -144,7 +144,7 @@ export function DelayChain( ac, ds  ){
         dn.delayTime.value = ds[ i ][0]
         gn.connect( dn )
         if ( i > 0 ){
-            nodes[ node.length - 1 ].connect( gn )
+            nodes[ nodes.length - 1 ].connect( gn )
         }
         nodes.push( gn, dn )
     }
@@ -241,3 +241,4 @@ export function Record( channels, length, sampleRate, setup, ondone, onprogress 
         ondone(b)
     })
 }
+//Record()

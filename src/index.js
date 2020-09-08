@@ -56,7 +56,11 @@ playerNoises.globalGain.connect( ac.destination )
 playerNoises.globalGain.gain.value = 1.0
 musicPlayer.globalGain.connect( ac.destination )
 musicPlayer.globalGain.gain.value = 1.0
-
+/*
+musicPlayer.globalGain.gain.value = 0.0
+playerNoises.globalGain.gain.value = 0.0
+oneShotSampler.globalGain.gain.value = 1.0
+*/
 /*
 offline
 Record(2,ac.sampleRate * 60,ac.sampleRate,

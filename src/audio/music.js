@@ -13,7 +13,7 @@ export function play(ac){
                 const ACT0 = ac.currentTime
                 if ( (!lastEnd) || ( ac.currentTime > (lastEnd-1) ) ){
                     //console.log('at',ACT0,'restart song for', lastEnd || ACT0 )
-                    lastEnd = planify( 0.5 + lastEnd || ACT0 )
+                    lastEnd = planify( lastEnd || ACT0 )
                 }
             },500)
         /*
@@ -124,20 +124,20 @@ export function play(ac){
         
         const endChord = playChord( chord, vels[0], t )
         const dur = endChord - t
-      //  if ( ci > 3 )
+          if ( ci > 3 )
             playBass( chord, dur, vels[1], t )
         
-    //    if ( ci > 7 )
+      if ( ci > 7 )
             playDrums( chord, dur, vels[3], t )
         
-  //      if ( ci > 9 )
+        //if ( ci > 9 )
         //playLament( chord, dur, vels[2], t )
         
-//        if ( ci > 12 )
+        if ( ci > 12 )
             playBassDrum( chord, dur, vels[4], t )
         
         const c32p = ci % 32
-        //if ( c32p > 16 )
+        if ( c32p > 16 )
             playHero( chord, dur, vels[5],t )
         
         //console.log(endChord,ac)
