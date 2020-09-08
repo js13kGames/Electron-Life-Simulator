@@ -47,56 +47,62 @@ const sounds2 = {
     l2 : [0.8,,29,,.21,.15,4,1.63,,.7,-137,.03,,,,,.11,,.1]
 }*/
 let SOUND
-{
-    const duration = 0.5
+// {
+//     const duration = 2
 
-    const gGainGainEnveloppe = [4]
+//     const gGainGainEnveloppe = [1,2,0]
 
-    const oscFrequencyEnveloppe = [1,400,0.3,200]
-    const oscGainGainEnveloppe  = [1,
-                                   0,0.01, 4,0.04 ]
+//     const oscFrequencyEnveloppe = undefined
+//     const oscGainGainEnveloppe  = [0]
 
-    const noiseGainGainEnveloppe = [1,0.01,0]
-    const noisePlaybackRateEnveloppe = undefined
+//     const noiseGainGainEnveloppe = undefined
+//     const noisePlaybackRateEnveloppe = [0.01,-1,4]
 
-    const modFrequencyEnveloppe = [1,1,1000]
-    const modGainGainEnveloppe = [200]
+//     const modFrequencyEnveloppe = undefined
+//     const modGainGainEnveloppe = undefined
 
-    const biquadFrequencyEnveloppe =  [5000,-0.5,100,1.0,300]
-    const biquadQEnveloppe = [10,0.5,1,1,20] 
+//     const biquadFrequencyEnveloppe = undefined
+//     const biquadQEnveloppe = undefined
 
-    const delayDelayTimeEnveloppe = [0.1,1,0.05,1.5,5]
-    const delayDelayGainEnveloppe = [0.8,1,0.9]
+//     const delayDelayTimeEnveloppe = [.1]
+//     const delayDelayGainEnveloppe = [1,1,0.5]
 
-
-    const ordered =  [
-        duration,
-        gGainGainEnveloppe,
-        oscFrequencyEnveloppe,
-        oscGainGainEnveloppe,
-        noiseGainGainEnveloppe,
-        noisePlaybackRateEnveloppe,
-        modFrequencyEnveloppe,
-        modGainGainEnveloppe,
-        biquadFrequencyEnveloppe,
-        biquadQEnveloppe,
-        delayDelayTimeEnveloppe,
-        delayDelayGainEnveloppe
-    ]
-//    SOUND= ordered
-    console.log('ORDERED SOUND*********************')
-    console.log( JSON.stringify( ordered ).replace(/null/g,'') )
-    console.log('*********************ORDERED SOUND')
-}
+//     const ordered =  [
+//         duration,
+//         gGainGainEnveloppe,
+//         oscFrequencyEnveloppe,
+//         oscGainGainEnveloppe,
+//         noiseGainGainEnveloppe,
+//         noisePlaybackRateEnveloppe,
+//         modFrequencyEnveloppe,
+//         modGainGainEnveloppe,
+//         biquadFrequencyEnveloppe,
+//         biquadQEnveloppe,
+//         delayDelayTimeEnveloppe,
+//         delayDelayGainEnveloppe
+//     ]
+// //    SOUND= ordered
+//     console.log('ORDERED SOUND*********************')
+//     console.log( JSON.stringify( ordered ).replace(/null/g,'') )
+//     console.log('*********************ORDERED SOUND')
+// }
 // monte bulle fantaise 
-//SOUND = [2,[0,0.05,0.5,0.3,1,0.2,0],[250,0.2,520],[0,0.01,0.4,2,0.01,3,1],[0],[1,0.01,5,0.1,0.2,0.5,0],[1],[0],[1000,-0.35,2000,0.5,800,0.45,2000,4,4000],[1,0.5,5,1,0],[1,0.5,0.25,0.25,0.75,0.1,0.1,1,0],[1,0.5,0.25,1,0.3]]
-SOUND = [0.5,[4],[1,400,0.3,200],[1,0,0.01,4,0.04],[1,0.01,0],,[1,1,1000],[200],[5000,-0.5,100,1,300],[10,0.5,1,1,20],[0.1,1,0.05,1.5,5],[0.8,1,0.9]]
+const SOUND1 = [2,[0,0.05,0.5,0.3,1,0.2,0],[250,0.2,520],[0,0.01,0.4,2,0.01,3,1],[0],[1,0.01,5,0.1,0.2,0.5,0],[1],[0],[1000,-0.35,2000,0.5,800,0.45,2000,4,4000],[1,0.5,5,1,0],[1,0.5,0.25,0.25,0.75,0.1,0.1,1,0],[1,0.5,0.25,1,0.3]]
+// tactactac
+const SOUND2 = [0.5,[4],[1,400,0.3,200],[1,0,0.01,4,0.04],[1,0.01,0],,[1,1,1000],[200],[5000,-0.5,100,1,300],[10,0.5,1,1,20],[0.1,1,0.05,1.5,5],[0.8,1,0.9]]
+
+// tole
+const SOUND3 = [2,[1,2,0],,[0],,[0.01,-1,4],,,,,[0.1],[1,1,0.5]]
+
+// bip
+const SOUND4 = [0.1]
+SOUND = SOUND4
 const sounds = {
-    nxt :  SOUND,
-    start :  SOUND,
-    checkl :  SOUND,
-    mssn :SOUND,
-    slw :SOUND,
+    nxt :  SOUND4,
+    start :  SOUND1,
+    checkl :  SOUND2,
+    mssn :SOUND3,
+    slw :SOUND2,
     sll :SOUND,
     l2 :SOUND,
 }
@@ -115,11 +121,11 @@ out.frequency.value = 2500
 out.connect( ac.destination )
 
 oneShotSampler.globalGain.connect( out )
-oneShotSampler.globalGain.gain.value = 0.7
+oneShotSampler.globalGain.gain.value = 0.6
 playerNoises.globalGain.connect( out )
-playerNoises.globalGain.gain.value = 1.0
+playerNoises.globalGain.gain.value = 0.9
 musicPlayer.globalGain.connect( out )
-musicPlayer.globalGain.gain.value = 0.0
+musicPlayer.globalGain.gain.value = 0.9
 
 
 /*

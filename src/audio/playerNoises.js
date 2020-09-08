@@ -79,7 +79,7 @@ export function PlayerNoises(ac){
             sonar.osc01.playbackRate.linearRampToValueAtTime( 1, t1 )
         }
         if ( d.hasCollision ){
-            scratching.gain.gain.linearRampToValueAtTime( 2, t1 )
+            scratching.gain.gain.linearRampToValueAtTime( 1.5, t1 )
             scratching.biquad.frequency.linearRampToValueAtTime( 300 , t1 )
         } else {
             scratching.gain.gain.linearRampToValueAtTime( 0, t1 )
