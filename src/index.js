@@ -50,13 +50,19 @@ const oneShotSampler = OneShotSampler(ac, sounds)
 const oneShot = oneShotSampler.players
 const playerNoises = PlayerNoises(ac)
 const musicPlayer = Music.play(ac)
+const out = ac.createBiquadFilter()
+out.type = 'lowpass'
+out.frequency.value = 2500
+out.connect( ac.destination )
 
-oneShotSampler.globalGain.connect( ac.destination )
+oneShotSampler.globalGain.connect( out )
 oneShotSampler.globalGain.gain.value = 0.7
-playerNoises.globalGain.connect( ac.destination )
-playerNoises.globalGain.gain.value = 0.0
-musicPlayer.globalGain.connect( ac.destination )
+playerNoises.globalGain.connect( out )
+playerNoises.globalGain.gain.value = 1.0
+musicPlayer.globalGain.connect( out )
 musicPlayer.globalGain.gain.value = 0.0
+
+
 /*
 musicPlayer.globalGain.gain.value = 0.0
 playerNoises.globalGain.gain.value = 0.0

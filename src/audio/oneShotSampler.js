@@ -1,5 +1,4 @@
-import { playBuffer,  GlobalGain } from './webaudioUtils.js'
-import { adsr,Record, DelayChain } from './webaudioUtils.js'
+import { playBuffer,  GlobalGain, NoiseBuffer,  adsr,Record, DelayChain } from './webaudioUtils.js'
 //const { zzfxBuffer } = require('./zz.js')
 /*
 function zzfxBuffer(){
@@ -7,8 +6,14 @@ function zzfxBuffer(){
 }*/
 
 //
+
+
 function non( ac, params ){    
-    const osc = ac.createOscillator(),
+    const duration = params[0],
+          osc = ac.createOscillator(),
+          noiseBuffer = NoiseBuffer(ac,duration),
+          noiseGain = ac.createGain(),
+          noise = playBuffer(ac,noiseBuffer,noiseGain,0,true),
           mod = ac.createOscillator(),
           delay = ac.createDelay(), 
           oscGain = ac.createGain(),
@@ -17,73 +22,108 @@ function non( ac, params ){
           gGain = ac.createGain(),
           compressor = ac.createDynamicsCompressor(),
           biquad = ac.createBiquadFilter()
+
+    //    biquad.type = 'bandpass'
+    noiseGain.connect( gGain )
+    mod.connect( modGain ).connect( osc.detune )
+    osc.connect( oscGain ).connect( gGain )
+    gGain.connect( delayGain ).connect( delay ).connect( gGain )
+    gGain.connect( compressor ).connect( biquad ).connect( ac.destination )
+
     
-    const duration = params[0]
-    
-    function program(ap,[e,t1,t2,v0,v1,v2,v3]){
-        ap.value = v0
-        let f = /*(v,t) => */ap[(e?'exponential':'linear')+'RampToValueAtTime'].bind(ap)//(v,t+ac.currentTime)
-        
-        f(0,v0)
-        f(t1,v1)
-        f(t2,v2)
-        f(duration,v3)
-        //ap.linearRampToValueAtTime(duration,v3)
-        /*ap.linearRampToValueAtTime(0,v0)
-        ap.linearRampToValueAtTime(t1,v1)
-        ap.linearRampToValueAtTime(t2,v2)
-        ap.linearRampToValueAtTime(duration,v3)
-        */
-    }    
-    function program2(ap,[e,...vts]){
+
+    function program(ap,vts){
+        if (!vts) return
+        //console.log('PROGRAM',vts)
         ap.value = vts[0]
-        const comp = [0,...vts,duration]
-        for ( let i = 0 ; i < vts.length ; i++ ){
-            
+        //ap.linearRampToValueAtTime(vts[0],0)
+        let t = 0
+        for ( let i = 1 ; i < vts.length ; i++ ){
+            let vt = vts[i]
+            if ( i%2 ){
+                t = vt
+            } else {
+                const f = ap[((t<0)
+                              ?'exponential'
+                              :'linear')+'RampToValueAtTime'].bind(ap)
+                f( vt, Math.abs(at) )
+                //console.log(((t<0)?'exp':'lin'),vt,'@',at)
+            }
         }
         
     }
-    mod.connect( modGain ).connect( osc.detune )
-    mod.frequency.value = 1
-    modGain.gain.value = 0
-    
-    osc.connect( oscGain )
-
-//    delay.delayTime.value = 1
-    
-    oscGain.connect( gGain )
-    gGain.connect( delayGain ).connect( delay ).connect( gGain )
-
-    gGain.connect( compressor ).connect( biquad ).connect( ac.destination )
-    biquad.frequency.value  = 1500
-    biquad.type = 'lowpass'
-    
-    //    gGain.gain.value = params[1]
-    
-    const oscFrequencyEnveloppe = [
-        0,
-        0.05,0.5,
-        800, 500, 200, 200
+    /*
+      osc.frequency       *
+      mod.frequency       *
+      delay.delayTime     *
+      oscGain.gain,       *
+      modGain.gain,       *
+      delayGain.gain,     *
+      gGain.gain          *
+      biquad.frequency    *
+      biquad.Q
+    */
+    const modGainGainEnveloppe = [
+        0
     ]
-    program( osc.frequency, oscFrequencyEnveloppe )
-    const oscGainGainEnveloppe = [
-        0,
-        0.01, 0.04,
-        0,1,0.01,1
+    const modFrequencyEnveloppe = [
+        1
     ]
-    program( oscGain.gain, oscGainGainEnveloppe)
+    const biquadFrequencyEnveloppe =  [
+        1000,
+        -0.35,2000,
+        0.5,800,
+        0.45,2000,
+        4,4000,
+    ]
+    const biquadQEnveloppe =  [
+        1,
+        0.5,5,
+        1.0,0
+    ]
+    const oscFrequencyEnveloppe = [250,0.2,520]
+    const oscGainGainEnveloppe  = [
+        0,
+        0.01,0.04,
+        2,0.01,
+        3,1.0
+    ]
     const delayDelayTimeEnveloppe = [
-        0,
-        0.25,0.75,
-        1,0.5,0.25,0.1
+        1,
+        0.5,  0.25,
+        0.25, 0.75,
+        0.1, 0.1,
+        1,    0,
     ]
-    program( delay.delayTime, delayDelayTimeEnveloppe)
-    
+    const delayDelayGainEnveloppe = [
+        1,
+        0.5,  0.25,
+        1,    0.3
+    ]
     const gGainGainEnveloppe = [
         0,
         0.05, 0.5,
-        0.3, 1, 0.2, 0
+        0.3, 1,
+        0.2, 0
     ]
+    const noiseGainGainEnveloppe = [1]
+    const noisePlaybackRateEnveloppe = [
+        1,
+        0.01,5,
+        0.1,0.2,
+        0.5, 0]
+    program( noiseGain.gain, noiseGainGainEnveloppe )
+    program( noise.playbackRate, noisePlaybackRateEnveloppe)
+    program( modGain.gain, modGainGainEnveloppe )
+    program( mod.frequency, modFrequencyEnveloppe )
+    program( biquad.frequency,biquadFrequencyEnveloppe)
+    program( biquad.Q,biquadQEnveloppe)
+    program( osc.frequency,oscFrequencyEnveloppe )
+    program( oscGain.gain, oscGainGainEnveloppe )
+    program( delay.delayTime, delayDelayTimeEnveloppe )
+    program( delayGain.gain, delayDelayGainEnveloppe )
+    program( gGain.gain, gGainGainEnveloppe )
+    
         
     
     osc.start()
@@ -93,7 +133,7 @@ function non( ac, params ){
 function zzfxBuffer(...p){
     const o = {}
     Record( 1, 44100, 44100, ac => {
-        non(ac,[0.5,1])
+        non(ac,[10,1])
 //         console.log('write for p',p)
 //         const osc = ac.createOscillator()
 //         const gain = ac.createGain()
@@ -130,7 +170,7 @@ function zzfxBuffer(...p){
 //         gain.connect( delay )
 //         osc.start()      
     },(buffer)=> {
-        console.log('done',buffer)
+        //console.log('done',buffer)
         o.b = buffer
     },(progress)=>{
         console.log('prog',progress)
