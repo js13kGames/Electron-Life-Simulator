@@ -65,7 +65,7 @@ export function PlayerNoises(ac){
     
     function update( d ){
         //return
-        ac.resume()
+        //ac.resume()
         const t = ac.currentTime,
               t1 = t + 1 / 32
         
