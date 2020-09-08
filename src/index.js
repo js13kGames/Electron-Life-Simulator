@@ -31,6 +31,7 @@ import * as measureFunction from './debug/measureFunction'
 
 const ac = new AudioContext()
 const sounds = {
+    start : [0.5,,1049,,.09,.25,,.45,,,442,.05,,.1,,,,.51,.08,.1],
     nxt : [0.5,,1049,,.09,.25,,.45,,,442,.05,,.1,,,,.51,.08,.1],
     checkl : [1.2,,1322,.05,.12,.03,1,.02,31,7.7,,,,,,,.27,.33,.04,.01],
     //mssn : [2.3,,34,.02,,.04,2,2.05,,1,-14,.16,,.8,,,.09,,.16,.17],
@@ -363,7 +364,7 @@ function GameState(){
                 timeout( () => event('story'),10000)
             },
             'next' : () => {
-                oneShot.nxt()
+                oneShot.start()
                 update({name:'I2'})
             },
             'story' : () => {

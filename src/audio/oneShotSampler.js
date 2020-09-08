@@ -15,13 +15,15 @@ function non( ac, params ){
           modGain = ac.createGain(),
           delayGain = ac.createGain(),
           gGain = ac.createGain(),
-          compressor = ac.createDynamicsCompressor()
+          compressor = ac.createDynamicsCompressor(),
+          biquad = ac.createBiquadFilter()
     
     const duration = params[0]
     
     function program(ap,[e,t1,t2,v0,v1,v2,v3]){
         ap.value = v0
-        let f = (v,t) => ap[(e?'exponential':'linear')+'RampToValueAtTime'](v,t+ac.currentTime)
+        let f = /*(v,t) => */ap[(e?'exponential':'linear')+'RampToValueAtTime'].bind(ap)//(v,t+ac.currentTime)
+        
         f(0,v0)
         f(t1,v1)
         f(t2,v2)
@@ -33,35 +35,57 @@ function non( ac, params ){
         ap.linearRampToValueAtTime(duration,v3)
         */
     }    
-
+    function program2(ap,[e,...vts]){
+        ap.value = vts[0]
+        const comp = [0,...vts,duration]
+        for ( let i = 0 ; i < vts.length ; i++ ){
+            
+        }
+        
+    }
     mod.connect( modGain ).connect( osc.detune )
     mod.frequency.value = 1
     modGain.gain.value = 0
     
     osc.connect( oscGain )
 
-    delay.delayTime.value = 1
+//    delay.delayTime.value = 1
     
     oscGain.connect( gGain )
     gGain.connect( delayGain ).connect( delay ).connect( gGain )
 
-    gGain.connect( compressor ).connect( ac.destination )
-
+    gGain.connect( compressor ).connect( biquad ).connect( ac.destination )
+    biquad.frequency.value  = 1500
+    biquad.type = 'lowpass'
     
-    gGain.gain.value = params[1]
-    const oscFrequencyEnv = [0,
-                             0.25,0.5,
-                             1000, 500, 200, 200]
-
+    //    gGain.gain.value = params[1]
     
-    program( osc.frequency, oscFrequencyEnv )
+    const oscFrequencyEnveloppe = [
+        0,
+        0.05,0.5,
+        800, 500, 200, 200
+    ]
+    program( osc.frequency, oscFrequencyEnveloppe )
+    const oscGainGainEnveloppe = [
+        0,
+        0.01, 0.04,
+        0,1,0.01,1
+    ]
+    program( oscGain.gain, oscGainGainEnveloppe)
+    const delayDelayTimeEnveloppe = [
+        0,
+        0.25,0.75,
+        1,0.5,0.25,0.1
+    ]
+    program( delay.delayTime, delayDelayTimeEnveloppe)
     
-    program( oscGain.gain, [0,
-                            0.01,0.04,
-                            0,1,0.01,1])
-    program( delay.delayTime, [0,
-                               0.25,0.75,
-                               1,0.5,0.25,0.1])
+    const gGainGainEnveloppe = [
+        0,
+        0.05, 0.5,
+        0.3, 1, 0.2, 0
+    ]
+        
+    
     osc.start()
     mod.start()
     
@@ -69,7 +93,7 @@ function non( ac, params ){
 function zzfxBuffer(...p){
     const o = {}
     Record( 1, 44100, 44100, ac => {
-        non(ac,[1,1])
+        non(ac,[0.5,1])
 //         console.log('write for p',p)
 //         const osc = ac.createOscillator()
 //         const gain = ac.createGain()
@@ -120,7 +144,7 @@ export function OneShotSampler( ac, sounds ){
         Object.entries( sounds )
             .map( ([n,p]) => [n,zzfxBuffer(...p)] )
             .map( ([n,b]) => [n, () => {
-                console.log('playbuffer',b.b)
+                console.log('playbuffer',n,b.b)
                 playBuffer(ac, b.b, globalGain, ac.currentTime )
 /*
                 
