@@ -38,10 +38,12 @@ function non( ac,
     biquad.type = 'lowpass'
     noiseGain.connect( gGain )
     mod.connect( modGain ).connect( osc.detune )
+    modGain.connect( noise.detune )
     osc.connect( oscGain ).connect( gGain )
-    gGain.connect( delayGain ).connect( delay ).connect( gGain )
+    delayGain.connect( delay ).connect( gGain )
+    
     gGain.connect( compressor ).connect( biquad ).connect( ac.destination )
-
+    biquad.connect( delayGain )
     
 
     function program(ap,vts){
@@ -136,7 +138,7 @@ function non( ac,
 }
 function zzfxBuffer(...p){
     const o = {}
-    Record( 1, 44100, 44100, ac => {
+    Record( 1, p[0]*44100, 44100, ac => {
         non(ac,...p)
 //         console.log('write for p',p)
 //         const osc = ac.createOscillator()

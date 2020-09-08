@@ -48,24 +48,25 @@ const sounds2 = {
 }*/
 let SOUND
 {
-    const duration = 2
+    const duration = 0.5
 
-    const gGainGainEnveloppe = undefined
+    const gGainGainEnveloppe = [4]
 
-    const oscFrequencyEnveloppe = undefined
-    const oscGainGainEnveloppe  = [1,0.001,0]
+    const oscFrequencyEnveloppe = [1,400,0.3,200]
+    const oscGainGainEnveloppe  = [1,
+                                   0,0.01, 4,0.04 ]
 
-    const noiseGainGainEnveloppe = [0]
+    const noiseGainGainEnveloppe = [1,0.01,0]
     const noisePlaybackRateEnveloppe = undefined
 
-    const modFrequencyEnveloppe = undefined
-    const modGainGainEnveloppe = undefined
+    const modFrequencyEnveloppe = [1,1,1000]
+    const modGainGainEnveloppe = [200]
 
-    const biquadFrequencyEnveloppe =  [1000]
-    const biquadQEnveloppe =  [10]
+    const biquadFrequencyEnveloppe =  [5000,-0.5,100,1.0,300]
+    const biquadQEnveloppe = [10,0.5,1,1,20] 
 
-    const delayDelayTimeEnveloppe = [0.1]
-    const delayDelayGainEnveloppe = [0,0.22,1]
+    const delayDelayTimeEnveloppe = [0.1,1,0.05,1.5,5]
+    const delayDelayGainEnveloppe = [0.8,1,0.9]
 
 
     const ordered =  [
@@ -82,16 +83,14 @@ let SOUND
         delayDelayTimeEnveloppe,
         delayDelayGainEnveloppe
     ]
-    SOUND= ordered
+//    SOUND= ordered
     console.log('ORDERED SOUND*********************')
-    console.log( JSON.stringify( SOUND).replace(/null/g,'') )
+    console.log( JSON.stringify( ordered ).replace(/null/g,'') )
     console.log('*********************ORDERED SOUND')
 }
 // monte bulle fantaise 
-// SOUND = [2,[0,0.05,0.5,0.3,1,0.2,0],[250,0.2,520],[0,0.01,0.4,2,0.01,3,1],[0],[1,0.01,5,0.1,0.2,0.5,0],[1],[0],[1000,-0.35,2000,0.5,800,0.45,2000,4,4000],[1,0.5,5,1,0],[1,0.5,0.25,0.25,0.75,0.1,0.1,1,0],[1,0.5,0.25,1,0.3]]
-// toc sourd
-//SOUND = [2,null,null,[1,0.001,0],[0],null,null,null,[1000],[10],[0.1],[0,0.22,1]]
-//SOUND = [2,,,[1,0.001,0],[0],,,,[1000],[10],[0.1],[0,0.22,1]]
+//SOUND = [2,[0,0.05,0.5,0.3,1,0.2,0],[250,0.2,520],[0,0.01,0.4,2,0.01,3,1],[0],[1,0.01,5,0.1,0.2,0.5,0],[1],[0],[1000,-0.35,2000,0.5,800,0.45,2000,4,4000],[1,0.5,5,1,0],[1,0.5,0.25,0.25,0.75,0.1,0.1,1,0],[1,0.5,0.25,1,0.3]]
+SOUND = [0.5,[4],[1,400,0.3,200],[1,0,0.01,4,0.04],[1,0.01,0],,[1,1,1000],[200],[5000,-0.5,100,1,300],[10,0.5,1,1,20],[0.1,1,0.05,1.5,5],[0.8,1,0.9]]
 const sounds = {
     nxt :  SOUND,
     start :  SOUND,
