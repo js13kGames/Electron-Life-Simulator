@@ -12,7 +12,7 @@ export function play(ac){
             setInterval( () => {
                 const ACT0 = ac.currentTime
                 if ( (!lastEnd) || ( ac.currentTime > (lastEnd-1) ) ){
-                    //console.log('at',ACT0,'restart song for', lastEnd || ACT0 )
+                    console.log('at',ACT0,'restart song for', lastEnd || ACT0 )
                     lastEnd = planify( lastEnd || ACT0 )
                 }
             },500)
@@ -55,8 +55,9 @@ export function play(ac){
               //chord = chordm
     const transpositions = [0,1,0,1,6,3,0,-3,-6 ]
     for ( let r = 0 ; r < 600 ; r++){
-        let q = 0
-        for ( let q = 0 ; q < 12 ; q++){
+
+
+        for ( let q = 0 ; q < 96 ; q++){
         transpositions.forEach( t => {
             //chords.push( chord7.map( x => x + t ) )
             //chords.push( chordm.map( x => x + t + ( 7 * q )%12 ))
@@ -69,7 +70,7 @@ export function play(ac){
         }
         }
         transpositions[  Math.floor(Math.random() * transpositions.length) ] = Math.floor(Math.random() * 12 - 2)
-        }
+    }
     /*
         for ( let q = 0 ; q < 12 ; q++){
             transpositions.forEach( t => {
