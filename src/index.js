@@ -47,47 +47,52 @@ const sounds2 = {
     l2 : [0.8,,29,,.21,.15,4,1.63,,.7,-137,.03,,,,,.11,,.1]
 }*/
 let SOUND
-// {
-//     const duration = 2
+{
+    const duration = 0.5
 
-//     const gGainGainEnveloppe = [1,2,0]
+    const gGainGainEnveloppe = undefined/*[
+        0,
+        0.001,       1,
+        0.015,       0.3,
+        0.5,        0
+    ]*/
 
-//     const oscFrequencyEnveloppe = undefined
-//     const oscGainGainEnveloppe  = [0]
+    const oscFrequencyEnveloppe = [0.2]
+    const oscGainGainEnveloppe  = [4,0.01,0]
 
-//     const noiseGainGainEnveloppe = undefined
-//     const noisePlaybackRateEnveloppe = [0.01,-1,4]
+    const noiseGainGainEnveloppe =  [4,0.01,0]
+    const noisePlaybackRateEnveloppe = [0.0035]
 
-//     const modFrequencyEnveloppe = undefined
-//     const modGainGainEnveloppe = undefined
+    const modFrequencyEnveloppe = [0.1,0.5,1]
+    const modGainGainEnveloppe = [10]
 
-//     const biquadFrequencyEnveloppe = undefined
-//     const biquadQEnveloppe = undefined
+    const biquadFrequencyEnveloppe = [2000]
+    const biquadQEnveloppe = undefined
 
-//     const delayDelayTimeEnveloppe = [.1]
-//     const delayDelayGainEnveloppe = [1,1,0.5]
+    const delayDelayTimeEnveloppe = [0.018]
+    const delayDelayGainEnveloppe = [0.99]
 
-//     const ordered =  [
-//         duration,
-//         gGainGainEnveloppe,
-//         oscFrequencyEnveloppe,
-//         oscGainGainEnveloppe,
-//         noiseGainGainEnveloppe,
-//         noisePlaybackRateEnveloppe,
-//         modFrequencyEnveloppe,
-//         modGainGainEnveloppe,
-//         biquadFrequencyEnveloppe,
-//         biquadQEnveloppe,
-//         delayDelayTimeEnveloppe,
-//         delayDelayGainEnveloppe
-//     ]
-// //    SOUND= ordered
-//     console.log('ORDERED SOUND*********************')
-//     console.log( JSON.stringify( ordered ).replace(/null/g,'') )
-//     console.log('*********************ORDERED SOUND')
-// }
+    const ordered =  [
+        duration,
+        gGainGainEnveloppe,
+        oscFrequencyEnveloppe,
+        oscGainGainEnveloppe,
+        noiseGainGainEnveloppe,
+        noisePlaybackRateEnveloppe,
+        modFrequencyEnveloppe,
+        modGainGainEnveloppe,
+        biquadFrequencyEnveloppe,
+        biquadQEnveloppe,
+        delayDelayTimeEnveloppe,
+        delayDelayGainEnveloppe
+    ]
+    SOUND= ordered
+    console.log('ORDERED SOUND*********************')
+    console.log( JSON.stringify( ordered ).replace(/null/g,'') )
+    console.log('*********************ORDERED SOUND')
+}
 // monte bulle fantaise 
-const SOUND1 = [2,[0,0.05,0.5,0.3,1,0.2,0],[250,0.2,520],[0,0.01,0.4,2,0.01,3,1],[0],[1,0.01,5,0.1,0.2,0.5,0],[1],[0],[1000,-0.35,2000,0.5,800,0.45,2000,4,4000],[1,0.5,5,1,0],[1,0.5,0.25,0.25,0.75,0.1,0.1,1,0],[1,0.5,0.25,1,0.3]]
+const SOUND1 = [1,[0,0.05,0.5,0.3,1,0.2,0],[250,0.2,520],[0,0.01,0.4,2,0.01,3,1],[0],[1,0.01,5,0.1,0.2,0.5,0],[1],[0],[1000,-0.35,2000,0.5,800,0.45,2000,4,4000],[1,0.5,5,1,0],[1,0.5,0.25,0.25,0.75,0.1,0.1,1,0],[1,0.5,0.25,1,0.3]]
 // tactactac
 const SOUND2 = [0.5,[4],[1,400,0.3,200],[1,0,0.01,4,0.04],[1,0.01,0],,[1,1,1000],[200],[5000,-0.5,100,1,300],[10,0.5,1,1,20],[0.1,1,0.05,1.5,5],[0.8,1,0.9]]
 
@@ -95,18 +100,18 @@ const SOUND2 = [0.5,[4],[1,400,0.3,200],[1,0,0.01,4,0.04],[1,0.01,0],,[1,1,1000]
 const SOUND3 = [2,[1,2,0],,[0],,[0.01,-1,4],,,,,[0.1],[1,1,0.5]]
 
 // bip
-const SOUND4 = [0.1]
-SOUND = SOUND4
+const SOUND_BIP = [0.1]
+
 const sounds = {
-    nxt :  SOUND4,
-    start :  SOUND1,
+    _test : SOUND,
+    nxt :  SOUND_BIP,
+    start :  SOUND3,
     checkl :  SOUND2,
     mssn :SOUND3,
     slw :SOUND2,
-    sll :SOUND,
-    l2 :SOUND,
+    sll :SOUND_BIP,
+    l2 :SOUND_BIP,
 }
-
 
 
 
@@ -123,10 +128,15 @@ out.connect( ac.destination )
 oneShotSampler.globalGain.connect( out )
 oneShotSampler.globalGain.gain.value = 0.6
 playerNoises.globalGain.connect( out )
-playerNoises.globalGain.gain.value = 0.9
+playerNoises.globalGain.gain.value =0// 0.9
 musicPlayer.globalGain.connect( out )
-musicPlayer.globalGain.gain.value = 0.9
+musicPlayer.globalGain.gain.value = 0//0.9
 
+document.body.onkeypress = (e) => {
+    if ( e.repeat ) return
+    oneShot._test()
+    console.log(e.key)
+}
 
 /*
 musicPlayer.globalGain.gain.value = 0.0
@@ -1070,7 +1080,7 @@ const step = (dt,T) =>{
 
     //    texts.updateMessage('welcome','BONJOUR')
 }
-const roller = Roller(step)
+//const roller = Roller(step)
 gameState.event('start')
 
 

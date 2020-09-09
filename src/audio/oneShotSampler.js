@@ -22,7 +22,8 @@ function non( ac,
               delayDelayTimeEnveloppe,
               delayDelayGainEnveloppe
               ){    
-    const osc = ac.createOscillator(),
+    const t0 = ac.currentTime,
+          osc = ac.createOscillator(),
           noiseBuffer = NoiseBuffer(ac,duration),
           noiseGain = ac.createGain(),
           noise = playBuffer(ac,noiseBuffer,noiseGain,0,true),
@@ -60,7 +61,7 @@ function non( ac,
                 const f = ap[((t<0)
                               ?'exponential'
                               :'linear')+'RampToValueAtTime'].bind(ap)
-                f( vt, Math.abs(t) )
+                f( vt, t0 + Math.abs(t) )
                 //console.log(((t<0)?'exp':'lin'),vt,'@',at)
             }
         }
@@ -184,6 +185,43 @@ function zzfxBuffer(...p){
     //const osc = 
     return o
 }
+
+function viewbuffer( n, b ){
+    const canvas = document.createElement('canvas')
+    const W = 600,
+          H = 300
+    canvas.height= H
+    canvas.width = W
+    document.body.appendChild(canvas)
+    
+    const context = canvas.getContext('2d')
+    
+    function toCanvas( t, v ){
+        return [
+            ( t / b.b.length )  * W,
+            ( v + 1 ) / 2 * H
+        ]
+    }
+    context.fillStyle = `rgba(255,255,255,1)`
+    context.fillRect(0,0,W,H)
+    const samples = b.b.getChannelData(0)
+    samples.forEach( (s,i) => {
+        const [x,y] = toCanvas(i,s)
+        if ( ( s > 1 ) || ( s < -1 )){
+            context.fillStyle = `rgba(255,0,0,1)`
+            context.fillRect(x,0,1,H)
+        } else {
+            context.fillStyle = `rgba(1,0,0,0.5)`
+            context.fillRect(x,y,1,1)
+            
+        }
+    })
+    context.fillStyle = `rgba(0,0,0,1)`
+    context.font = 'monospace'
+    context.fontSize = '10px'
+    context.fillText( n,10,20)
+}
+
 export function OneShotSampler( ac, sounds ){
     const globalGain = GlobalGain( ac )
     const players = Object.fromEntries(
@@ -191,6 +229,7 @@ export function OneShotSampler( ac, sounds ){
             .map( ([n,p]) => [n,zzfxBuffer(...p)] )
             .map( ([n,b]) => [n, () => {
                 console.log('playbuffer',n,b.b)
+                viewbuffer( n, b )
                 playBuffer(ac, b.b, globalGain, ac.currentTime )
 /*
                 
