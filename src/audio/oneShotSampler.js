@@ -22,7 +22,7 @@ function non( ac,
               delayDelayTimeEnveloppe,
               delayDelayGainEnveloppe
               ){    
-    const t0 = ac.currentTime,
+    const t0 = 0,// ac.currentTime,
           osc = ac.createOscillator(),
           noiseBuffer = NoiseBuffer(ac,duration),
           noiseGain = ac.createGain(),
@@ -50,8 +50,9 @@ function non( ac,
     function program(ap,vts){
         if (!vts) return
         //console.log('PROGRAM',vts)
-        ap.value = vts[0]
-        //ap.linearRampToValueAtTime(vts[0],0)
+        //ap.value = vts[0]
+        ap.setValueAtTime(vts[0],t0)
+        ///ap.linearRampToValueAtTime(vts[0],t0)
         let t = 0
         for ( let i = 1 ; i < vts.length ; i++ ){
             let vt = vts[i]
@@ -133,8 +134,8 @@ function non( ac,
     program( delayGain.gain, delayDelayGainEnveloppe )
 
     
-    osc.start()
-    mod.start()
+    osc.start(t0)
+    mod.start(t0)
     
 }
 function zzfxBuffer(...p){
@@ -229,7 +230,7 @@ export function OneShotSampler( ac, sounds ){
             .map( ([n,p]) => [n,zzfxBuffer(...p)] )
             .map( ([n,b]) => [n, () => {
                 console.log('playbuffer',n,b.b)
-                viewbuffer( n, b )
+                //viewbuffer( n, b )
                 playBuffer(ac, b.b, globalGain, ac.currentTime )
 /*
                 
