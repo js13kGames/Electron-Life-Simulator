@@ -27,11 +27,11 @@ export function mkChoices( level, sublevel ){
     const outij = (i,j) => ( ( i < 0 ) || ( i >= width ) || ( j < 0 ) || ( j >= height ) )
     const ij2idx = (i,j) => {
         return i + j * width
-        if (outij(i,j) ){
+      /*  if (outij(i,j) ){
             throw new Error(`[${i},${j}]`)
         } else{
             return i + j * width
-        }
+        }*/
         
     } 
 

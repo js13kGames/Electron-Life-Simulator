@@ -360,8 +360,8 @@ function Display(){
         }
         //  }
 //    ]
-        const start = Date.now()
-        return [ ...draws.map( measureFunction.time ), Date.now() - start ]
+        //const start = Date.now()
+        //return [ ...draws.map( measureFunction.time ), Date.now() - start ]
         
     }
     return { draw, camera, feedbackBuffer, textMode }
@@ -791,10 +791,12 @@ const step = (dt,T) =>{
         //
         // move and collisions
         //
-        
-        const speed01 = 1,
+        const { level, sublevel, nsublevels } = gameState.state
+        const spd = Missions[level].subs[sublevel].spd || 0.5
+
+        const speed01 = spd,
               minspeed = 150,
-              maxspeed = 40,
+              maxspeed = 20,
               ff = (1-speed01) * minspeed + speed01 * maxspeed
         let dx,dy
         if ( ['S3'].includes( stateName() ) ){
@@ -1069,14 +1071,15 @@ const step = (dt,T) =>{
     }
     
     
-    const elapsed = display.draw( camera, choices, player, particles, timeoutBar, lifeBar, remainingTo, cols )
-    if ( false ){
+//    const elapsed =
+          display.draw( camera, choices, player, particles, timeoutBar, lifeBar, remainingTo, cols )
+  /*  if ( false ){
         if ( elapsed[ elapsed.length - 1 ] >= 8 ){
             // console.log(elapsed)
         } else {
             // console.log('<8')
         }
-    }
+    }*/
     //    stats.end()
 
     //    texts.updateMessage('welcome','BONJOUR')

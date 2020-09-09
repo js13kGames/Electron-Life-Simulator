@@ -21,11 +21,22 @@ export const Missions = [{
     //    hs : [0,1],
     hs : [0.5,1],
     subs : [{
-        name : 'popo1',
+        name : 'popo 0',
+        spd : 0,
         level : [300,30,2,[0,1,0,1,0,1]], // nice, challening for beginner
     },{
-        name : 'test1',
-        level : [5000,30,1,[0,0,0,0]], 
+        name : 'popo 0.5',
+        spd : 0.5,
+        level : [300,30,2,[0,1,0,1,0,1]], // nice, challening for beginner
+    },{
+        name : 'popo 0.75',
+        spd : 0.75,
+        level : [300,30,2,[0,1,0,1,0,1]], // nice, challening for beginner
+    },{
+        name : 'popo 1',
+        spd : 1,
+        level : [300,30,2,[0,1,0,1,0,1]], // nice, challening for beginner
+//        level : [5000,30,1,[0,0,0,0]], 
         //level : [500,30,2,[0,0,1,1,1,0,0]], // ??
         // level : [500,100,2,[0,0,1,1,1,0,0]] // challening for beginner
     }]
