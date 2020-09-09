@@ -729,7 +729,7 @@ const lifeBar = LifeBar()
 
 
 const step = (dt,T) =>{
-    const timeoutBarVisibility = ['G1','S1','S2','R0','L1']
+    const timeoutBarVisibility = ['G1','S1','S2','L1']
     const mapVisibility = ['S2','S3','W1','W2','L1']
     const playerVisibility = ['S2','S3']
     const lifeBarVisibility = ['S1','S2','S3','W1','W2','L1']
@@ -745,7 +745,7 @@ const step = (dt,T) =>{
     }
     
     
-    if ( stateName() === 'S2'){
+    if ( stateNameIs('S2') ){
         copyV2(gameState.state.choices.startPosition, player.position)
     }
     
@@ -755,7 +755,9 @@ const step = (dt,T) =>{
     // check timeouts
     const remainingTo = gameState.checkTimeouts(T)
     timeoutBar.remain = remainingTo
-    timeoutBar.vis =  (remainingTo !== undefined)   && timeoutBarVisibility.includes( stateName() ) 
+    //timeoutBar.vis =  (remainingTo !== undefined)   && timeoutBarVisibility.includes( stateName() )
+    timeoutBar.vis =  (remainingTo !== undefined)   && stateIsOneOf(timeoutBarVisibility)
+    
     if ( keyboardController.anyKeyStroke.length ){
         //  textScreen.cls()
     }
@@ -795,11 +797,12 @@ const step = (dt,T) =>{
         const spd = Missions[level].subs[sublevel].spd || 0.5
 
         const speed01 = spd,
-              minspeed = 150,
-              maxspeed = 20,
+              minspeed = 160,
+              maxspeed = 15,
               ff = (1-speed01) * minspeed + speed01 * maxspeed
         let dx,dy
-        if ( ['S3'].includes( stateName() ) ){
+        if ( stateNameIs('S3') ){
+        //if ( ['S3'].includes( stateName() ) ){
             dx = 1
             //dx = ( -1*l + r ) 
             dy = ( -1*u + d )
@@ -833,7 +836,7 @@ const step = (dt,T) =>{
         }
     }
 
-    if( stateName() === 'S3' ){
+    if( stateNameIs('S3') ){
         // checkLaps
         //  if (gameState.state.choices) {
         const choices = gameState.state.choices.choices
@@ -876,9 +879,9 @@ const step = (dt,T) =>{
     camera.scale = clamp( camera.scale, 4,32) // 4 wide zoom, 32 closeup
 
     if ( choices ){
-        choices.vis = mapVisibility.includes( stateName() )
+        choices.vis = stateIsOneOf(mapVisibility)
     }
-    player.vis = playerVisibility.includes(  stateName() )
+    player.vis = stateIsOneOf(playerVisibility)
     player.energy =  gameState.state.energy
     player.hasCollision = HASCOLLIDSION
 

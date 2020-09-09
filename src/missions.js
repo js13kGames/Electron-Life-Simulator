@@ -21,12 +21,12 @@ export const Missions = [{
     //    hs : [0,1],
     hs : [0.5,1],
     subs : [{
-        name : 'popo 0',
-        spd : 0,
+        name : 'popo 0.5',
+        spd : 0.75,
         level : [300,30,2,[0,1,0,1,0,1]], // nice, challening for beginner
     },{
         name : 'popo 0.5',
-        spd : 0.5,
+        spd : 0.75,
         level : [300,30,2,[0,1,0,1,0,1]], // nice, challening for beginner
     },{
         name : 'popo 0.75',
