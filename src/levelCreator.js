@@ -74,27 +74,27 @@ export function mkChoices( level, sublevel ){
             const curve = BezierCurve( ...pts )
             const points = curve.getPoints(  npts )
             if ( i === 0 ){
-                const mainPixels = paintPoints( points, 'O' )                
+                paintPoints( points, 'O' )                
             } else if ( i === (choices.length - 2 )){
-                const mainPixels = paintPoints( points, 'G' )
+                paintPoints( points, 'G' )
             } else {
                 if ( isgood ){
-                    const mainPixels = paintPoints( points, 'M' )                
+                paintPoints( points, 'M' )                
                 } else {
-                    const mainPixels = paintPoints( points, 'S' )
+                paintPoints( points, 'S' )
                 }
             }
         })
         
     }
-    if ( false ){
+  /*  if ( false ){
         //const directions = 
         const $div = document.createElement('div')
         $div.textContent = choices.slice(2,choices.length-1)
             .map( ({good}) => good?'UP':'DOWN' ).join( ' - ' )
         $div.style = 'position:fixed;bottom:50px;'
         document.body.appendChild($div)
-    }
+    }*/
     const directions = choices.slice(2,choices.length-1).map( ({good}) => good )
 
     

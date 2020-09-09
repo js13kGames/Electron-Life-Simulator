@@ -22,7 +22,7 @@ document.body.style = bodyStyle
 
 // time measurement
 /*const Stats = require('stats.js')
-var stats = new Stats();
+  var stats = new Stats();
 */
 //stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 //document.body.appendChild( stats.dom );
@@ -31,21 +31,21 @@ import * as measureFunction from './debug/measureFunction'
 
 const ac = new AudioContext()
 /*
-const sounds2 = {
-    start : [0.5,,1049,,.09,.25,,.45,,,442,.05,,.1,,,,.51,.08,.1],
-    nxt : [0.5,,1049,,.09,.25,,.45,,,442,.05,,.1,,,,.51,.08,.1],
-    checkl : [1.2,,1322,.05,.12,.03,1,.02,31,7.7,,,,,,,.27,.33,.04,.01],
-    //mssn : [2.3,,34,.02,,.04,2,2.05,,1,-14,.16,,.8,,,.09,,.16,.17],
-    strt : [3.3,,565,.04,.19,0,,.33,,-4.1,,,,,,,.12,.05,,.55],
-    //mssn : [1.7,,27,.02,.16,.18,3,.7,,-0.7,,,,.1,,,,.34,.21,.09], // prout
-    //mssn : [,,1632,,.09,.12,,1.52,,,,,.09,,,,.09,.59,.08],
-    mssn : [0.9,,1,,.09,.03,,.69,14,2,,,,.1,1.4],
-    //z : [1.2,,674,.07,.18,.01,,.9,-25,,,,.02,.7],
-    slw : [1.5,,803,.05,.43,.55,,1.86,,,-97,.02,.27,,,,,.64,.04],
-    ///l1 : [2.7,,72,.01,,.32,2,1.51,,-0.6,,,.02,,,,.07,.63],
-    sll : [2.2,,476,.04,.09,.64,4,3.96,.2,,,,,1,,.4,,.55,.04],
-    l2 : [0.8,,29,,.21,.15,4,1.63,,.7,-137,.03,,,,,.11,,.1]
-}*/
+  const sounds2 = {
+  start : [0.5,,1049,,.09,.25,,.45,,,442,.05,,.1,,,,.51,.08,.1],
+  nxt : [0.5,,1049,,.09,.25,,.45,,,442,.05,,.1,,,,.51,.08,.1],
+  checkl : [1.2,,1322,.05,.12,.03,1,.02,31,7.7,,,,,,,.27,.33,.04,.01],
+  //mssn : [2.3,,34,.02,,.04,2,2.05,,1,-14,.16,,.8,,,.09,,.16,.17],
+  strt : [3.3,,565,.04,.19,0,,.33,,-4.1,,,,,,,.12,.05,,.55],
+  //mssn : [1.7,,27,.02,.16,.18,3,.7,,-0.7,,,,.1,,,,.34,.21,.09], // prout
+  //mssn : [,,1632,,.09,.12,,1.52,,,,,.09,,,,.09,.59,.08],
+  mssn : [0.9,,1,,.09,.03,,.69,14,2,,,,.1,1.4],
+  //z : [1.2,,674,.07,.18,.01,,.9,-25,,,,.02,.7],
+  slw : [1.5,,803,.05,.43,.55,,1.86,,,-97,.02,.27,,,,,.64,.04],
+  ///l1 : [2.7,,72,.01,,.32,2,1.51,,-0.6,,,.02,,,,.07,.63],
+  sll : [2.2,,476,.04,.09,.64,4,3.96,.2,,,,,1,,.4,,.55,.04],
+  l2 : [0.8,,29,,.21,.15,4,1.63,,.7,-137,.03,,,,,.11,,.1]
+  }*/
 let SOUND
 // {
 //     const duration = 0.2
@@ -103,19 +103,19 @@ let SOUND
 let sounds
 {
     const SOUND_BULLE = [1,[0,0.05,0.5,0.3,1,0.2,0],[250,0.2,520],[0,0.01,0.4,2,0.01,3,1],[0],[1,0.01,5,0.1,0.2,0.5,0],[1],[0],[1000,-0.35,2000,0.5,800,0.45,2000,4,4000],[1,0.5,5,1,0],[1,0.5,0.25,0.25,0.75,0.1,0.1,1,0],[1,0.5,0.25,1,0.3]]
-// tactactac
-const SOUND2 = [0.5,[1.25],[1,400,0.3,200],[1,0,0.01,4,0.04],[1,0.01,0],,[1,1,1000],[200],[5000,-0.5,100,1,300],[10,0.5,1,1,20],[0.1,1,0.05,1.5,5],[0.8,1,0.9]]
+    // tactactac
+    const SOUND2 = [0.5,[1.25],[1,400,0.3,200],[1,0,0.01,4,0.04],[1,0.01,0],,[1,1,1000],[200],[5000,-0.5,100,1,300],[10,0.5,1,1,20],[0.1,1,0.05,1.5,5],[0.8,1,0.9]]
 
-// tole
-const SOUND3 = [2,[1,2,0],,[0],,[0.01,-1,4],,,,,[0.1],[1,1,0.5]]
+    // tole
+    const SOUND3 = [2,[1,2,0],,[0],,[0.01,-1,4],,,,,[0.1],[1,1,0.5]]
 
-// bip
+    // bip
 
-const SOUND_BIP = [0.1]
-const SOUND_BIP2 = [0.1,[0, 0.01,1, 0.02,0.1, 0.1,0]]
-const SOUND_PFOAN = [0.5,,,[1],[0],,[100],[1000,0.5,100],,,,]
+    const SOUND_BIP = [0.1]
+    const SOUND_BIP2 = [0.1,[0, 0.01,1, 0.02,0.1, 0.1,0]]
+    const SOUND_PFOAN = [0.5,,,[1],[0],,[100],[1000,0.5,100],,,,]
 
-const SOUND_TOC = [0.1,[1],,[0,0.001,1,0.015,1,0.02,0],[0,0.001,3,0.015,3,0.02,0],[1,0.5,0.9],[100],[1000,0.05,100,0.5,1000],[1000,0.5,0.1],[10],[0.002,0.5,0.2],[0.9,0.5,1]]
+    const SOUND_TOC = [0.1,[1],,[0,0.001,1,0.015,1,0.02,0],[0,0.001,3,0.015,3,0.02,0],[1,0.5,0.9],[100],[1000,0.05,100,0.5,1000],[1000,0.5,0.1],[10],[0.002,0.5,0.2],[0.9,0.5,1]]
     sounds = {
         // _test : SOUND,
         nxt :  SOUND_BIP,
@@ -150,33 +150,33 @@ musicPlayer.globalGain.gain.value = 0.9
 
 document.body.onkeypress = (e) => {
     if ( e.repeat ) return
-//    oneShot._test()
+    //    oneShot._test()
 }
 
 /*
-musicPlayer.globalGain.gain.value = 0.0
-playerNoises.globalGain.gain.value = 0.0
-oneShotSampler.globalGain.gain.value = 1.0
+  musicPlayer.globalGain.gain.value = 0.0
+  playerNoises.globalGain.gain.value = 0.0
+  oneShotSampler.globalGain.gain.value = 1.0
 */
 /*
-offline
-Record(2,ac.sampleRate * 60,ac.sampleRate,
-       ac => {
-           const musicPlayer = Music.play( ac )
-           musicPlayer.globalGain.connect( ac.destination )
-           musicPlayer.globalGain.gain.value = 1.0           
-       },
-       buffer => {
-           console.log('rendered',buffer)
-           playBuffer( ac, buffer, ac.destination, ac.currentTime, false )
-       },
-       ratio => {
-           console.log('progress',ratio*100,"%")
-       })
+  offline
+  Record(2,ac.sampleRate * 60,ac.sampleRate,
+  ac => {
+  const musicPlayer = Music.play( ac )
+  musicPlayer.globalGain.connect( ac.destination )
+  musicPlayer.globalGain.gain.value = 1.0           
+  },
+  buffer => {
+  console.log('rendered',buffer)
+  playBuffer( ac, buffer, ac.destination, ac.currentTime, false )
+  },
+  ratio => {
+  console.log('progress',ratio*100,"%")
+  })
 */
 /*
-import { PAD } from './pad.js'
-console.log(PAD)
+  import { PAD } from './pad.js'
+  console.log(PAD)
 */
 
 const ar = 16/9
@@ -321,59 +321,45 @@ function Display(){
             
             
         }
-        const draws = [
-            () => {
-                //feedbackBuffer.copy()
-                //context.fillStyle = 'rgba(0,127,200,1)'
-                context.fillStyle = 'rgba(0,0,0,1)'
-                context.fillRect(0,0,canvas.width,canvas.height)
-                //display.newframe( )
-            },
-            () => {
-                if (level && level.vis) drawMap()
-            },
-            () => {
-                if ( textMode.vis ) textMode.draw()
-            },
-            () => {
-                const dx = Math.floor( ( canvas.width - textMode.canvas.width  )/ 2 ),
-                      dy = Math.floor( ( canvas.height - textMode.canvas.height ) / 2 )
-                if ( textMode.vis )
-                    context.drawImage( textMode.canvas,dx,dy )
-            },
-            () => {
-                if ( player.vis ) drawPlayer( context, camera)
-            },
-            () => {
-                particles.els.forEach( (particle,i) => {
-                    if ( particle.vis )
-                        drawParticle( context, camera, particle, i )
-                })
-            },
-            // () => {
-            //     /*Object.values(texts.textPanels).forEach( tp => {
-            //         if ( tp.vis ){
-            //             drawPanel(tp)
-            //         }
-            //     })*/
-            // },
-            () => {
-                if ( timeoutBar.vis ){
-                    drawTimeoutBar()
-                }
-            },
-            () => {
-                // feedbackBuffer.paste()
-            },
-            () => {
-                feedbackBuffer.alter(context)
-            },
-            () => {
-                if ( lifeBar.vis ){
-                    drawLifeBar()
-                }
-            }
-        ]
+        //const draws = [
+            //() => {
+        context.fillStyle = 'rgba(0,0,0,1)'
+        context.fillRect(0,0,canvas.width,canvas.height)
+        //},
+        //  () => {
+        if (level && level.vis) drawMap()
+        //},
+        //            () => {
+        if ( textMode.vis ) textMode.draw()
+        //          },
+        //        () => {
+        const dx = Math.floor( ( canvas.width - textMode.canvas.width  )/ 2 ),
+              dy = Math.floor( ( canvas.height - textMode.canvas.height ) / 2 )
+        if ( textMode.vis ) context.drawImage( textMode.canvas,dx,dy )
+        //},
+        //    () => {
+        if ( player.vis ) drawPlayer( context, camera)
+        //  },
+        //() => {
+        particles.els.forEach( (particle,i) => {
+            if ( particle.vis )
+                drawParticle( context, camera, particle, i )
+        })
+        //            },
+        //            () => {
+        if ( timeoutBar.vis ){
+            drawTimeoutBar()
+        }
+        //          },
+        //        () => {
+        feedbackBuffer.alter(context)
+        //      },
+        //    () => {
+        if ( lifeBar.vis ){
+            drawLifeBar()
+        }
+        //  }
+//    ]
         const start = Date.now()
         return [ ...draws.map( measureFunction.time ), Date.now() - start ]
         
@@ -437,7 +423,7 @@ function GameState(){
     }
     const timeouts = [] 
     function update( ...ps ){
-         // console.log('update',...ps)
+        // console.log('update',...ps)
         Object.assign( state, ...ps )
     }
 
@@ -631,7 +617,7 @@ function GameState(){
             })
         }
     }
-        
+    
     function timeout( f, delay ){
         const start = state.T,
               end = start + delay,
@@ -741,7 +727,7 @@ const timeoutBar = TimeoutBar()
 const lifeBar = LifeBar()
 
 
-    
+
 const step = (dt,T) =>{
     const timeoutBarVisibility = ['G1','S1','S2','R0','L1']
     const mapVisibility = ['S2','S3','W1','W2','L1']
@@ -775,15 +761,15 @@ const step = (dt,T) =>{
     }
     const TIME_BEFORE_SKIP_STATE = 1000
     // grab input
-//    stats.begin()
+    //    stats.begin()
 
     const sinceStateStart = T - gameState.state.t
     
     /*
-    if ( ['I0','I1','G0','G1','G2','S1',
-    'L1','L2','W2','W3','R0'].includes( stateName() ) ){*/
+      if ( ['I0','I1','G0','G1','G2','S1',
+      'L1','L2','W2','W3','R0'].includes( stateName() ) ){*/
     if ( !stateIsOneOf('S2','S3') ){
-    
+        
         if ( sinceStateStart > TIME_BEFORE_SKIP_STATE ){
             if ( keyboardController.anyKeyStroke.length ){
                 //console.log('to!')
@@ -847,21 +833,21 @@ const step = (dt,T) =>{
 
     if( stateName() === 'S3' ){
         // checkLaps
-      //  if (gameState.state.choices) {
-            const choices = gameState.state.choices.choices
-            // console.log( player.position,player.lastpos )
-            let idx = -1
-            for ( let i = 0 ; i < choices.length ; i++ ){            
-                const x = choices[ i ].x
-                if ( ( player.lastpos.x < x ) && ( x <= player.position.x ) ){
-                    idx = i
-                    break
-                }
+        //  if (gameState.state.choices) {
+        const choices = gameState.state.choices.choices
+        // console.log( player.position,player.lastpos )
+        let idx = -1
+        for ( let i = 0 ; i < choices.length ; i++ ){            
+            const x = choices[ i ].x
+            if ( ( player.lastpos.x < x ) && ( x <= player.position.x ) ){
+                idx = i
+                break
             }
-            if ( idx !== -1 ){
-                gameState.event('checkLine',idx, choices.length - 2)
-                // console.log('step',idx,'/', choices.length - 2)
-            }
+        }
+        if ( idx !== -1 ){
+            gameState.event('checkLine',idx, choices.length - 2)
+            // console.log('step',idx,'/', choices.length - 2)
+        }
         //        }
         // front raycast
         function frontRaycast( position, length, types ) {
@@ -912,7 +898,7 @@ const step = (dt,T) =>{
     }
     lifeBar.vis = lifeBarVisibility.includes(  stateName() )
     copyV2( player.position, camera.center )
- 
+    
 
 
     playerNoises.update({
@@ -952,13 +938,13 @@ const step = (dt,T) =>{
             printCenter(9,'* mission cleared! *')
         }
         /*
-        let j = 4
-        for ( let i = 0 ; i < nsublevels ; i++ ){
-            //if ( i < level ){
-            printCenter(j,`"${ml.subs[i].name}"`)
-            j++
-            //}
-        }*/
+          let j = 4
+          for ( let i = 0 ; i < nsublevels ; i++ ){
+          //if ( i < level ){
+          printCenter(j,`"${ml.subs[i].name}"`)
+          j++
+          //}
+          }*/
         for ( let j = 0 ; j < (level+1) ; j++ ){
             //printCenter(6,`"${ms.name}"`)
         }
@@ -995,9 +981,9 @@ const step = (dt,T) =>{
     } else if ( ['G2'].includes(stateName()) ){
         printCenter(6,'sublevel'+gameState.state.sublevel, true )
         /*writeMission( textScreen,
-                      gameState.state.level || 1,
-                      gameState.state.sublevel || 1,
-                      undefined)*/
+          gameState.state.level || 1,
+          gameState.state.sublevel || 1,
+          undefined)*/
         //(gameState.state.choices && gameState.state.choices.directions) || [0])
     } else if ( ['I1'].includes(stateName()) ){
         printCenter(7,'electron life simulator')
@@ -1048,14 +1034,14 @@ const step = (dt,T) =>{
                          `lev:${s(level)}/${s(nlevels)} `
                          +`sub:${s(sublevel)}/${s(nsublevels)} `
                          +`lL:${s(lives)}/${s(L)}`)
-                         /*
-        textScreen.print(4,15,s(level).toString())
-        textScreen.print(7,15,sublevel.toString())
-        textScreen.print(10,15,
-                         ''+lives.toString()
-                         +'/'
-                         +L.toString()
-                         +' lives')*/
+        /*
+          textScreen.print(4,15,s(level).toString())
+          textScreen.print(7,15,sublevel.toString())
+          textScreen.print(10,15,
+          ''+lives.toString()
+          +'/'
+          +L.toString()
+          +' lives')*/
     }
 
     const { feedbackBuffer } = display
@@ -1065,16 +1051,16 @@ const step = (dt,T) =>{
         feedbackBuffer.o.a = clamp(a+1/60/3,0,1)
     } /*else if ( (['S2'].includes(stateName())) ){
         feedbackBuffer.o.a = 0.02
-    }*/ else {
-        feedbackBuffer.o.a = 0.05
-    }
+        }*/ else {
+            feedbackBuffer.o.a = 0.05
+        }
     let cols
     {
         /*const slicedur = 200 // ms
-        const disc = 32
-        const f = (Math.floor(T/slicedur)%disc)/disc
-        const tcol = T/1000
-        const s = ( Math.sin(2*Math.PI*T/2000) * 2 ) - 1
+          const disc = 32
+          const f = (Math.floor(T/slicedur)%disc)/disc
+          const tcol = T/1000
+          const s = ( Math.sin(2*Math.PI*T/2000) * 2 ) - 1
         */
         if ( stateIsOneOf(mapVisibility) ){
             const hs = Missions[ gameState.state.level ].hs
@@ -1091,7 +1077,7 @@ const step = (dt,T) =>{
             // console.log('<8')
         }
     }
-//    stats.end()
+    //    stats.end()
 
     //    texts.updateMessage('welcome','BONJOUR')
 }
