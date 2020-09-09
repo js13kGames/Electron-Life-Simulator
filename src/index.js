@@ -147,12 +147,12 @@ playerNoises.globalGain.connect( out )
 playerNoises.globalGain.gain.value = 1.0
 musicPlayer.globalGain.connect( out )
 musicPlayer.globalGain.gain.value = 0.9
-
+/*
 document.body.onkeypress = (e) => {
     if ( e.repeat ) return
     //    oneShot._test()
 }
-
+*/
 /*
   musicPlayer.globalGain.gain.value = 0.0
   playerNoises.globalGain.gain.value = 0.0
