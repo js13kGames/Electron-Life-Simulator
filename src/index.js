@@ -431,6 +431,19 @@ function GameState(){
     const NLIVES = 3
     const NOMINAL_ENERGY = 1
 
+    // debug REMOVEME
+    let FIRST_LEVEL = 0 
+    let FIRST_SUBLEVEL = 0
+    const url_param_level = parseInt( new URL(document.URL).searchParams.get("level") )
+    const url_param_sublevel = parseInt( new URL(document.URL).searchParams.get("sublevel") )
+    if ( ! ( isNaN(url_param_level) || isNaN( url_param_sublevel ) ) ) {
+        console.log('setting level to ',url_param_level)
+        console.log('setting sublevel to ',url_param_sublevel)
+        FIRST_LEVEL = url_param_level
+        FIRST_SUBLEVEL = url_param_sublevel
+    }
+    // gubed
+    
     const automata = {
         I : { 'start' : d => update({name:'I0'}) },
         // intro
@@ -472,8 +485,8 @@ function GameState(){
                 oneShot.nxt()
                 update({
                     name:'I3',
-                    level : 0,
-                    sublevel : 0,
+                    level : FIRST_LEVEL,
+                    sublevel : FIRST_SUBLEVEL,
                     L : NLIVES,
                     lives : NLIVES,
                     energy : NOMINAL_ENERGY,
@@ -1068,7 +1081,13 @@ const step = (dt,T) =>{
           const s = ( Math.sin(2*Math.PI*T/2000) * 2 ) - 1
         */
         if ( stateIsOneOf(mapVisibility) ){
-            const hs = Missions[ gameState.state.level ].hs
+            let hs = Missions[ gameState.state.level ].hs
+            if ( !hs ){
+                hs =  [0,1]
+
+                // REMOVEME
+                console.error('no color for level', gameState.state.level)
+            }
             cols = Cols(...hs)
         }
     }
