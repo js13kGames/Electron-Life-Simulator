@@ -114,15 +114,15 @@ export const Missions = mkMissions([
         ['aveazdc duerzr fromage',1,[1390,90,3,[9,1,5]]],
         ['ou un vin',1,[500,30,8,[13,1,7]]],
     ],'The Electron Gods are pleased with your work'],
-    ['On the road',[0.1,5],[
-        ['zerQuaz 4f6f54e penses-tu',13,[900,80,3,[1,7,1]]],
-        ['Deezr la poése qzdegzeohqsrg fie',5,[1300,80,3,[5,1,18]]],
-        ['Entre deux  daction',5,[100,30,8,[5,1,13]]],
-        ['quzdaezzeqzdzerz i montent avec ',5,[190,30,3,[5,19,1]]],
-        ['Une petzrite',1,[190,30,8,[19,1,18]]],
-        ['Gallerie',1,[1900,39,3,[1,13,9]]],
+    ['High Width Mountain Flows',[0,1],[     // rather hard level
+        ['Think fast act slow',0.5,[140,30,8,[1,7,1]]],
+        ['A taste of deja-vu',0.7,[420,35,8,[1,7,1,7,1,7]]],
+        ['Mind All The Gaps',0.85,[520,35,8,[1,7,1,7,1,7,6,1,7]]],
+        ['Doing the same thing',0.9,[520,35,8,[1,7,1,7,1,7,6,1,7]]],
+        ['The repeating task',0.925,[520,35,8,[1,7,1,7,1,7,6,1,7]]],
+        ['Nothing Can Happen To Me',0.5,[520,35,8,[1,7,1,7,1,7,6,1,7]]],
+        ['Caught by surprise',0.9,[520,35,8,[1,7,1,7,1,7,6,6,1,7]]],
     ],'The Electron Gods made you one of them'],
-
 ])
 console.log('Missions',Missions)
 
