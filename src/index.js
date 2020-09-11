@@ -958,8 +958,8 @@ const step = (dt,T) =>{
         if ( showLevelWin ){
             const level = gameState.state.level
             const endText = Missions[ level ].cleared
-            printCenter(9,'* mission cleared! *')
-            textScreen.printParagraphs( 11, endText+"\n",0 )
+            printCenter(8,'* mission cleared! *')
+            textScreen.printParagraphs( 12, endText+"\n",0 )
         }       
 
         /*
