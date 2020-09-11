@@ -429,6 +429,7 @@ function GameState(){
 
 
     const NLIVES = 3
+    const MAXMAX_LIVES = 8
     const NOMINAL_ENERGY = 1
 
     // debug REMOVEME
@@ -588,7 +589,7 @@ function GameState(){
             'next' : () => {
                 const level = state.level + 1
                 if ( level < state.nlevels ){
-                    const lives = state.lives + 1,
+                    const lives = Math.min(MAXMAX_LIVES,state.lives + 1),
                           L = Math.max(state.L,lives)
                     update({
                         sublevel : 0,
@@ -802,7 +803,7 @@ const step = (dt,T) =>{
         WALLDIST = undefined
     
     let collision
-    if ( stateIsOneOf(['S3','W1','W2']) ){
+    if ( stateIsOneOf(['S3','W1']) ){
         //
         // move and collisions
         //
@@ -1021,7 +1022,8 @@ const step = (dt,T) =>{
         printMission(false,false, false, true )
     } else if ( ['W3'].includes(stateName()) ){
         printCenter(5,'You Won It All!')
-        printCenter(7,'Electron Gods are please to meet you.!')
+        printCenter(7,'Electron Gods are pleased')
+        printCenter(8,'to welcome you !')
         printCenter(10,'Thanks for playing!')
     } else if ( ['S1'].includes(stateName()) ){
         printMission(true)
