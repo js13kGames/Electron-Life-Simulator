@@ -30,59 +30,51 @@ function mkMissions( _missions ){
 }
 export const Missions = mkMissions([
     ['First Day Of Work',[0.0,0.5],[
-        ['An Easy Win',0.75,[200,30,1,[0,0,0]]],
-        ['Straight Ahead',0.8,[800,30,2,[0,0,0]]],
+        ['An Easy Day',0.75,[200,30,1,[0,0,0]]],
+        ['Ignore distractions',0.8,[800,30,2,[0,0,0]]],
         ['First Decision',0.75,[600,30,2,[0,1]]],
         ['Think Fast',0.8,[600,30,2,[0,1]]],
         ['Think Faster',0.85,[400,30,2,[0,1]]],
         ['Gotta be twice as good',0.85,[400,30,2,[0,1,0]]],
         ['Swinging the cable',0.87,[400,80,2,[0,1,0,1]]],
     ],'The Electron Gods are pleased with your work'],
+    ['A Bit of Thrust',[0.3,0.9],[
+        ['Following orders',0.87,[420,60,2,[0,1,0,1,0,1,0,1,0,1]]],
+        ['Long Distane Call',0.87,[420,60,2,[0,1,0,1,0,1,0,1,0,1]]],
+        ['Flipped Bit',0.88,[450,60,2,[0,1,0,1,0,1,1,1,0,1]]],
+        ['The Shift',0.88,[450,60,2,[1,0,1,0,1,1,1,0,1,0]]],
+        ['Third Element',0.87,[420,30,3,[0,2,0,2,0,2,0,2,0,2]]],
+        ['Get On Through',0.87,[420,30,3,[0,2,0,2,1,2,0,2,0,2]]], 
+        ['Confusing management',0.87,[420,30,3,[1,2,1,2,0,1,2,1,2]]],
+        ['The Big Switch',0.9,[820,40,3,[0,1,0,2,0,1,0,2,0]]]
+    ]],
+    ['Patience',[0.75,0.0],[ // -> 11th level ?
+        ['On Rails',0.8,[2000,30,2,[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]],
+        ['Trunkin\'',0.65,[2000,30,2,[0,0,0,0,0,0,0,0,0,0,1,0,0,1,1]]],
+        //['The Jam',0.2,[2000,30,2,[0,0,0,0,0,0,0,0,0,0,0,0,0,1,1]]],
+        //Crosstown Traffic
+        ['Slow Memory',0.5,[600,50,4,[0,3,2,3,1,3,0]]],
+        ['Data Congestion',0.1,[6000,50,1,[0,1,0]]] // too long
+    ],'Have you shown your extreme obedience and determination to the Electron God?'],
     ['Airplane Mode',[0.5,1],[
         ['The Landing',0.65,[800,80,5,[0,1,2,3,4]]],
         ['Taking off',0.8,[800,90,5,[4,3,2,1,0]]],
         ['Descent',0.9,[800,80,5,[0,1,2,3,4]]],
-        ['Overwork',0.9,[160,80,5,[0,1,2,3,4,4,3,2,1,0]]],
-    ],'The Electron Gods are delighted by your ease of manoeuver and obedience'],
-    ['Patience',[0.75,0.0],[
-        ['Trunkin\'',0.65,[2000,30,2,[0,0,0,0,0,0,0,0,0,0,0,0,0,1,1]]],
-        ['The Jam',0.2,[2000,30,2,[0,0,0,0,0,0,0,0,0,0,0,0,0,1,1]]],
-        ['Crosstown Traffic',0.5,[600,50,4,[0,3,2,3,1,3,0]]],
-        ['Data Congestion',0.1,[6000,50,0,[0,1,0]]]
-    ],'Have you shown your extreme obedience and determination to the Electron God?'],
-    ['fomma fpor',[0.1,13],[
-        ['Pourquoi',7,[100,80,3,[5,1,13]]],
-        ['Le temdazps',1,[100,80,3,[7,13,1]]],
-        ['est il',1,[500,30,8,[1,13,5]]],
-        ['sansazd signification',1,[700,80,3,[1,5,13]]],
-        ['avec du fromage',1,[1300,80,3,[7,1,5]]],
-        ['ou un vin',1,[500,30,8,[13,1,7]]],
-    ],'The Electron Gods are pleased with your work'],
-    ['On the road',[0.1,5],[
-        ['Queazdazd penses-tu',13,[500,80,3,[1,7,1]]],
-        ['De la poésie',5,[1300,80,3,[5,1,18]]],
-        ['Entre deux sequences daction',5,[100,30,8,[5,1,13]]],
-        ['qui mazdontent avec ',5,[100,30,3,[5,18,1]]],
-        ['Une petite',1,[100,30,8,[13,1,18]]],
-        ['Gallerie',1,[1300,30,3,[1,13,1]]],
-    ],'The Electron Gods are pleased with your work'],
-    ['F3 turc azdazdlvmls mlkjdlk e macheir',[0.1,18],[
-        ['Donne la vie',5,[100,30,3,[7,1,18]]],
-        ['Aux azdazdpetits',1,[500,30,8,[1,1,5]]],
-        ['qui jouent bien',13,[700,80,3,[1,5,1]]],
-        ['Dadzazdns une mesure',1,[1800,30,3,[7,1,5]]],
-        ['Que l"on dit',1,[100,80,3,[7,13,1]]],
-        ['Bienvenue',5,[100,80,3,[18,5,1]]],
-    ],'The Electron Gods are pleased with your work'],
-    ['fade daoiet hdomma fpor',[0.1,13],[
-        ['Pourquoi',7,[100,80,3,[5,1,13]]],
-        ['Le temps',1,[100,80,3,[7,13,1]]],
-        ['est il',1,[500,30,8,[1,13,5]]],
-        ['sans signification',1,[700,80,3,[1,5,13]]],
-        ['aveazdc du fromage',1,[1300,80,3,[7,1,5]]],
-        ['ou un vin',1,[500,30,8,[13,1,7]]],
-    ],'The Electron Gods are pleased with your work'],
-    ['On the road',[0.1,5],[
+        ['Touch And Go',0.9,[800,80,5,[0,1,2,3,4,4,3,2,1,0]]],
+        ['Two In a Row',0.92,[900,80,5,[0,1,2,3,4,2,0,1,2,3,4]]],
+        ['Direct Connection',0.92,[1000,80,5,[0,1,2,3,4,0,1,2,3,4]]],
+    ],'The Electron Gods are delighted by your ease of manoeuver'],
+    ['High Width Mountain Flows',[0,1],[     // rather hard level
+        ['Think fast act slow',0.5,[140,30,8,[1,7,1]]],
+        ['A taste of deja-vu',0.7,[420,35,8,[1,7,1,7,1,7]]],
+        ['Mind All The Gaps',0.85,[520,35,8,[1,7,1,7,1,7,6,1,7]]],
+        ['Doing the same thing',0.9,[520,35,8,[1,7,1,7,1,7,6,1,7]]],
+        ['The repeating task',0.925,[520,35,8,[1,7,1,7,1,7,6,1,7]]],
+        ['Nothing Can Happen To Me',0.5,[520,35,8,[1,7,1,7,1,7,6,1,7]]],
+        ['Caught by surprise',0.9,[520,35,8,[1,7,1,7,1,7,6,6,1,7]]],
+    ],'The Electron Gods made you one of them'],
+])
+console.log('Missions',Missions,    ['On the road',[0.1,5],[
         ['Quaz 4f6f54e penses-tu',13,[500,80,3,[1,7,1]]],
         ['De la poése qzdegohqsrg fie',5,[1300,80,3,[5,1,18]]],
         ['Entrefzefze deux  daction',5,[100,30,8,[5,1,13]]],
@@ -113,18 +105,7 @@ export const Missions = mkMissions([
         ['szerans signification',1,[709,80,3,[1,5,13]]],
         ['aveazdc duerzr fromage',1,[1390,90,3,[9,1,5]]],
         ['ou un vin',1,[500,30,8,[13,1,7]]],
-    ],'The Electron Gods are pleased with your work'],
-    ['High Width Mountain Flows',[0,1],[     // rather hard level
-        ['Think fast act slow',0.5,[140,30,8,[1,7,1]]],
-        ['A taste of deja-vu',0.7,[420,35,8,[1,7,1,7,1,7]]],
-        ['Mind All The Gaps',0.85,[520,35,8,[1,7,1,7,1,7,6,1,7]]],
-        ['Doing the same thing',0.9,[520,35,8,[1,7,1,7,1,7,6,1,7]]],
-        ['The repeating task',0.925,[520,35,8,[1,7,1,7,1,7,6,1,7]]],
-        ['Nothing Can Happen To Me',0.5,[520,35,8,[1,7,1,7,1,7,6,1,7]]],
-        ['Caught by surprise',0.9,[520,35,8,[1,7,1,7,1,7,6,6,1,7]]],
-    ],'The Electron Gods made you one of them'],
-])
-console.log('Missions',Missions)
+    ],'The Electron Gods are pleased with your work'])
 
 // export const Missions = [{
 //     name : 'test',
