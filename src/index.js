@@ -104,7 +104,7 @@ let sounds
 {
     const SOUND_BULLE = [1,[0,0.05,0.5,0.3,1,0.2,0],[250,0.2,520],[0,0.01,0.4,2,0.01,3,1],[0],[1,0.01,5,0.1,0.2,0.5,0],[1],[0],[1000,-0.35,2000,0.5,800,0.45,2000,4,4000],[1,0.5,5,1,0],[1,0.5,0.25,0.25,0.75,0.1,0.1,1,0],[1,0.5,0.25,1,0.3]]
     // tactactac
-    const SOUND2 = [0.5,[1.25],[1,400,0.3,200],[1,0,0.01,4,0.04],[1,0.01,0],,[1,1,1000],[200],[5000,-0.5,100,1,300],[10,0.5,1,1,20],[0.1,1,0.05,1.5,5],[0.8,1,0.9]]
+    const SOUND2 = [0.5,[1.5],[1,400,0.3,200],[1,0,0.01,4,0.04],[1,0.01,0],,[1,1,1000],[200],[5000,-0.5,100,1,300],[10,0.5,1,1,20],[0.1,1,0.05,1.5,5],[0.8,1,0.9]]
 
     // tole
     const SOUND3 = [2,[1,2,0],,[0],,[0.01,-1,4],,,,,[0.1],[1,1,0.5]]
@@ -112,7 +112,8 @@ let sounds
     // bip
 
     const SOUND_BIP = [0.1]
-    const SOUND_BIP2 = [0.1,[0, 0.01,1, 0.02,0.1, 0.1,0]]
+    //const SOUND_BIP2 = [0.1,[1],[400,0.05,200,0.1,800]] // gorge
+    const SOUND_BIP2 = [0.1,[1],[200,0.05,800,0.1,600]] // gorge
     const SOUND_PFOAN = [0.5,,,[1],[0],,[100],[1000,0.5,100],,,,]
 
     const SOUND_TOC = [0.1,[1],,[0,0.001,1,0.015,1,0.02,0],[0,0.001,3,0.015,3,0.02,0],[1,0.5,0.9],[100],[1000,0.05,100,0.5,1000],[1000,0.5,0.1],[10],[0.002,0.5,0.2],[0.9,0.5,1]]
@@ -446,7 +447,8 @@ function GameState(){
     // gubed
     
     const automata = {
-        I : { 'start' : d => update({name:'I0'}) },
+        //I : { 'start' : d => update({name:'I0'}) },
+        I : { 'start' : d => update({name:'I2'}) },
         // intro
         I0 : {
             '>' : () => {
@@ -496,7 +498,7 @@ function GameState(){
                 })
             },
         },
-        // ... snd screen
+        // ... 2nd screen
         I3 : {              
             'next' : () => {
                 oneShot.mssn()
@@ -942,7 +944,7 @@ const step = (dt,T) =>{
             printCenter(7,`"${ms.name}"`)
         }
         if ( showDirs ){
-            printCenter(9,'you follow the directions:')
+            printCenter(9,'you follow the route:')
             printCenter(11,gameState.state.choices.directions.join('.'))
         }
         if ( showFailure ){
@@ -954,8 +956,12 @@ const step = (dt,T) =>{
             printCenter(11,'you made it!')
         }
         if ( showLevelWin ){
+            const level = gameState.state.level
+            const endText = Missions[ level ].cleared
             printCenter(9,'* mission cleared! *')
-        }
+            textScreen.printParagraphs( 11, endText+"\n",0 )
+        }       
+
         /*
           let j = 4
           for ( let i = 0 ; i < nsublevels ; i++ ){
@@ -985,7 +991,7 @@ const step = (dt,T) =>{
     } else  if ( ['I3'].includes(stateName()) ){
         printCenter(1,'The Odyssey Begins...')
         
-        const paragraphs = 'Now your destiny is to always follow the correct route. Every electron knows what happens when you fail to follow the correct route...\n\n404 : Electronic DEATH!\n\nSo ALWAYS remember the ordered up and down branches of the route!\n\nGOOD LUCK!'
+        const paragraphs = 'Now your destiny will always be to Follow the Correct Route In Pipes and lead the Sacred Data to its Destination. Every electron knows what happens when you fail to Follow the Correct Route...\n\n404 : Electronic DEATH!\n\nSo ALWAYS remember the ordered up and down Numbers of the Correct Route!\n\nGOOD LUCK!'
         textScreen.printParagraphs( 3, paragraphs, 0 )
         
         //textScreen.print(0,5,'"Follow the correct route, ignore the incorrect one or you will die", you can remember your electron mother say. This is your life, now !')
@@ -1007,7 +1013,7 @@ const step = (dt,T) =>{
     } else if ( ['I1'].includes(stateName()) ){
         printCenter(7,'electron life simulator')
     } else if ( ['I0'].includes(stateName()) ){
-        printCenter(6,'machin presents')
+        printCenter(6,'lespin presents')
     } else if ( ['L1'].includes(stateName()) ){
         
         printMission(false,true)

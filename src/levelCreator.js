@@ -34,19 +34,21 @@ export function mkChoices( level, sublevel ){
         }*/
         
     } 
-
+    const Heights = new Array(npossible).fill(0).map( (_,i) => height * (i+1) / (npossible+1) )
     // choices
     const choices = new Array( mainBranchesCount + 3 ).fill(0).map( (_,i) => {
         //const npossible = 2 + Math.floor( Math.random() * 2 )
         //const good = Math.floor( Math.random() * npossible )
         const good = path[ Math.max(0,i-2) ]
         const x = i * width / ( mainBranchesCount + 2 )
-        const ys = [
+        const ys = Heights
+        /*const ys = [
             [],
             [height/2],
             [height/3,2*height/3],
             [height/4,height/2,3*height/4],
-        ][ npossible ].map( y => Math.floor(y) )        
+            [height/4,height/2,3*height/4],
+        ][ npossible ].map( y => Math.floor(y) )        */
         return { x,good,ys }
     })
     choices[1].ys = [ choices[2].ys[choices[2].good] ]
