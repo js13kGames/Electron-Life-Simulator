@@ -46,15 +46,15 @@ export const Missions = mkMissions([
         ['Third Element',0.87,[420,30,3,[0,2,0,2,0,2,0,2,0,2]]],
         ['Get On Through',0.87,[420,30,3,[0,2,0,2,1,2,0,2,0,2]]], 
         ['Confusing management',0.87,[420,30,3,[1,2,1,2,0,1,2,1,2]]],
-        ['The Big Switch',0.9,[820,40,3,[0,1,0,2,0,1,0,2,0]]]
-    ]],
+        //['The Big Switch',0.9,[820,40,3,[0,1,0,2,0,1,0,2,0]]]
+    ],'The Electrons Gods notice your focus and agility' ],
     ['Patience',[0.75,0.0],[ // -> 11th level ?
         ['On Rails',0.8,[2000,30,2,[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]],
         ['Trunkin\'',0.65,[2000,30,2,[0,0,0,0,0,0,0,0,0,0,1,0,0,1,1]]],
         //['The Jam',0.2,[2000,30,2,[0,0,0,0,0,0,0,0,0,0,0,0,0,1,1]]],
         //Crosstown Traffic
         ['Slow Memory',0.5,[600,50,4,[0,3,2,3,1,3,0]]],
-        ['Data Congestion',0.1,[6000,50,1,[0,1,0]]] // too long
+        ['Data Congestion/The Golden Path',0.1,[6000,50,1,[0,1,0]]] // too long
     ],'Have you shown your extreme obedience and determination to the Electron God?'],
     ['Airplane Mode',[0.5,1],[
         ['The Landing',0.65,[800,80,5,[0,1,2,3,4]]],
