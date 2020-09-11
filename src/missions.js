@@ -37,8 +37,9 @@ export const Missions = mkMissions([
         ['Think Faster',0.85,[400,30,2,[0,1]]],
         ['Gotta be twice as good',0.85,[400,30,2,[0,1,0]]],
         ['Swinging the cable',0.87,[400,80,2,[0,1,0,1]]],
+        ['Learn a pattern',0.89,[400,80,2,[0,1,0,1]]],
     ],'The Electron Gods are pleased with your work'],
-    ['A Bit of Thrust',[0.3,0.9],[
+    ['A Bit of Thrust',[0.5,0.9],[
         ['Following orders',0.87,[420,60,2,[0,1,0,1,0,1,0,1,0,1]]],
         ['Long Distane Call',0.88,[420,60,2,[0,1,0,1,0,1,0,1,0,1,0,1,0,1]]],
         ['Flipped Bit',0.88,[450,60,2,[0,1,0,1,0,1,1,1,0,1]]],
@@ -50,22 +51,6 @@ export const Missions = mkMissions([
         ['Responsabilities',0.93,[420,60,4,[1,2,1,2,0,1,2,1,4]]],
         //['The Big Switch',0.9,[820,40,3,[0,1,0,2,0,1,0,2,0]]]
     ],'The Electrons Gods notice your focus and agility' ],
-    ['Patience',[0.75,0.0],[ // -> 11th level ?
-        ['On Rails',0.8,[2000,30,2,[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]],
-        ['Trunkin\'',0.65,[2000,30,2,[0,0,0,0,0,0,0,0,0,0,1,0,0,1,1]]],
-        //['The Jam',0.2,[2000,30,2,[0,0,0,0,0,0,0,0,0,0,0,0,0,1,1]]],
-        //Crosstown Traffic
-        ['Slow Memory',0.5,[600,50,4,[0,3,2,3,1,3,0]]],
-        ['Data Congestion/The Golden Path',0.1,[6000,50,1,[0,1,0]]] // too long
-    ],'Have you shown your extreme obedience and determination to the Electron God?'],
-    ['Airplane Mode',[0.5,1],[
-        ['The Landing',0.65,[800,80,5,[0,1,2,3,4]]],
-        ['Taking off',0.8,[800,90,5,[4,3,2,1,0]]],
-        ['Descent',0.9,[800,80,5,[0,1,2,3,4]]],
-        ['Touch And Go',0.9,[800,80,5,[0,1,2,3,4,4,3,2,1,0]]],
-        ['Two In a Row',0.92,[900,80,5,[0,1,2,3,4,2,0,1,2,3,4]]],
-        ['Direct Connection',0.92,[1000,80,5,[0,1,2,3,4,0,1,2,3,4]]],
-    ],'The Electron Gods are delighted by your ease of manoeuver'],
     ['High Width Mountain Flows',[0,1],[     // rather hard level
         ['Think fast act slow',0.5,[140,30,8,[1,7,1]]],
         ['A taste of deja-vu',0.7,[420,35,8,[1,7,1,7,1,7]]],
@@ -75,6 +60,42 @@ export const Missions = mkMissions([
         ['Nothing Can Happen To Me',0.5,[520,35,8,[1,7,1,7,1,7,6,1,7]]],
         ['Caught by surprise',0.9,[520,35,8,[1,7,1,7,1,7,6,6,1,7]]],
     ],'The Electron Gods made you one of them'],
+    ['Airplane Mode',[0.25,0.7],[
+        ['The Landing',0.8,[800,80,5,[0,1,2,3,4]]],
+        ['Taking off',0.85,[800,200,8,[7,6,5,3,0]]],
+        ['Descent',0.9,[800,100,5,[0,1,2,3,4]]],
+        ['Touch And Go',0.91,[800,80,5,[0,1,2,3,4,4,3,2,0]]],
+        ['Two In a Row',0.92,[900,80,5,[0,1,2,3,4,2,2,1,2,3,4]]],
+        ['Distortions',0.95,[1000,80,5,[0,1,2,3,4,2,0,1,2,3,4]]],
+        ['Direct Connection',0.92,[1000,80,5,[0,1,2,3,4,0,1,2,3,4]]],
+    ],'The Electron Gods are delighted by your ease of manoeuver'],
+    /*['Same boss Everyday',[0.6,0.7],[
+        
+    ]]*/
+    ['Blind Routing',[0.6,0.7],[
+        ['Pattern Fidelity',0.95,[800,20,2,[0,1,0,1,0,1,0,1,0,1]]],
+        ['Specialisation',0.97,[800,20,2,[0,1,0,1,0,1,0,1,0,1]]],
+        ['Become the Automata',0.98,[800,20,2,[0,1,0,1,0,1,0,1,0,1]]],
+        ['Electron-Machine',0.99,[800,20,2,[0,1,0,1,0,1,0,1,0,1]]],
+        ['Path to Detachement/1',1,[600,20,2,[0,1,0,1,0,1,0,1,0,1]]],
+        ['Detached/2',1,[500,20,2,[0,1,0,1,0,1,0,1,0,1]]],
+        ['Detached/3',1,[400,20,2,[0,1,0,1,0,1,0,1,0,1]]],
+        ['Detached 4',1,[380,20,2,[0,1,0,1,0,1,0,1,0,1]]],
+        ['Detached 5',1,[380,25,2,[0,1,0,1,0,1,0,1,0,1]]],
+        ['Detached 6',1,[380,30,2,[0,1,0,1,0,1,0,1,0,1]]],
+        ['Detached 7',1,[380,40,2,[0,1,0,1,0,1,0,1,0,1]]],
+        ['Detached 8',1,[380,50,2,[0,1,0,1,0,1,0,1,0,1]]],
+        ['Detached 9',1,[380,57,2,[0,1,0,1,0,1,0,1,0,1]]],
+        ['You\'ve changed',1,[380,57,2,[0,1,0,1,0,1,0,1,0,0]]],
+    ],'The Electron Gods recognised something bright in you'],
+    ['Patience',[0.75,0.0],[ // -> 11th level ?
+        ['On Rails',0.8,[2000,30,2,[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]],
+        ['Trunkin\'',0.65,[2000,30,2,[0,0,0,0,0,0,0,0,0,0,1,0,0,1,1]]],
+        //['The Jam',0.2,[2000,30,2,[0,0,0,0,0,0,0,0,0,0,0,0,0,1,1]]],
+        //Crosstown Traffic
+        ['Slow Memory',0.5,[600,50,4,[0,3,2,3,1,3,0]]],
+        ['Data Congestion/The Golden Path',0.1,[6000,50,1,[0,1,0]]] // too long
+    ],'Your obedience to the Electron Gods is noticed as extreme'],
 ])
 console.log('Missions',Missions,    ['On the road',[0.1,5],[
         ['Quaz 4f6f54e penses-tu',13,[500,80,3,[1,7,1]]],
