@@ -40,12 +40,14 @@ export const Missions = mkMissions([
     ],'The Electron Gods are pleased with your work'],
     ['A Bit of Thrust',[0.3,0.9],[
         ['Following orders',0.87,[420,60,2,[0,1,0,1,0,1,0,1,0,1]]],
-        ['Long Distane Call',0.87,[420,60,2,[0,1,0,1,0,1,0,1,0,1]]],
+        ['Long Distane Call',0.88,[420,60,2,[0,1,0,1,0,1,0,1,0,1,0,1,0,1]]],
         ['Flipped Bit',0.88,[450,60,2,[0,1,0,1,0,1,1,1,0,1]]],
         ['The Shift',0.88,[450,60,2,[1,0,1,0,1,1,1,0,1,0]]],
-        ['Third Element',0.87,[420,30,3,[0,2,0,2,0,2,0,2,0,2]]],
-        ['Get On Through',0.87,[420,30,3,[0,2,0,2,1,2,0,2,0,2]]], 
-        ['Confusing management',0.87,[420,30,3,[1,2,1,2,0,1,2,1,2]]],
+        ['Third Element',0.87,[420,30,3,[0,2,0,2,0,2,2,2,0,2]]],
+        ['Get On Through',0.87,[420,30,3,[0,2,0,2,1,2,2,2,0,2]]], 
+        ['Confusing management',0.9,[420,34,3,[1,2,1,2,0,1,2,1,2]]],
+        ['New Orders',0.92,[420,50,4,[1,2,1,2,0,1,2,1,3]]],
+        ['Responsabilities',0.93,[420,60,4,[1,2,1,2,0,1,2,1,4]]],
         //['The Big Switch',0.9,[820,40,3,[0,1,0,2,0,1,0,2,0]]]
     ],'The Electrons Gods notice your focus and agility' ],
     ['Patience',[0.75,0.0],[ // -> 11th level ?
