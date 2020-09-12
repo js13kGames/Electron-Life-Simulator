@@ -31,32 +31,32 @@ function mkMissions( _missions ){
 export const Missions = mkMissions([
     ['First Day Of Work',[0.0,0.5],[
         ['An Easy Day',0.75,[200,30,1,[0,0,0]]],
-        ['Ignore distractions',0.8,[800,30,2,[0,0,0]]],
+        ['Ignore Distractions',0.8,[800,30,2,[0,0,0]]],
         ['First Decision',0.75,[600,30,2,[0,1]]],
         ['Think Fast',0.8,[600,30,2,[0,1]]],
         ['Think Faster',0.85,[400,30,2,[0,1]]],
         ['Gotta be twice as good',0.85,[400,30,2,[0,1,0]]],
         ['Swinging the cable',0.87,[400,80,2,[0,1,0,1]]],
-        ['Learn a pattern',0.89,[400,80,2,[0,1,0,1]]],
+        ['Learn a Pattern',0.89,[400,80,2,[0,1,0,1]]],
     ],'The Electron Gods are pleased with your work'],
     ['A Bit of Thrust',[0.5,0.9],[
-        ['Following orders',0.87,[420,60,2,[0,1,0,1,0,1,0,1,0,1]]],
+        ['Following Orders',0.87,[420,60,2,[0,1,0,1,0,1,0,1,0,1]]],
         ['Long Distane Call',0.88,[420,60,2,[0,1,0,1,0,1,0,1,0,1,0,1,0,1]]],
         ['Flipped Bit',0.88,[450,60,2,[0,1,0,1,0,1,1,1,0,1]]],
         ['The Shift',0.88,[450,60,2,[1,0,1,0,1,1,1,0,1,0]]],
         ['Third Element',0.87,[420,30,3,[0,2,0,2,0,2,2,2,0,2]]],
         ['Get On Through',0.87,[420,30,3,[0,2,0,2,1,2,2,2,0,2]]], 
-        ['Confusing management',0.9,[420,34,3,[1,2,1,2,0,1,2,1,2]]],
+        ['Confusing Management',0.9,[420,34,3,[1,2,1,2,0,1,2,1,2]]],
         ['New Orders',0.92,[420,50,4,[1,2,1,2,0,1,2,1,3]]],
         ['Responsabilities',0.93,[420,60,4,[1,2,1,2,0,1,2,1,4]]],
         //['The Big Switch',0.9,[820,40,3,[0,1,0,2,0,1,0,2,0]]]
     ],'The Electrons Gods notice your focus and agility' ],
     ['High Width Mountain Flows',[0,1],[     // rather hard level
-        ['Think fast act slow',0.5,[140,30,8,[1,7,1]]],
-        ['A taste of deja-vu',0.7,[420,35,8,[1,7,1,7,1,7]]],
+        ['Think Fast Act Slow',0.5,[140,30,8,[1,7,1]]],
+        ['A Taste Of Deja-vu',0.7,[420,35,8,[1,7,1,7,1,7]]],
         ['Mind All The Gaps',0.85,[520,35,8,[1,7,1,7,1,7,6,1,7]]],
-        ['Doing the same thing',0.9,[520,35,8,[1,7,1,7,1,7,6,1,7]]],
-        ['The repeating task',0.925,[520,35,8,[1,7,1,7,1,7,6,1,7]]],
+        ['Doing the Same Thing',0.9,[520,35,8,[1,7,1,7,1,7,6,1,7]]],
+        ['The Repeating Task',0.925,[520,35,8,[1,7,1,7,1,7,6,1,7]]],
         ['Nothing Can Happen To Me',0.5,[520,35,8,[1,7,1,7,1,7,6,1,7]]],
         ['Caught by surprise',0.9,[520,35,8,[1,7,1,7,1,7,6,6,1,7]]],
     ],'You were The Right Electron for the Mission, the Electron Gods says'],
@@ -77,10 +77,10 @@ export const Missions = mkMissions([
         ['The Way of the Early',0.9,[200,30,3,[0,1,1,1,1]]],
     ],'By achieving the five ways, you stand closer to the Electron Gods'],
     ['Same boss Everyday',[0.45,0.5],[
-        ['A morning',0.9,[200,30,4,[1,3,2,1,3,2,1]]],
-        ['The same morning',0.9,[250,30,4,[1,3,2,1,3,2,1,3,2,1]]],
-        ['The same dinner',0.9,[300,30,4,[1,3,2,1,3,2,1,3,2,1,3,2,1]]],
-        ['The same night',0.9,[400,30,4,[1,3,2,1,3,2,1,3,2,1,3,2,1,3,2]]],
+        ['A Morning',0.9,[200,30,4,[1,3,2,1,3,2,1]]],
+        ['The Same Morning',0.9,[250,30,4,[1,3,2,1,3,2,1,3,2,1]]],
+        ['The Same Dinner',0.9,[300,30,4,[1,3,2,1,3,2,1,3,2,1,3,2,1]]],
+        ['The Same Night',0.9,[400,30,4,[1,3,2,1,3,2,1,3,2,1,3,2,1,3,2]]],
     ],'The Electron Gods know you need something else'],
     ['Blind Routing',[0.6,0.7],[
         ['Pattern Fidelity',0.95,[800,20,2,[0,1,0,1,0,1,0,1,0,1]]],
@@ -105,7 +105,7 @@ export const Missions = mkMissions([
         //Crosstown Traffic
         ['Slow Memory',0.5,[600,50,4,[0,3,2,3,1,3,0]]],        
     ],'Your obedience to the Electron Gods is noticed as extreme'],
-    ['The Final Enlightenment',[0.75,0.0],[ // -> 11th level ?
+    ['The Final Enlightenment',[0.172,1.5],[ // -> 11th level ?
         ['The Golden Path',0.1,[6000,50,1,[0,1,0]]] // too long
     ],'The Electron Gods made you one of them']
 ])
