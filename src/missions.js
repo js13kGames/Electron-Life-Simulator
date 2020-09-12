@@ -69,7 +69,7 @@ export const Missions = mkMissions([
         ['Distortions',0.95,[1000,80,5,[0,1,2,3,4,2,0,1,2,3,4]]],
         ['Direct Connection',0.92,[1000,80,5,[0,1,2,3,4,0,1,2,3,4]]],
     ],'The Electron Gods are delighted by your ease of manoeuver'],
-    ['Fives ways to do it',[0.25,0.35],[
+    ['Fives ways to do it',[0.8,0.35],[
         ['The Way of the last',0.9,[200,30,3,[1,1,1,1,0]]],
         ['The Way of the Follower',0.9,[200,30,3,[1,1,1,0,1]]],
         ['The Way of the Middle',0.9,[200,30,3,[1,1,0,1,1]]],
@@ -87,7 +87,7 @@ export const Missions = mkMissions([
         ['Specialisation',0.97,[800,20,2,[0,1,0,1,0,1,0,1,0,1]]],
         ['Become the Automata',0.98,[800,20,2,[0,1,0,1,0,1,0,1,0,1]]],
         ['Electron-Machine',0.99,[800,20,2,[0,1,0,1,0,1,0,1,0,1]]],
-        ['Path to Detachement/1',1,[600,20,2,[0,1,0,1,0,1,0,1,0,1]]],
+        ['Detached/1',1,[600,20,2,[0,1,0,1,0,1,0,1,0,1]]],
         ['Detached/2',1,[500,20,2,[0,1,0,1,0,1,0,1,0,1]]],
         ['Detached/3',1,[400,20,2,[0,1,0,1,0,1,0,1,0,1]]],
         ['Detached/4',1,[380,20,2,[0,1,0,1,0,1,0,1,0,1]]],

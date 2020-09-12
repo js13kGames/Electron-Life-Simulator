@@ -784,11 +784,11 @@ const step = (dt,T) =>{
     const sinceStateStart = T - gameState.state.t
 
     // REMOVE ME
-    if ( stateNameIs('S3') ){
-        if ( sinceStateStart > 500 ){
-            gameState.event('sublevel-win')
-        }
-    }
+    // if ( stateNameIs('S3') ){
+    //     if ( sinceStateStart > 500 ){
+    //         gameState.event('sublevel-win')
+    //     }
+    // }
     // REMOVE ME
     /*
       if ( ['I0','I1','G0','G1','G2','S1',
