@@ -447,8 +447,8 @@ function GameState(){
     // gubed
     
     const automata = {
-        //I : { 'start' : d => update({name:'I0'}) },
-        I : { 'start' : d => update({name:'I2'}) },
+        I : { 'start' : d => update({name:'I0'}) },
+        //I : { 'start' : d => update({name:'I2'}) },
         // intro
         I0 : {
             '>' : () => {
