@@ -113,7 +113,7 @@ let sounds
 
     const SOUND_BIP = [0.1]
     //const SOUND_BIP2 = [0.1,[1],[400,0.05,200,0.1,800]] // gorge
-    const SOUND_BIP2 = [0.1,[1],[200,0.05,800,0.1,600]] // gorge
+    const SOUND_BIP2 = [0.1,[1.3],[200,0.05,800,0.1,600]] // gorge
     const SOUND_PFOAN = [0.5,,,[1],[0],,[100],[1000,0.5,100],,,,]
 
     const SOUND_TOC = [0.1,[1],,[0,0.001,1,0.015,1,0.02,0],[0,0.001,3,0.015,3,0.02,0],[1,0.5,0.9],[100],[1000,0.05,100,0.5,1000],[1000,0.5,0.1],[10],[0.002,0.5,0.2],[0.9,0.5,1]]
@@ -782,7 +782,14 @@ const step = (dt,T) =>{
     //    stats.begin()
 
     const sinceStateStart = T - gameState.state.t
-    
+
+    // REMOVE ME
+    if ( stateNameIs('S3') ){
+        if ( sinceStateStart > 500 ){
+            gameState.event('sublevel-win')
+        }
+    }
+    // REMOVE ME
     /*
       if ( ['I0','I1','G0','G1','G2','S1',
       'L1','L2','W2','W3','R0'].includes( stateName() ) ){*/
