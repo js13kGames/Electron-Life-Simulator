@@ -1,12 +1,12 @@
-== Electron Life Simulator
+# Electron Life Simulator
 
 A browser game that let you live the full exciting life and carreer of and electron.
 
-== Controls
+# Controls
 
 Use "Up" and "Down" arrow keys to control the electron up and down
 
-== Misc
+# Misc
 
 Electron Life Simulator is released under the MIT License
 
